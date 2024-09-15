@@ -2,6 +2,7 @@
 
 import { Machine } from "./machine"
 import { rewriteConstant, matchConstant } from "./termConstant"
+import { rewriteFunction, matchFunction } from "./termFunction"
 import { rewriteLet, matchLet } from "./termLet"
 import { rewriteLookup, matchLookup } from "./termLookup"
 
@@ -26,6 +27,7 @@ export function rewriteTerm(m: Machine): Machine {
             if ("$policy" in m.term) {
                 switch (m.term.$policy) {
                     case "Constant": return rewriteConstant(m);
+                    case "Function": return rewriteFunction(m);
                     case "Let": return rewriteLet(m);
                     case "Lookup": return rewriteLookup(m);
                 }
@@ -49,6 +51,7 @@ export function matchTerm(pattern: any, value: any): MatchResult {
     if ((pattern !== null) && (typeof pattern === "object") && ("$policy" in pattern)) {
         switch (pattern.$policy) {
             case "Constant": return matchConstant(pattern, value);
+            case "Function": return matchFunction(pattern, value);
             case "Let": return matchLet(pattern, value);
             case "Lookup": return matchLookup(pattern, value);
         }

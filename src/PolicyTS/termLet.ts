@@ -99,10 +99,10 @@ export function isLet(term: any): term is LetTerm {
 /*
 ## Rewrite Rules
 
-Each expressions in the bindings are evaluated in order and bound to the associated 
-pattern. See pattern matching. If any of the binding expressions block, then the 
-let expressions reduces to another let expression with the results of any unblocked 
-binding expressions.
+The term of the binding is evaluated bound to the associated 
+pattern. See pattern matching. If the binding term blocks, then the 
+let term reduces to another let term with the results of any unblocked 
+binding term.
 
 */
 export function rewriteLet(m: Machine): Machine {
