@@ -170,10 +170,253 @@ let snd = {
         arg: fls
     }
 };
+// Church Numerals
+let c0 = fls;
+// scc = λn. λs. λz. s (n s z);   (From #1)
+// fun n -> fun s -> fun z -> s ((n s) z)
+let scc = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "n" },
+    term: {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "s" },
+        term: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "z" },
+            term: {
+                $policy: "Application",
+                function: { $policy: "Lookup", name: "s" },
+                arg: {
+                    $policy: "Application",
+                    function: {
+                        $policy: "Application",
+                        function: { $policy: "Lookup", name: "n" },
+                        arg: { $policy: "Lookup", name: "s" }
+                    },
+                    arg: { $policy: "Lookup", name: "z" }
+                }
+            }
+        }
+    }
+};
+// plus = λm. λn. λs. λz. m s (n s z);      (From #1)
+// fun m -> fun n -> fun s -> fun z -> (m s) ((n s) z)
+let plus = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "m" },
+    term: {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "n" },
+        term: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "s" },
+            term: {
+                $policy: "Function",
+                pattern: { $policy: "Lookup", name: "z" },
+                term: {
+                    $policy: "Application",
+                    function: {
+                        $policy: "Application",
+                        function: { $policy: "Lookup", name: "m" },
+                        arg: { $policy: "Lookup", name: "s" }
+                    },
+                    arg: {
+                        $policy: "Application",
+                        function: {
+                            $policy: "Application",
+                            function: { $policy: "Lookup", name: "n" },
+                            arg: { $policy: "Lookup", name: "s" }
+                        },
+                        arg: { $policy: "Lookup", name: "z" }
+                    }
+                }
+            }
+        }
+    }
+};
+// times = λm. λn. m (plus n) c0;   (From #1)
+// fun m -> fun n -> (m (plus n)) c0
+let times = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "m" },
+    term: {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "n" },
+        term: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: { $policy: "Lookup", name: "m" },
+                arg: {
+                    $policy: "Application",
+                    function: plus,
+                    arg: { $policy: "Lookup", name: "n" }
+                }
+            },
+            arg: c0
+        }
+    }
+};
+// iszro = λm. m (λx. fls) tru;   (From #1)
+// fun m -> (m (fun x -> fls)) tru
+let iszro = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "m" },
+    term: {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "m" },
+            arg: {
+                $policy: "Function",
+                pattern: { $policy: "Lookup", name: "x" },
+                term: fls
+            }
+        },
+        arg: tru
+    }
+};
+// zz = pair c0 c0;     (From #1)
+// (pair c0) c0
+let zz = {
+    $policy: "Application",
+    function: {
+        $policy: "Application",
+        function: pair,
+        arg: c0
+    },
+    arg: c0
+};
+// ss = λp.pair (snd p) (plus c1 (snd p));   (From #1)
+// fun p -> (pair (snd p)) ((plus c1) (snd p))
+let ss = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "p" },
+    term: {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: pair,
+            arg: {
+                $policy: "Application",
+                function: snd,
+                arg: { $policy: "Lookup", name: "p" }
+            },
+        },
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: plus,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: c0
+                }
+            },
+            arg: {
+                $policy: "Application",
+                function: snd,
+                arg: { $policy: "Lookup", name: "p" }
+            }
+        }
+    }
+};
+// prd = λm.fst (m ss zz);   (From #1)
+// fun m -> fst ((m ss) zz)
+let prd = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "m" },
+    term: {
+        $policy: "Application",
+        function: fst,
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: { $policy: "Lookup", name: "m" },
+                arg: ss
+            },
+            arg: zz
+        }
+    }
+};
+// subtract1 = λm. λn. n prd m;  (From #1)
+// fun m -> fun n -> (n prd) m
+let subtract1 = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "m" },
+    term: {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "n" },
+        term: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: { $policy: "Lookup", name: "n" },
+                arg: prd
+            },
+            arg: { $policy: "Lookup", name: "m" }
+        }
+    }
+};
+// equal = λm. λn. and (iszro (m prd n)) (iszro (n prd m));  (From #1)
+// fun m -> fun n -> (and (iszro ((m prd) n))) (iszro ((n prd) m))
+let equal = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "m" },
+    term: {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "n" },
+        term: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: and,
+                arg: {
+                    $policy: "Application",
+                    function: iszro,
+                    arg: {
+                        $policy: "Application",
+                        function: {
+                            $policy: "Application",
+                            function: { $policy: "Lookup", name: "m" },
+                            arg: prd
+                        },
+                        arg: { $policy: "Lookup", name: "n" }
+                    }
+                }
+            },
+            arg: {
+                $policy: "Application",
+                function: iszro,
+                arg: {
+                    $policy: "Application",
+                    function: {
+                        $policy: "Application",
+                        function: { $policy: "Lookup", name: "n" },
+                        arg: prd
+                    },
+                    arg: { $policy: "Lookup", name: "m" }
+                }
+            }
+        }
+    }
+};
 const machine_1 = require("./machine");
 const term_1 = require("./term");
 const app_1 = require("./app");
 function testTAPL() {
+    testEqual33();
+    testEqual32();
+    testEqual01();
+    testEqual00();
+    testIszroSubtract321();
+    testIszroSubtract10();
+    testIszroSubtract00();
+    testIszroPrd1();
+    testIszro1();
+    testIszro0();
     testSnd();
     testFst();
     testNotFls();
@@ -189,6 +432,278 @@ function testTAPL() {
     testFls();
     testTru();
     testTestCombinator();
+}
+function testEqual33() {
+    // (equal 3) 3
+    const term = {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: equal,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: {
+                        $policy: "Application",
+                        function: scc,
+                        arg: {
+                            $policy: "Application",
+                            function: scc,
+                            arg: c0
+                        }
+                    }
+                }
+            }
+        },
+        arg: {
+            $policy: "Application",
+            function: scc,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: {
+                        $policy: "Application",
+                        function: scc,
+                        arg: c0
+                    }
+                }
+            }
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsTru(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+function testEqual32() {
+    // (equal 3) 2
+    const term = {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: equal,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: {
+                        $policy: "Application",
+                        function: scc,
+                        arg: {
+                            $policy: "Application",
+                            function: scc,
+                            arg: c0
+                        }
+                    }
+                }
+            }
+        },
+        arg: {
+            $policy: "Application",
+            function: scc,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: c0
+                }
+            }
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsFls(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+function testEqual01() {
+    // (equal 0) 1
+    const term = {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: equal,
+            arg: c0
+        },
+        arg: {
+            $policy: "Application",
+            function: scc,
+            arg: c0
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsFls(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+function testEqual00() {
+    // (equal 0) 0
+    const term = {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: equal,
+            arg: c0
+        },
+        arg: c0
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsTru(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+function testIszroSubtract321() {
+    // 0 = 3 - 2 - 1
+    // iszro (subtract1 (((subtract1 3) 2) 1))
+    const term = {
+        $policy: "Application",
+        function: iszro,
+        arg: {
+            $policy: "Application",
+            function: subtract1,
+            arg: {
+                $policy: "Application",
+                function: {
+                    $policy: "Application",
+                    function: {
+                        $policy: "Application",
+                        function: subtract1,
+                        arg: {
+                            $policy: "Application",
+                            function: scc,
+                            arg: {
+                                $policy: "Application",
+                                function: scc,
+                                arg: {
+                                    $policy: "Application",
+                                    function: scc,
+                                    arg: c0
+                                }
+                            }
+                        }
+                    },
+                    arg: {
+                        $policy: "Application",
+                        function: scc,
+                        arg: {
+                            $policy: "Application",
+                            function: scc,
+                            arg: c0
+                        }
+                    }
+                },
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: c0
+                }
+            }
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsTru(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+function testIszroSubtract10() {
+    // iszro ((substract1 1) 0)
+    const term = {
+        $policy: "Application",
+        function: iszro,
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: subtract1,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: c0
+                }
+            },
+            arg: c0
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsFls(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+function testIszroSubtract00() {
+    // iszro ((substract1 0) 0)
+    const term = {
+        $policy: "Application",
+        function: iszro,
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: subtract1,
+                arg: c0
+            },
+            arg: c0
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsTru(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+// iszro (prd (scc c0))
+function testIszroPrd1() {
+    const term = {
+        $policy: "Application",
+        function: iszro,
+        arg: {
+            $policy: "Application",
+            function: prd,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: c0
+            }
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsTru(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+// iszro (scc c0)
+function testIszro1() {
+    const term = {
+        $policy: "Application",
+        function: iszro,
+        arg: {
+            $policy: "Application",
+            function: scc,
+            arg: c0
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsFls(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+function testIszro0() {
+    const term = {
+        $policy: "Application",
+        function: iszro,
+        arg: c0
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(equalsTru(r.term));
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testSnd() {
     // snd ((pair v) w)
