@@ -124,10 +124,58 @@ let not = {
         arg: tru
     }
 };
+// Pairs
+// pair = λf.λs.λb. b f s;   (From #1)
+// fun f -> fun s -> fun b -> (b f) s
+let pair = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "f" },
+    term: {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "s" },
+        term: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "b" },
+            term: {
+                $policy: "Application",
+                function: {
+                    $policy: "Application",
+                    function: { $policy: "Lookup", name: "b" },
+                    arg: { $policy: "Lookup", name: "f" }
+                },
+                arg: { $policy: "Lookup", name: "s" }
+            }
+        }
+    }
+};
+// fst = λp. p tru;   (From #1)
+// fun p -> p tru
+let fst = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "p" },
+    term: {
+        $policy: "Application",
+        function: { $policy: "Lookup", name: "p" },
+        arg: tru
+    }
+};
+// snd = λp. p fls;   (From #1)
+// fun p -> p fls
+let snd = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "p" },
+    term: {
+        $policy: "Application",
+        function: { $policy: "Lookup", name: "p" },
+        arg: fls
+    }
+};
 const machine_1 = require("./machine");
 const term_1 = require("./term");
 const app_1 = require("./app");
 function testTAPL() {
+    testSnd();
+    testFst();
     testNotFls();
     testNotTru();
     testOrFlsFls();
@@ -141,6 +189,51 @@ function testTAPL() {
     testFls();
     testTru();
     testTestCombinator();
+}
+function testSnd() {
+    // snd ((pair v) w)
+    const v = "v";
+    const w = "w";
+    const term = {
+        $policy: "Application",
+        function: snd,
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: pair,
+                arg: v
+            },
+            arg: w
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(r.term === w);
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+}
+// fst (pair v w) →∗ v   (From #1)
+function testFst() {
+    // fst ((pair v) w)
+    const v = "v";
+    const w = "w";
+    const term = {
+        $policy: "Application",
+        function: fst,
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: pair,
+                arg: v
+            },
+            arg: w
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    (0, app_1.passOrThrow)(r.term === v);
+    (0, app_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testNotFls() {
     // not fls

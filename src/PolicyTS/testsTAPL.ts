@@ -134,11 +134,63 @@ let not = {
     }
 }
 
+
+// Pairs
+// pair = λf.λs.λb. b f s;   (From #1)
+// fun f -> fun s -> fun b -> (b f) s
+let pair = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "f" },
+    term: {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "s" },
+        term: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "b" },
+            term: {
+                $policy: "Application",
+                function: {
+                    $policy: "Application",
+                    function: { $policy: "Lookup", name: "b" },
+                    arg: { $policy: "Lookup", name: "f" }
+                },
+                arg: { $policy: "Lookup", name: "s" }
+            }
+        }
+    }
+}
+
+// fst = λp. p tru;   (From #1)
+// fun p -> p tru
+let fst = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "p" },
+    term: {
+        $policy: "Application",
+        function: { $policy: "Lookup", name: "p" },
+        arg: tru
+    }
+}
+
+// snd = λp. p fls;   (From #1)
+// fun p -> p fls
+let snd = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "p" },
+    term: {
+        $policy: "Application",
+        function: { $policy: "Lookup", name: "p" },
+        arg: fls
+    }
+}
+
 import { Machine } from "./machine"
 import { rewriteTerm } from "./term"
 import { passOrThrow } from "./app"
 
 export function testTAPL() {
+    testSnd();
+    testFst();
     testNotFls();
     testNotTru();
     testOrFlsFls();
@@ -154,6 +206,54 @@ export function testTAPL() {
     testTestCombinator();
 }
 
+function testSnd() {
+    // snd ((pair v) w)
+    const v = "v";
+    const w = "w";
+    const term = {
+        $policy: "Application",
+        function: snd,
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: pair,
+                arg: v
+            },
+            arg: w
+        }
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === w);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+
+
+// fst (pair v w) →∗ v   (From #1)
+function testFst() {
+    // fst ((pair v) w)
+    const v = "v";
+    const w = "w";
+    const term = {
+        $policy: "Application",
+        function: fst,
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: pair,
+                arg: v
+            },
+            arg: w
+        }
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === v);
+    passOrThrow(r.bindings === m.bindings);
+}
 function testNotFls() {
     // not fls
     const term = {
