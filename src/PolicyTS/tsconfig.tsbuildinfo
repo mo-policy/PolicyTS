@@ -1,1 +1,1 @@
-{"root":["./app.ts"],"version":"5.6.2"}
+{"root":["./app.ts","./machine.ts","./term.ts","./termconstant.ts"],"version":"5.6.2"}
