@@ -15,6 +15,7 @@ if (dev) {
 }
 else {
     // Run all the tests.
+    testApplyFunction();
     testLet();
     testLookupBlocked();
     testLookupSuccess();
@@ -26,6 +27,22 @@ else {
     testConstantNull();
 }
 function develop() {
+}
+function testApplyFunction() {
+    // (fun x -> x) 1
+    const term = {
+        $policy: "Application",
+        function: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "x" },
+            term: { $policy: "Lookup", name: "x" }
+        },
+        arg: 1
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
 }
 function testLet() {
     // let x = 1 in 2

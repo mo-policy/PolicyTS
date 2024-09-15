@@ -1,1 +1,1 @@
-{"root":["./app.ts","./machine.ts","./term.ts","./termconstant.ts","./termfunction.ts","./termlet.ts","./termlookup.ts"],"version":"5.6.2"}
+{"root":["./app.ts","./machine.ts","./term.ts","./termapplication.ts","./termconstant.ts","./termfunction.ts","./termlet.ts","./termlookup.ts"],"version":"5.6.2"}

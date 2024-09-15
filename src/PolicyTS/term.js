@@ -3,7 +3,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.rewriteTerm = rewriteTerm;
 exports.matchTerm = matchTerm;
+const termApplication_1 = require("./termApplication");
 const termConstant_1 = require("./termConstant");
+const termFunction_1 = require("./termFunction");
 const termLet_1 = require("./termLet");
 const termLookup_1 = require("./termLookup");
 /**
@@ -28,7 +30,9 @@ function rewriteTerm(m) {
         else if ((m.term !== null) && (typeof m.term === "object")) {
             if ("$policy" in m.term) {
                 switch (m.term.$policy) {
+                    case "Application": return (0, termApplication_1.rewriteApplication)(m);
                     case "Constant": return (0, termConstant_1.rewriteConstant)(m);
+                    case "Function": return (0, termFunction_1.rewriteFunction)(m);
                     case "Let": return (0, termLet_1.rewriteLet)(m);
                     case "Lookup": return (0, termLookup_1.rewriteLookup)(m);
                 }
@@ -51,7 +55,9 @@ function rewriteTerm(m) {
 function matchTerm(pattern, value) {
     if ((pattern !== null) && (typeof pattern === "object") && ("$policy" in pattern)) {
         switch (pattern.$policy) {
+            case "Application": return (0, termApplication_1.matchApplication)(pattern, value);
             case "Constant": return (0, termConstant_1.matchConstant)(pattern, value);
+            case "Function": return (0, termFunction_1.matchFunction)(pattern, value);
             case "Let": return (0, termLet_1.matchLet)(pattern, value);
             case "Lookup": return (0, termLookup_1.matchLookup)(pattern, value);
         }

@@ -1,6 +1,7 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
 import { Machine } from "./machine"
+import { rewriteApplication, matchApplication } from "./termApplication"
 import { rewriteConstant, matchConstant } from "./termConstant"
 import { rewriteFunction, matchFunction } from "./termFunction"
 import { rewriteLet, matchLet } from "./termLet"
@@ -26,6 +27,7 @@ export function rewriteTerm(m: Machine): Machine {
         } else if ((m.term !== null) && (typeof m.term === "object")) {
             if ("$policy" in m.term) {
                 switch (m.term.$policy) {
+                    case "Application": return rewriteApplication(m);
                     case "Constant": return rewriteConstant(m);
                     case "Function": return rewriteFunction(m);
                     case "Let": return rewriteLet(m);
@@ -50,6 +52,7 @@ export type MatchResult = ({ readonly [k: string]: any } | false)
 export function matchTerm(pattern: any, value: any): MatchResult {
     if ((pattern !== null) && (typeof pattern === "object") && ("$policy" in pattern)) {
         switch (pattern.$policy) {
+            case "Application": return matchApplication(pattern, value);
             case "Constant": return matchConstant(pattern, value);
             case "Function": return matchFunction(pattern, value);
             case "Let": return matchLet(pattern, value);
