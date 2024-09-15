@@ -80,11 +80,13 @@ Function bindings block if any of the closure bindings are blocked.
 */
 export function rewriteFunction(m: Machine): Machine {
     if (!(isFunction(m.term))) { throw "expected Function"; };
-    if (!("closure" in m.term)) {
-        // to do
+    if (Object.keys(m.bindings).length === 0) {
         return m;
     } else {
-        return m;
+        // to do: filter closure to only free variables in function.
+        const cb = Object.assign({}, m.bindings);
+        const f = Object.assign({}, m.term, { closure: cb });
+        return m.copyWith({ term: f });
     }
 }
 

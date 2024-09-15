@@ -1,8 +1,10 @@
 "use strict";
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.passOrThrow = passOrThrow;
 const machine_1 = require("./machine");
 const term_1 = require("./term");
+const testsTAPL_1 = require("./testsTAPL");
 function passOrThrow(condition) {
     if (!condition) {
         throw "Test failed";
@@ -15,6 +17,7 @@ if (dev) {
 }
 else {
     // Run all the tests.
+    (0, testsTAPL_1.testTAPL)();
     testApplyFunction();
     testLet();
     testLookupBlocked();

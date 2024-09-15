@@ -2,7 +2,9 @@
 
 import { Machine } from "./machine"
 import { rewriteTerm } from "./term"
-function passOrThrow(condition: boolean): asserts condition {
+import { testTAPL } from "./testsTAPL"
+
+export function passOrThrow(condition: boolean): asserts condition {
     if (!condition) {
         throw "Test failed"
     }
@@ -15,6 +17,9 @@ if (dev) {
     develop();
 } else {
     // Run all the tests.
+
+    testTAPL();
+
     testApplyFunction();
     testLet();
     testLookupBlocked();
