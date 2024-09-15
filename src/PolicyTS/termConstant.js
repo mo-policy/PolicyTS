@@ -6,12 +6,11 @@ exports.isConstant = isConstant;
 exports.rewriteConstant = rewriteConstant;
 exports.matchConstant = matchConstant;
 function isWrappedConstant(term) {
-    return (term !== undefined) &&
+    return (term !== null) &&
         (typeof term === "object") &&
-        ("$policy" in term) &&
+        ("$policy" in term) && (term.$policy === "Constant") &&
         ("value" in term) &&
-        (Object.entries(term).length === 2) &&
-        (term.$policy === "Constant");
+        (Object.keys(term).length === 2);
 }
 /**
  * Tests if a term meets the requirements for a ConstantTerm.
@@ -19,16 +18,11 @@ function isWrappedConstant(term) {
  * @returns         True if term is a ConstantTerm, otherwise false.
  */
 function isConstant(term) {
-    if (term !== undefined) {
-        if ((typeof term === "object") && ("$policy" in term)) {
-            return isWrappedConstant(term);
-        }
-        else {
-            return true;
-        }
+    if (isWrappedConstant(term)) {
+        return true;
     }
     else {
-        return false;
+        return !((term !== null) && (typeof term === "object") && ("$policy" in term));
     }
 }
 /*
@@ -38,7 +32,7 @@ Constant terms are in fully reduced form. The rewrite function is simply a no op
 */
 function rewriteConstant(m) {
     if (!(isConstant(m.term))) {
-        throw "expected ConstantTerm";
+        throw "expected Constant";
     }
     ;
     return m;
@@ -49,6 +43,21 @@ function rewriteConstant(m) {
 
 */
 function matchConstant(pattern, value) {
-    return (pattern === value);
+    if (isWrappedConstant(pattern)) {
+        if (pattern.value === value) {
+            return {};
+        }
+        else {
+            return false;
+        }
+    }
+    else {
+        if (pattern === value) {
+            return {};
+        }
+        else {
+            return false;
+        }
+    }
 }
 //# sourceMappingURL=termConstant.js.map

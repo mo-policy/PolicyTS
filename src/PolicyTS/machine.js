@@ -27,17 +27,6 @@ class Machine {
         return Object.assign(new Machine(), this, values);
     }
     /**
-     * Returns a new Machine with the given binding.
-     * @param name      The name to be bound.
-     * @param value     The value of the binding.
-     * @returns         A new Machine instance.
-     */
-    setBinding(name, value) {
-        const bindings = Object.assign({}, this.bindings);
-        Object.defineProperty(bindings, name, value);
-        return new Machine(this.term, this.blocked, bindings);
-    }
-    /**
      * Returns the value of a bound name.
      * @param name      The name of the binding.
      * @returns         The value of the binding or unefined.

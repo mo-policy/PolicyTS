@@ -1,7 +1,9 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
 import { Machine } from "./machine"
-import { rewriteConstant } from "./termConstant"
+import { rewriteConstant, matchConstant } from "./termConstant"
+import { rewriteLet, matchLet } from "./termLet"
+import { rewriteLookup, matchLookup } from "./termLookup"
 
 /**
  * The top level rewrite function for all terms.
@@ -24,6 +26,8 @@ export function rewriteTerm(m: Machine): Machine {
             if ("$policy" in m.term) {
                 switch (m.term.$policy) {
                     case "Constant": return rewriteConstant(m);
+                    case "Let": return rewriteLet(m);
+                    case "Lookup": return rewriteLookup(m);
                 }
                 throw "Unexpected term";
             } else {
@@ -36,7 +40,21 @@ export function rewriteTerm(m: Machine): Machine {
                 return m.copyWith({ term: nextTerm });
             }
         } else 
-            return m;
+            return rewriteConstant(m);
     }
-    
 }
+
+export type MatchResult = ({ readonly [k: string]: any } | false)
+export function matchTerm(pattern: any, value: any): MatchResult {
+    if ((pattern !== null) && (typeof pattern === "object") && ("$policy" in pattern)) {
+        switch (pattern.$policy) {
+            case "Constant": return matchConstant(pattern, value);
+            case "Let": return matchLet(pattern, value);
+            case "Lookup": return matchLookup(pattern, value);
+        }
+        throw "unexpected pattern"
+    } else {
+        return matchConstant(pattern, value);
+    }
+}
+

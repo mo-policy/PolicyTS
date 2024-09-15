@@ -15,6 +15,9 @@ if (dev) {
     develop();
 } else {
     // Run all the tests.
+    testLet();
+    testLookupBlocked();
+    testLookupSuccess();
     testConstantWrappedConstant();
     testConstantTerm1();
     testConstantArray();
@@ -24,6 +27,42 @@ if (dev) {
 }
  
 function develop() {
+}
+
+function testLet() {
+    // let x = 1 in 2
+    const term = {
+        $policy: "Let",
+        binding: {
+            $policy: "PatternBinding",
+            pattern: { $policy: "Lookup", name: "x" },
+            term: 1
+        },
+        in: 2
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(("x" in r.bindings) && (r.bindings.x === 1) && (Object.keys(r.bindings).length === 1));
+    passOrThrow(r.term === 2);
+}
+
+function testLookupBlocked() {
+    const term = { $policy: "Lookup", name: "x" };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.blocked === true);
+    passOrThrow(r.term === term);
+}
+
+function testLookupSuccess() {
+    const term = { $policy: "Lookup", name: "x" };
+    const bindings: { [k: string]: any } = {
+        "x": 1
+    }
+    const m = new Machine(term, false, bindings);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === bindings);
 }
 
 function testConstantWrappedConstant() {

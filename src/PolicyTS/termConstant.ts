@@ -38,6 +38,7 @@ A constant term holds a fully reduced value.
 */
 
 import { Machine } from "./machine"
+import { MatchResult } from "./term"
 
 /**
  * The ConstantTerm wraps a value which is fully reduced. 
@@ -47,13 +48,12 @@ export type ConstantTerm = {
     value: any
 }
 
-export function isWrappedConstant(term: any): boolean {
-    return (term !== undefined) &&
+export function isWrappedConstant(term: any): term is ConstantTerm {
+    return (term !== null) &&
         (typeof term === "object") &&
-        ("$policy" in term) &&
+        ("$policy" in term) && (term.$policy === "Constant") &&
         ("value" in term) &&
-        (Object.entries(term).length === 2) &&
-        (term.$policy === "Constant");
+        (Object.keys(term).length === 2);
 }
 
 /**
@@ -61,16 +61,13 @@ export function isWrappedConstant(term: any): boolean {
  * @param term      The term to test against the requirements of a ConstantTerm.
  * @returns         True if term is a ConstantTerm, otherwise false.
  */
-export function isConstant(term: any): term is ConstantTerm {
-    if (term !== undefined) {
-        if ((typeof term === "object") && ("$policy" in term)) {
-            return isWrappedConstant(term);
-        } else {
-            return true;
-        }
+export function isConstant(term: any): boolean {
+    if (isWrappedConstant(term)) {
+        return true;
     } else {
-        return false;
+        return !((term !== null) && (typeof term === "object") && ("$policy" in term));
     }
+
 }
 
 /*
@@ -79,7 +76,7 @@ export function isConstant(term: any): term is ConstantTerm {
 Constant terms are in fully reduced form. The rewrite function is simply a no op.
 */
 export function rewriteConstant(m: Machine): Machine {
-    if (!(isConstant(m.term))) { throw "expected ConstantTerm"; };
+    if (!(isConstant(m.term))) { throw "expected Constant"; };
     return m;
 }
 
@@ -88,7 +85,19 @@ export function rewriteConstant(m: Machine): Machine {
 
 
 */
-export function matchConstant(pattern: any, value: any): ({ readonly [k: string]: ConstantTerm } | boolean) {
-    return (pattern === value);
+export function matchConstant(pattern: any, value: any): MatchResult {
+    if (isWrappedConstant(pattern)) {
+        if (pattern.value === value) {
+            return {};
+        } else {
+            return false;
+        }
+    } else {
+        if (pattern === value) {
+            return {};
+        } else {
+            return false;
+        }
+    }
 }
 
