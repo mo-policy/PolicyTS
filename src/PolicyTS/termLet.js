@@ -42,7 +42,7 @@ function rewriteLet(m) {
         return m;
     }
     else {
-        const matchOfBinding = (0, term_1.matchTerm)(m.term.binding.pattern, resultOfBindingTerm.term);
+        const matchOfBinding = (0, term_1.matchTerm)(m, m.term.binding.pattern, resultOfBindingTerm.term);
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
             return (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.in, bindings: nextBindings }));

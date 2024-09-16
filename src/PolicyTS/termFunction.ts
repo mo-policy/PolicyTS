@@ -44,8 +44,7 @@ An function value term.
 
 */
 
-import { Machine } from "./machine"
-import { MatchResult } from "./term"
+import { Machine, MatchResult } from "./machine"
 
 export type FunctionTerm = {
     $policy: "Function",

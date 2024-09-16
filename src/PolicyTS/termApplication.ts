@@ -40,8 +40,8 @@ Calls a function with an argument.
 
 */
 
-import { Machine } from "./machine"
-import { rewriteTerm, matchTerm, MatchResult } from "./term"
+import { Machine, MatchResult } from "./machine"
+import { rewriteTerm, matchTerm } from "./term"
 import { isFunction } from "./termFunction"
 
 export type ApplicationTerm = {
@@ -92,7 +92,7 @@ export function rewriteApplication(m: Machine): Machine {
             } else {
                 // third, match the arg to the function pattern, returning an object 
                 //        which maps string (names) to Bindings, or false if it fails to match
-                const matchResult = matchTerm(resultOfAppFunction.term.pattern, resultOfAppArg.term);
+                const matchResult = matchTerm(m, resultOfAppFunction.term.pattern, resultOfAppArg.term);
                 if (matchResult) {
                     // fourth, assemble the bindings for use inside the term of the function
                     //         the bindings should be, the bindings of the function's closure

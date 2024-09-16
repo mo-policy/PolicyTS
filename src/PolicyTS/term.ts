@@ -1,11 +1,6 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
-import { Machine } from "./machine"
-import { rewriteApplication, matchApplication } from "./termApplication"
-import { rewriteConstant, matchConstant } from "./termConstant"
-import { rewriteFunction, matchFunction } from "./termFunction"
-import { rewriteLet, matchLet } from "./termLet"
-import { rewriteLookup, matchLookup } from "./termLookup"
+import { Machine, MatchResult } from "./machine"
 
 /**
  * The top level rewrite function for all terms.
@@ -24,43 +19,29 @@ export function rewriteTerm(m: Machine): Machine {
                 nextTerm[i] = nextMachine.term;
             }
             return m.copyWith({ term: nextTerm });
-        } else if ((m.term !== null) && (typeof m.term === "object")) {
-            if ("$policy" in m.term) {
-                switch (m.term.$policy) {
-                    case "Application": return rewriteApplication(m);
-                    case "Constant": return rewriteConstant(m);
-                    case "Function": return rewriteFunction(m);
-                    case "Let": return rewriteLet(m);
-                    case "Lookup": return rewriteLookup(m);
+        } else {
+            const f = m.getRewriteFunction();
+            if ((m.term !== null) && (typeof m.term === "object")) {
+                if ("$policy" in m.term) {
+                    return f(m);
+                } else {
+                    // rewrite the properties of machine.term
+                    const nextTerm: { [k: string]: any } = {};
+                    for (let p in m.term) {
+                        let nextMachine = rewriteTerm(m.copyWith({ term: m.term[p] }));
+                        nextTerm[p] = nextMachine.term;
+                    }
+                    return m.copyWith({ term: nextTerm });
                 }
-                throw "Unexpected term";
             } else {
-                // rewrite the properties of machine.term
-                const nextTerm: { [k: string]: any } = {};
-                for (let p in m.term) {
-                    let nextMachine = rewriteTerm(m.copyWith({ term: m.term[p] }));
-                    nextTerm[p] = nextMachine.term;
-                }
-                return m.copyWith({ term: nextTerm });
+                return f(m);
             }
-        } else 
-            return rewriteConstant(m);
+        }
     }
 }
 
-export type MatchResult = ({ readonly [k: string]: any } | false)
-export function matchTerm(pattern: any, value: any): MatchResult {
-    if ((pattern !== null) && (typeof pattern === "object") && ("$policy" in pattern)) {
-        switch (pattern.$policy) {
-            case "Application": return matchApplication(pattern, value);
-            case "Constant": return matchConstant(pattern, value);
-            case "Function": return matchFunction(pattern, value);
-            case "Let": return matchLet(pattern, value);
-            case "Lookup": return matchLookup(pattern, value);
-        }
-        throw "unexpected pattern"
-    } else {
-        return matchConstant(pattern, value);
-    }
+export function matchTerm(m: Machine, pattern: any, value: any): MatchResult {
+    const f = m.getMatchFunction(pattern);
+    return f(pattern, value);
 }
 

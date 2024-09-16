@@ -37,8 +37,7 @@ A constant term holds a fully reduced value.
 
 */
 
-import { Machine } from "./machine"
-import { MatchResult } from "./term"
+import { Machine, MatchResult } from "./machine"
 
 /**
  * The ConstantTerm wraps a value which is fully reduced. 

@@ -1,5 +1,15 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
+import { rewriteApplication, matchApplication } from "./termApplication"
+import { rewriteConstant, matchConstant } from "./termConstant"
+import { rewriteFunction, matchFunction } from "./termFunction"
+import { rewriteIf, matchIf } from "./termIf"
+import { rewriteLet, matchLet } from "./termLet"
+import { rewriteLookup, matchLookup } from "./termLookup"
+
+
+export type MatchResult = ({ readonly [k: string]: any } | false)
+
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -38,6 +48,47 @@ export class Machine {
             return this.bindings[name];
         }
         return undefined;
+    }
+    /**
+     * Gets a rewrite function for the current term.
+     * @returns     A rewrite function.
+     */
+    getRewriteFunction(): ((m: Machine) => Machine) {
+        if ((this.term !== null) && (typeof this.term === "object")) {
+            if ("$policy" in this.term) {
+                switch (this.term.$policy) {
+                    case "Application": return rewriteApplication;
+                    case "Constant": return rewriteConstant;
+                    case "Function": return rewriteFunction;
+                    case "If": return rewriteIf;
+                    case "Let": return rewriteLet;
+                    case "Lookup": return rewriteLookup;
+                }
+                throw "Unexpected term";
+            }
+        }
+        return rewriteConstant;
+    }
+    /**
+     * Gets a match function for the supplied pattern.
+     * @param pattern   The pattern used to determine the match function.
+     * @returns         A match function for the supplied pattern.
+     */
+    getMatchFunction(pattern: any): ((pattern: any, value: any) => MatchResult) {
+        if ((pattern !== null) && (typeof pattern === "object")) {
+            if ("$policy" in pattern) {
+                switch (pattern.$policy) {
+                    case "Application": return matchApplication;
+                    case "Constant": return matchConstant;
+                    case "Function": return matchFunction;
+                    case "If": return matchIf;
+                    case "Let": return matchLet;
+                    case "Lookup": return matchLookup;
+                }
+                throw "Unexpected pattern";
+            }
+        }
+        return matchConstant;
     }
     /**
      * Verifies if the given term is of the provided schema name.

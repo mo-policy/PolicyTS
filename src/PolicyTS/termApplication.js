@@ -53,7 +53,7 @@ function rewriteApplication(m) {
             else {
                 // third, match the arg to the function pattern, returning an object 
                 //        which maps string (names) to Bindings, or false if it fails to match
-                const matchResult = (0, term_1.matchTerm)(resultOfAppFunction.term.pattern, resultOfAppArg.term);
+                const matchResult = (0, term_1.matchTerm)(m, resultOfAppFunction.term.pattern, resultOfAppArg.term);
                 if (matchResult) {
                     // fourth, assemble the bindings for use inside the term of the function
                     //         the bindings should be, the bindings of the function's closure

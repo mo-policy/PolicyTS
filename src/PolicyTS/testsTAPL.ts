@@ -428,12 +428,100 @@ let equal = {
     }
 }
 
+// realbool = λb. b true false;  (From #1)
+// fun b -> (b true) false
+let realbool = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "b" },
+    term: {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "b" },
+            arg: true
+        },
+        arg: false
+    }
+}
+
+// churchbool = λb. if b then tru else fls;  (From #1)
+// fun b -> if b then tru else fls
+let churchbool = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "b" },
+    term: {
+        $policy: "If",
+        condition: { $policy: "Lookup", name: "b" },
+        then: tru,
+        else: fls
+    }
+}
+
+// realeq = λm. λn. (equal m n) true false;  (From #1)
+// fun m -> fun n -> (((equal m) n) true) false
+let realeq = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "m" },
+    term: {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "n" },
+        term: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: {
+                    $policy: "Application",
+                    function: {
+                        $policy: "Application",
+                        function: equal,
+                        arg: { $policy: "Lookup", name: "m" }
+                    },
+                    arg: { $policy: "Lookup", name: "n" }
+                },
+                arg: true
+            },
+            arg: false
+        }
+    }
+}
+
+// realnat = λm. m (λx. succ x) 0;  (From #1)
+// fun m -> (m (fun x -> succ x)) 0
+let realnat = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "m" },
+    term: {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "m" },
+            arg: {
+                $policy: "Function",
+                pattern: { $policy: "Lookup", name: "x" },
+                term: {
+                    $policy: "succ",
+                    arg: { $policy: "Lookup", name: "x" } 
+                }
+            }
+        },
+        arg: 0
+    }
+}
 
 import { Machine } from "./machine"
 import { rewriteTerm } from "./term"
 import { passOrThrow } from "./app"
 
 export function testTAPL() {
+    testRealnatTimes22();
+    testRealnat2();
+    testRealnat0();
+    testRealeq01();
+    testRealeq00();
+    testChurchboolFalse();
+    testChurchboolTrue();
+    testRealboolFls();
+    testRealboolTru();
     testEqual33();
     testEqual32();
     testEqual01();
@@ -461,6 +549,185 @@ export function testTAPL() {
     testTestCombinator();
 }
 
+class MachineWithSucc extends Machine {
+    override copyWith(values: { [k: string]: any }): Machine {
+        return Object.assign(new MachineWithSucc(), this, values);
+    }
+    override getRewriteFunction() {
+        if (
+            (this.term !== null) &&
+            (typeof this.term === "object") &&
+            ("$policy" in this.term)
+        ) {
+            if (this.term.$policy === "succ") {
+                return (function (mm: Machine): Machine {
+                    const x = mm.bindings["x"] as number;
+                    return mm.copyWith({ term: x + 1 });
+                });
+            } else {
+                return super.getRewriteFunction();
+            }
+        } else {
+            return super.getRewriteFunction();
+        }
+    }
+}
+
+function testRealnatTimes22() {
+    // realnat ((times c2) c2);   (From #1)
+    const term = {
+        $policy: "Application",
+        function: realnat,
+        arg: {
+            $policy: "Application",
+            function: {
+                $policy: "Application",
+                function: times,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: {
+                        $policy: "Application",
+                        function: scc,
+                        arg: c0
+                    }
+                }
+            },
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: c0
+                }
+            }
+        }
+    };
+    const m = new MachineWithSucc(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 4);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testRealnat2() {
+    // realnat 2
+    const term = {
+        $policy: "Application",
+        function: realnat,
+        arg: {
+            $policy: "Application",
+            function: scc,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: c0
+            }
+        }
+    };
+    const m = new MachineWithSucc(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testRealnat0() {
+    // realnat 0
+    const term = {
+        $policy: "Application",
+        function: realnat,
+        arg: c0
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 0);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+
+function testRealeq01() {
+    // (equal 0) 1
+    const term = {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: realeq,
+            arg: c0
+        },
+        arg: {
+            $policy: "Application",
+            function: scc,
+            arg: c0
+        }
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === false);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testRealeq00() {
+    // (equal 0) 0
+    const term = {
+        $policy: "Application",
+        function: {
+            $policy: "Application",
+            function: realeq,
+            arg: c0
+        },
+        arg: c0
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === true);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testChurchboolFalse() {
+    // churchbool false
+    const term = {
+        $policy: "Application",
+        function: churchbool,
+        arg: false
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(equalsFls(r.term));
+    passOrThrow(r.bindings === m.bindings);
+}
+function testChurchboolTrue() {
+    // churchbool true
+    const term = {
+        $policy: "Application",
+        function: churchbool,
+        arg: true
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(equalsTru(r.term));
+    passOrThrow(r.bindings === m.bindings);
+}
+function testRealboolFls() {
+    // realbool fls
+    const term = {
+        $policy: "Application",
+        function: realbool,
+        arg: fls
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === false);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testRealboolTru() {
+    // realbool tru
+    const term = {
+        $policy: "Application",
+        function: realbool,
+        arg: tru
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === true);
+    passOrThrow(r.bindings === m.bindings);
+}
 function testEqual33() {
     // (equal 3) 3
     const term = {

@@ -32,12 +32,12 @@ The lookup term is used to refer to the value bound to a name.
             },
             "name": { "type": "string" }
         }
-    }
+    },
+    "required": [ "$policy", "name" ]
 
 */
 
-import { Machine } from "./machine"
-import { MatchResult } from "./term"
+import { Machine, MatchResult } from "./machine"
 
 export type LookupTerm = {
     $policy: "Lookup",

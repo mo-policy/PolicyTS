@@ -63,8 +63,8 @@ Used to bind a value to a name.
 
 */
 
-import { Machine } from "./machine"
-import { rewriteTerm, matchTerm, MatchResult } from "./term"
+import { Machine, MatchResult } from "./machine"
+import { rewriteTerm, matchTerm } from "./term"
 
 export type PatternBindingTerm = {
     $policy: "PatternBinding",
@@ -112,7 +112,7 @@ export function rewriteLet(m: Machine): Machine {
         // to do: return new LetTerm with blocked term
         return m;
     } else {
-        const matchOfBinding = matchTerm(m.term.binding.pattern, resultOfBindingTerm.term);
+        const matchOfBinding = matchTerm(m, m.term.binding.pattern, resultOfBindingTerm.term);
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
             return rewriteTerm(m.copyWith({ term: m.term.in, bindings: nextBindings }));
