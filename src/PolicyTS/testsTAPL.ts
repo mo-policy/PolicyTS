@@ -5,7 +5,7 @@
 // ISBN 978-0-262-30382-8
 
 // Church Booleans
-// from 5.2 Programming in the Lambda - Calculus(1)
+// from 5.2 Programming in the Lambda - Calculus(#1)
 
 // tru = λt. λf. t;  (From #1)
 // fun t -> fun f -> t
@@ -100,7 +100,7 @@ const and = {
 
 // or = λb. λc. b tru c;    (From #1)
 // fun b -> fun c -> (b tru) c
-let or = {
+const or = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "b" },
     term: {
@@ -120,7 +120,7 @@ let or = {
 
 // not = λb.b fls tru;      (From #1)
 // fun b -> (b fls) tru
-let not = {
+const not = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "b" },
     term: {
@@ -138,7 +138,7 @@ let not = {
 // Pairs
 // pair = λf.λs.λb. b f s;   (From #1)
 // fun f -> fun s -> fun b -> (b f) s
-let pair = {
+const pair = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "f" },
     term: {
@@ -162,7 +162,7 @@ let pair = {
 
 // fst = λp. p tru;   (From #1)
 // fun p -> p tru
-let fst = {
+const fst = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "p" },
     term: {
@@ -174,7 +174,7 @@ let fst = {
 
 // snd = λp. p fls;   (From #1)
 // fun p -> p fls
-let snd = {
+const snd = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "p" },
     term: {
@@ -186,11 +186,11 @@ let snd = {
 
 // Church Numerals
 
-let c0 = fls
+const c0 = fls
 
 // scc = λn. λs. λz. s (n s z);   (From #1)
 // fun n -> fun s -> fun z -> s ((n s) z)
-let scc = {
+const scc = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "n" },
     term: {
@@ -218,7 +218,7 @@ let scc = {
 
 // plus = λm. λn. λs. λz. m s (n s z);      (From #1)
 // fun m -> fun n -> fun s -> fun z -> (m s) ((n s) z)
-let plus = {
+const plus = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "m" },
     term: {
@@ -254,7 +254,7 @@ let plus = {
 
 // times = λm. λn. m (plus n) c0;   (From #1)
 // fun m -> fun n -> (m (plus n)) c0
-let times = {
+const times = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "m" },
     term: {
@@ -278,7 +278,7 @@ let times = {
 
 // iszro = λm. m (λx. fls) tru;   (From #1)
 // fun m -> (m (fun x -> fls)) tru
-let iszro = {
+const iszro = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "m" },
     term: {
@@ -298,7 +298,7 @@ let iszro = {
 
 // zz = pair c0 c0;     (From #1)
 // (pair c0) c0
-let zz = {
+const zz = {
     $policy: "Application",
     function: {
         $policy: "Application",
@@ -310,7 +310,7 @@ let zz = {
 
 // ss = λp.pair (snd p) (plus c1 (snd p));   (From #1)
 // fun p -> (pair (snd p)) ((plus c1) (snd p))
-let ss = {
+const ss = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "p" },
     term: {
@@ -346,7 +346,7 @@ let ss = {
 
 // prd = λm.fst (m ss zz);   (From #1)
 // fun m -> fst ((m ss) zz)
-let prd = {
+const prd = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "m" },
     term: {
@@ -366,7 +366,7 @@ let prd = {
 
 // subtract1 = λm. λn. n prd m;  (From #1)
 // fun m -> fun n -> (n prd) m
-let subtract1 = {
+const subtract1 = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "m" },
     term: {
@@ -386,7 +386,7 @@ let subtract1 = {
 
 // equal = λm. λn. and (iszro (m prd n)) (iszro (n prd m));  (From #1)
 // fun m -> fun n -> (and (iszro ((m prd) n))) (iszro ((n prd) m))
-let equal = {
+const equal = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "m" },
     term: {
@@ -430,7 +430,7 @@ let equal = {
 
 // realbool = λb. b true false;  (From #1)
 // fun b -> (b true) false
-let realbool = {
+const realbool = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "b" },
     term: {
@@ -446,7 +446,7 @@ let realbool = {
 
 // churchbool = λb. if b then tru else fls;  (From #1)
 // fun b -> if b then tru else fls
-let churchbool = {
+const churchbool = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "b" },
     term: {
@@ -459,7 +459,7 @@ let churchbool = {
 
 // realeq = λm. λn. (equal m n) true false;  (From #1)
 // fun m -> fun n -> (((equal m) n) true) false
-let realeq = {
+const realeq = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "m" },
     term: {
@@ -487,7 +487,7 @@ let realeq = {
 
 // realnat = λm. m (λx. succ x) 0;  (From #1)
 // fun m -> (m (fun x -> succ x)) 0
-let realnat = {
+const realnat = {
     $policy: "Function",
     pattern: { $policy: "Lookup", name: "m" },
     term: {
@@ -508,11 +508,64 @@ let realnat = {
     }
 }
 
+// fix = λf. (λx. f (λy. x x y)) (λx. f (λy. x x y));  (From #1)
+// fun f -> (fun x -> f (fun y -> (x x) y)) (fun x -> f (fun y -> (x x) y))
+const fix = {
+    $policy: "Function",
+    pattern: { $policy: "Lookup", name: "f" },
+    term: {
+        $policy: "Application",
+        function: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "x" },
+            term: {
+                $policy: "Application",
+                function: { $policy: "Lookup", name: "f" },
+                arg: {
+                    $policy: "Function",
+                    pattern: { $policy: "Lookup", name: "y" },
+                    term: {
+                        $policy: "Application",
+                        function: {
+                            $policy: "Application",
+                            function: { $policy: "Lookup", name: "x" },
+                            arg: { $policy: "Lookup", name: "x" }
+                        },
+                        arg: { $policy: "Lookup", name: "y" }
+                    }
+                }
+            }
+        },
+        arg: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "x" },
+            term: {
+                $policy: "Application",
+                function: { $policy: "Lookup", name: "f" },
+                arg: {
+                    $policy: "Function",
+                    pattern: { $policy: "Lookup", name: "y" },
+                    term: {
+                        $policy: "Application",
+                        function: {
+                            $policy: "Application",
+                            function: { $policy: "Lookup", name: "x" },
+                            arg: { $policy: "Lookup", name: "x" }
+                        },
+                        arg: { $policy: "Lookup", name: "y" }
+                    }
+                }
+            }
+        }
+    }
+}
+
 import { Machine } from "./machine"
 import { rewriteTerm } from "./term"
 import { passOrThrow } from "./app"
 
 export function testTAPL() {
+    testFactorial();
     testRealnatTimes22();
     testRealnat2();
     testRealnat0();
@@ -549,6 +602,7 @@ export function testTAPL() {
     testTestCombinator();
 }
 
+
 class MachineWithSucc extends Machine {
     override copyWith(values: { [k: string]: any }): Machine {
         return Object.assign(new MachineWithSucc(), this, values);
@@ -571,6 +625,168 @@ class MachineWithSucc extends Machine {
             return super.getRewriteFunction();
         }
     }
+}
+
+function testFactorial() {
+    // g = λfct. λn. if realeq n c0 then c1 else (times n (fct (prd n)));   (From #1)
+    // fun fct -> fun n -> if realeq n c0 then c1 else ((times n) (fct (prd n)))
+    const g = {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "fct" },
+        term: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "n" },
+            term: {
+                $policy: "If",
+                condition: {
+                    $policy: "Application",
+                    function: {
+                        $policy: "Application",
+                        function: realeq,
+                        arg: { $policy: "Lookup", name: "n" }
+                    },
+                    arg: c0
+                },
+                then: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: c0
+                },
+                else: {
+                    $policy: "Application",
+                    function: {
+                        $policy: "Application",
+                        function: times,
+                        arg: { $policy: "Lookup", name: "n" }
+                    },
+                    arg: {
+                        $policy: "Application",
+                        function: { $policy: "Lookup", name: "fct" },
+                        arg: {
+                            $policy: "Application",
+                            function: prd,
+                            arg: { $policy: "Lookup", name: "n" }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // factorial = fix g;   (From #1)
+    const factorial = {
+        $policy: "Application",
+        function: fix,
+        arg: g
+    }
+    const termFactorial0 = {
+        $policy: "Application",
+        function: realnat,
+        arg: {
+            $policy: "Application",
+            function: factorial,
+            arg: c0
+        }
+    }
+    const m0 = new MachineWithSucc(termFactorial0);
+    const r0 = rewriteTerm(m0);
+    passOrThrow(r0.term === 1);
+    passOrThrow(r0.bindings === m0.bindings);
+
+    const termFactorial1 = {
+        $policy: "Application",
+        function: realnat,
+        arg: {
+            $policy: "Application",
+            function: factorial,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: c0
+            }
+        }
+    }
+    const m1 = new MachineWithSucc(termFactorial1);
+    const r1 = rewriteTerm(m1);
+    passOrThrow(r1.term === 1);
+    passOrThrow(r1.bindings === m1.bindings);
+
+    const termFactorial2 = {
+        $policy: "Application",
+        function: realnat,
+        arg: {
+            $policy: "Application",
+            function: factorial,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: c0
+                }
+            }
+        }
+    }
+    const m2 = new MachineWithSucc(termFactorial2);
+    const r2 = rewriteTerm(m2);
+    passOrThrow(r2.term === 2);
+    passOrThrow(r2.bindings === m2.bindings);
+
+    const termFactorial3 = {
+        $policy: "Application",
+        function: realnat,
+        arg: {
+            $policy: "Application",
+            function: factorial,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: {
+                        $policy: "Application",
+                        function: scc,
+                        arg: c0
+                    }
+                }
+            }
+        }
+    }
+    const m3 = new MachineWithSucc(termFactorial3);
+    const r3 = rewriteTerm(m3);
+    passOrThrow(r3.term === 6);
+    passOrThrow(r3.bindings === m3.bindings);
+
+    const termFactorial4 = {
+        $policy: "Application",
+        function: realnat,
+        arg: {
+            $policy: "Application",
+            function: factorial,
+            arg: {
+                $policy: "Application",
+                function: scc,
+                arg: {
+                    $policy: "Application",
+                    function: scc,
+                    arg: {
+                        $policy: "Application",
+                        function: scc,
+                        arg: {
+                            $policy: "Application",
+                            function: scc,
+                            arg: c0
+                        }
+                    }
+                }
+            }
+        }
+    }
+    const m4 = new MachineWithSucc(termFactorial4);
+    const r4 = rewriteTerm(m4);
+    passOrThrow(r4.term === 24);
+    passOrThrow(r4.bindings === m4.bindings);
 }
 
 function testRealnatTimes22() {
