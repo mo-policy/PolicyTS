@@ -38,6 +38,9 @@ The lookup term is used to refer to the value bound to a name.
 */
 
 import { Machine, MatchResult } from "./machine"
+import { rewriteTerm } from "./term";
+import { isConstant } from "./termConstant";
+import { isFunction } from "./termFunction";
 
 export type LookupTerm = {
     $policy: "Lookup",
@@ -68,7 +71,11 @@ export function rewriteLookup(m: Machine): Machine {
     if (binding === undefined) {
         return m.copyWith({ blocked: true });
     } else {
-        return m.copyWith({ term: binding });
+        if ((isConstant(binding) || isFunction(binding))) {
+            return m.copyWith({ term: binding });
+        } else {
+            return rewriteTerm(m.copyWith({ term: binding }));
+        }        
     }
 }
 

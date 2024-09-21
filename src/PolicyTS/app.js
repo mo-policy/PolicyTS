@@ -10,27 +10,6 @@ function passOrThrow(condition) {
         throw "Test failed";
     }
 }
-const dev = false;
-if (dev) {
-    // Run the test under development.
-    develop();
-}
-else {
-    // Run all the tests.
-    (0, testsTAPL_1.testTAPL)();
-    testApplyFunction();
-    testLet();
-    testLookupBlocked();
-    testLookupSuccess();
-    testConstantWrappedConstant();
-    testConstantTerm1();
-    testConstantArray();
-    testConstantObjectOneProperty();
-    testConstantEmptyObject();
-    testConstantNull();
-}
-function develop() {
-}
 function testApplyFunction() {
     // (fun x -> x) 1
     const term = {
@@ -60,8 +39,8 @@ function testLet() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    passOrThrow(("x" in r.bindings) && (r.bindings.x === 1) && (Object.keys(r.bindings).length === 1));
     passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
 }
 function testLookupBlocked() {
     const term = { $policy: "Lookup", name: "x" };
@@ -123,5 +102,87 @@ function testConstantNull() {
     const mjs = JSON.stringify(m);
     const rjs = JSON.stringify(r);
     passOrThrow(mjs === rjs);
+}
+class DevMachine extends machine_1.Machine {
+    copyWith(values) {
+        return Object.assign(new DevMachine(), this, values);
+    }
+    getRewriteFunction() {
+        if (this.term === "x<4") {
+            return (function LessThan4(m) {
+                const x = m.bindings["x"];
+                return m.copyWith({ term: (x < 4) });
+            });
+        }
+        if (this.term === "x+1") {
+            return (function XPlusPlus(m) {
+                const x = m.bindings["x"];
+                return m.copyWith({ term: (x + 1) });
+            });
+        }
+        return super.getRewriteFunction();
+    }
+}
+function develop() {
+    // let rec f = fun x -> f x in f 1
+    // let f = fix (fun f -> fun x -> f x) in f 1
+    // let f = fix (fun f -> fun x -> if "x<4" then f "x++" else 4) in f 1
+    const term = {
+        $policy: "Let",
+        binding: {
+            $policy: "PatternBinding",
+            pattern: { $policy: "Lookup", name: "f" },
+            term: {
+                $policy: "Fix",
+                term: {
+                    $policy: "Function",
+                    pattern: { $policy: "Lookup", name: "f" },
+                    term: {
+                        $policy: "Function",
+                        pattern: { $policy: "Lookup", name: "x" },
+                        term: {
+                            $policy: "If",
+                            condition: "x<4",
+                            then: {
+                                $policy: "Application",
+                                function: { $policy: "Lookup", name: "f" },
+                                arg: "x+1"
+                            },
+                            else: 4
+                        }
+                    }
+                }
+            }
+        },
+        in: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "f" },
+            arg: 1
+        }
+    };
+    const m = new DevMachine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 4);
+    passOrThrow(r.bindings === m.bindings);
+}
+const dev = false;
+if (dev) {
+    // Run the test under development.
+    develop();
+}
+else {
+    // Run all the tests.
+    develop();
+    (0, testsTAPL_1.testTAPL)();
+    testApplyFunction();
+    testLet();
+    testLookupBlocked();
+    testLookupSuccess();
+    testConstantWrappedConstant();
+    testConstantTerm1();
+    testConstantArray();
+    testConstantObjectOneProperty();
+    testConstantEmptyObject();
+    testConstantNull();
 }
 //# sourceMappingURL=app.js.map

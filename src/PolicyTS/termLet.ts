@@ -115,7 +115,8 @@ export function rewriteLet(m: Machine): Machine {
         const matchOfBinding = matchTerm(m, m.term.binding.pattern, resultOfBindingTerm.term);
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
-            return rewriteTerm(m.copyWith({ term: m.term.in, bindings: nextBindings }));
+            const resultOfIn = rewriteTerm(m.copyWith({ term: m.term.in, bindings: nextBindings }));
+            return m.copyWith({ term: resultOfIn.term });
         } else {
             throw "binding failed"
         }

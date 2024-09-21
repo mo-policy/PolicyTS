@@ -45,7 +45,8 @@ function rewriteLet(m) {
         const matchOfBinding = (0, term_1.matchTerm)(m, m.term.binding.pattern, resultOfBindingTerm.term);
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
-            return (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.in, bindings: nextBindings }));
+            const resultOfIn = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.in, bindings: nextBindings }));
+            return m.copyWith({ term: resultOfIn.term });
         }
         else {
             throw "binding failed";

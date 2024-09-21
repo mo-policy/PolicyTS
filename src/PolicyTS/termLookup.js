@@ -4,6 +4,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isLookup = isLookup;
 exports.rewriteLookup = rewriteLookup;
 exports.matchLookup = matchLookup;
+const term_1 = require("./term");
+const termConstant_1 = require("./termConstant");
+const termFunction_1 = require("./termFunction");
 function isLookup(term) {
     return (term !== null) &&
         (typeof term === "object") &&
@@ -31,7 +34,12 @@ function rewriteLookup(m) {
         return m.copyWith({ blocked: true });
     }
     else {
-        return m.copyWith({ term: binding });
+        if (((0, termConstant_1.isConstant)(binding) || (0, termFunction_1.isFunction)(binding))) {
+            return m.copyWith({ term: binding });
+        }
+        else {
+            return (0, term_1.rewriteTerm)(m.copyWith({ term: binding }));
+        }
     }
 }
 /*

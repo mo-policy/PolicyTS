@@ -10,32 +10,6 @@ export function passOrThrow(condition: boolean): asserts condition {
     }
 }
 
-const dev = false;
-
-if (dev) {
-    // Run the test under development.
-    develop();
-} else {
-    // Run all the tests.
-
-    testTAPL();
-
-    testApplyFunction();
-    testLet();
-    testLookupBlocked();
-    testLookupSuccess();
-    testConstantWrappedConstant();
-    testConstantTerm1();
-    testConstantArray();
-    testConstantObjectOneProperty();
-    testConstantEmptyObject();
-    testConstantNull();
-}
- 
-function develop() {
-}
-
-
 function testApplyFunction() {
     // (fun x -> x) 1
     const term =
@@ -66,8 +40,8 @@ function testLet() {
     };
     const m = new Machine(term);
     const r = rewriteTerm(m);
-    passOrThrow(("x" in r.bindings) && (r.bindings.x === 1) && (Object.keys(r.bindings).length === 1));
     passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
 }
 
 function testLookupBlocked() {
@@ -133,3 +107,94 @@ function testConstantNull() {
     const rjs = JSON.stringify(r);
     passOrThrow(mjs === rjs);
 }
+
+class DevMachine extends Machine {
+    override copyWith(values: { [k: string]: any }): Machine {
+        return Object.assign(new DevMachine(), this, values);
+    }
+    override getRewriteFunction() {
+        if (this.term === "x<4") {
+            return (
+                function LessThan4(m: Machine): Machine {
+                    const x = m.bindings["x"];
+                    return m.copyWith({ term: (x < 4) });
+                }
+            );
+        } if (this.term === "x+1") {
+            return (
+                function XPlusPlus(m: Machine): Machine {
+                    const x = m.bindings["x"];
+                    return m.copyWith({ term: (x + 1) });
+                }
+            );
+        }
+        return super.getRewriteFunction();
+
+    }
+}
+
+function develop() {
+    // let rec f = fun x -> f x in f 1
+    // let f = fix (fun f -> fun x -> f x) in f 1
+    // let f = fix (fun f -> fun x -> if "x<4" then f "x++" else 4) in f 1
+    const term = {
+        $policy: "Let",
+        binding: {
+            $policy: "PatternBinding",
+            pattern: { $policy: "Lookup", name: "f" },
+            term: {
+                $policy: "Fix",
+                term: {
+                    $policy: "Function",
+                    pattern: { $policy: "Lookup", name: "f" },
+                    term: {
+                        $policy: "Function",
+                        pattern: { $policy: "Lookup", name: "x" },
+                        term: {
+                            $policy: "If",
+                            condition: "x<4",
+                            then: {
+                                $policy: "Application",
+                                function: { $policy: "Lookup", name: "f" },
+                                arg: "x+1"
+                            },
+                            else: 4
+                        }
+                    }
+                }
+            }
+        },
+        in: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "f" },
+            arg: 1
+        }
+    };
+    const m = new DevMachine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 4);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+const dev = false;
+
+if (dev) {
+    // Run the test under development.
+    develop();
+} else {
+    // Run all the tests.
+    develop();
+    testTAPL();
+
+    testApplyFunction();
+    testLet();
+    testLookupBlocked();
+    testLookupSuccess();
+    testConstantWrappedConstant();
+    testConstantTerm1();
+    testConstantArray();
+    testConstantObjectOneProperty();
+    testConstantEmptyObject();
+    testConstantNull();
+}
+

@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Machine = void 0;
 const termApplication_1 = require("./termApplication");
 const termConstant_1 = require("./termConstant");
+const termFix_1 = require("./termFix");
 const termFunction_1 = require("./termFunction");
 const termIf_1 = require("./termIf");
 const termLet_1 = require("./termLet");
@@ -53,6 +54,7 @@ class Machine {
                 switch (this.term.$policy) {
                     case "Application": return termApplication_1.rewriteApplication;
                     case "Constant": return termConstant_1.rewriteConstant;
+                    case "Fix": return termFix_1.rewriteFix;
                     case "Function": return termFunction_1.rewriteFunction;
                     case "If": return termIf_1.rewriteIf;
                     case "Let": return termLet_1.rewriteLet;
@@ -74,6 +76,7 @@ class Machine {
                 switch (pattern.$policy) {
                     case "Application": return termApplication_1.matchApplication;
                     case "Constant": return termConstant_1.matchConstant;
+                    case "Fix": return termFix_1.matchFix;
                     case "Function": return termFunction_1.matchFunction;
                     case "If": return termIf_1.matchIf;
                     case "Let": return termLet_1.matchLet;

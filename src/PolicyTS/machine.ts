@@ -2,6 +2,7 @@
 
 import { rewriteApplication, matchApplication } from "./termApplication"
 import { rewriteConstant, matchConstant } from "./termConstant"
+import { matchFix, rewriteFix } from "./termFix"
 import { rewriteFunction, matchFunction } from "./termFunction"
 import { rewriteIf, matchIf } from "./termIf"
 import { rewriteLet, matchLet } from "./termLet"
@@ -59,6 +60,7 @@ export class Machine {
                 switch (this.term.$policy) {
                     case "Application": return rewriteApplication;
                     case "Constant": return rewriteConstant;
+                    case "Fix": return rewriteFix;
                     case "Function": return rewriteFunction;
                     case "If": return rewriteIf;
                     case "Let": return rewriteLet;
@@ -80,6 +82,7 @@ export class Machine {
                 switch (pattern.$policy) {
                     case "Application": return matchApplication;
                     case "Constant": return matchConstant;
+                    case "Fix": return matchFix;
                     case "Function": return matchFunction;
                     case "If": return matchIf;
                     case "Let": return matchLet;
