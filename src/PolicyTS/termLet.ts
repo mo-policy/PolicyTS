@@ -66,33 +66,21 @@ Used to bind a value to a name.
 import { Machine, MatchResult } from "./machine"
 import { rewriteTerm, matchTerm } from "./term"
 
-export type PatternBindingTerm = {
-    $policy: "PatternBinding",
-    pattern: any,
-    term: any
-}
-
 export type LetTerm = {
     $policy: "Let",
-    binding: PatternBindingTerm,
+    pattern: any,
+    term: any,
     in: any
-}
-export function isPatternBinding(pb: any): pb is PatternBindingTerm {
-    return (pb !== undefined) &&
-        (typeof pb === "object") &&
-        ("$policy" in pb) && (pb.$policy === "PatternBinding") &&
-        ("pattern" in pb) &&
-        ("term" in pb) &&
-        (Object.keys(pb).length === 3);
 }
 
 export function isLet(term: any): term is LetTerm {
     return (term !== null) &&
         (typeof term === "object") &&
         ("$policy" in term) && (term.$policy === "Let") &&
-        ("binding" in term) && (isPatternBinding(term.binding)) &&
+        ("pattern" in term) &&
+        ("term" in term) &&
         ("in" in term) &&
-        (Object.keys(term).length === 3);
+        (Object.keys(term).length === 4);
 }
 
 
@@ -107,12 +95,12 @@ binding term.
 */
 export function rewriteLet(m: Machine): Machine {
     if (!(isLet(m.term))) { throw "expected Let"; };
-    const resultOfBindingTerm = rewriteTerm(m.copyWith({ term: m.term.binding.term }));
+    const resultOfBindingTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
     if (resultOfBindingTerm.blocked) {
         // to do: return new LetTerm with blocked term
         return m;
     } else {
-        const matchOfBinding = matchTerm(m, m.term.binding.pattern, resultOfBindingTerm.term);
+        const matchOfBinding = matchTerm(m, m.term.pattern, resultOfBindingTerm.term);
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
             const resultOfIn = rewriteTerm(m.copyWith({ term: m.term.in, bindings: nextBindings }));

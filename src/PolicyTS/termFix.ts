@@ -64,9 +64,9 @@ export function rewriteFix(m: Machine): Machine {
         const f = m.term.term;
         const matchResult = matchTerm(m, f.pattern, f.term);
         if (!matchResult) { throw "match failed" }
-        let bindings: { [k: string]: any } = {};
+        let fixBindings: { [k: string]: any } = {};
         for (const p in matchResult) {
-            bindings[p] = {
+            fixBindings[p] = {
                 $policy: "Fix",
                 term: {
                     $policy: "Function",
@@ -75,6 +75,7 @@ export function rewriteFix(m: Machine): Machine {
                 }
             };
         }
+        const bindings = Object.assign({}, m.bindings, fixBindings);
         const mFix = m.copyWith({ term: f.term, bindings: bindings });
         return rewriteTerm(mFix);
     } else {

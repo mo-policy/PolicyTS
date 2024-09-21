@@ -28,9 +28,9 @@ function rewriteFix(m) {
         if (!matchResult) {
             throw "match failed";
         }
-        let bindings = {};
+        let fixBindings = {};
         for (const p in matchResult) {
-            bindings[p] = {
+            fixBindings[p] = {
                 $policy: "Fix",
                 term: {
                     $policy: "Function",
@@ -39,6 +39,7 @@ function rewriteFix(m) {
                 }
             };
         }
+        const bindings = Object.assign({}, m.bindings, fixBindings);
         const mFix = m.copyWith({ term: f.term, bindings: bindings });
         return (0, term_1.rewriteTerm)(mFix);
     }

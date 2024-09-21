@@ -31,11 +31,8 @@ function testLet() {
     // let x = 1 in 2
     const term = {
         $policy: "Let",
-        binding: {
-            $policy: "PatternBinding",
-            pattern: { $policy: "Lookup", name: "x" },
-            term: 1
-        },
+        pattern: { $policy: "Lookup", name: "x" },
+        term: 1,
         in: 2
     };
     const m = new Machine(term);
@@ -139,27 +136,24 @@ function develop() {
     // let f = fix (fun f -> fun x -> if "x<4" then f "x++" else 4) in f 1
     const term = {
         $policy: "Let",
-        binding: {
-            $policy: "PatternBinding",
-            pattern: { $policy: "Lookup", name: "f" },
+        pattern: { $policy: "Lookup", name: "f" },
+        term: {
+            $policy: "Fix",
             term: {
-                $policy: "Fix",
+                $policy: "Function",
+                pattern: { $policy: "Lookup", name: "f" },
                 term: {
                     $policy: "Function",
-                    pattern: { $policy: "Lookup", name: "f" },
+                    pattern: { $policy: "Lookup", name: "x" },
                     term: {
-                        $policy: "Function",
-                        pattern: { $policy: "Lookup", name: "x" },
-                        term: {
-                            $policy: "If",
-                            condition: "x<4",
-                            then: {
-                                $policy: "Application",
-                                function: { $policy: "Lookup", name: "f" },
-                                arg: "x+1"
-                            },
-                            else: 4
-                        }
+                        $policy: "If",
+                        condition: "x<4",
+                        then: {
+                            $policy: "Application",
+                            function: { $policy: "Lookup", name: "f" },
+                            arg: "x+1"
+                        },
+                        else: 4
                     }
                 }
             }

@@ -1,26 +1,18 @@
 "use strict";
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isPatternBinding = isPatternBinding;
 exports.isLet = isLet;
 exports.rewriteLet = rewriteLet;
 exports.matchLet = matchLet;
 const term_1 = require("./term");
-function isPatternBinding(pb) {
-    return (pb !== undefined) &&
-        (typeof pb === "object") &&
-        ("$policy" in pb) && (pb.$policy === "PatternBinding") &&
-        ("pattern" in pb) &&
-        ("term" in pb) &&
-        (Object.keys(pb).length === 3);
-}
 function isLet(term) {
     return (term !== null) &&
         (typeof term === "object") &&
         ("$policy" in term) && (term.$policy === "Let") &&
-        ("binding" in term) && (isPatternBinding(term.binding)) &&
+        ("pattern" in term) &&
+        ("term" in term) &&
         ("in" in term) &&
-        (Object.keys(term).length === 3);
+        (Object.keys(term).length === 4);
 }
 /*
 ## Rewrite Rules
@@ -36,13 +28,13 @@ function rewriteLet(m) {
         throw "expected Let";
     }
     ;
-    const resultOfBindingTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.binding.term }));
+    const resultOfBindingTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
     if (resultOfBindingTerm.blocked) {
         // to do: return new LetTerm with blocked term
         return m;
     }
     else {
-        const matchOfBinding = (0, term_1.matchTerm)(m, m.term.binding.pattern, resultOfBindingTerm.term);
+        const matchOfBinding = (0, term_1.matchTerm)(m, m.term.pattern, resultOfBindingTerm.term);
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
             const resultOfIn = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.in, bindings: nextBindings }));
