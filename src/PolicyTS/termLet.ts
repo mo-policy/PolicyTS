@@ -9,26 +9,18 @@ Used to bind a value to a name.
 
     {
         "$policy": "Let",
-        "binding": _PatternBinding_,
-        "inTerm": _term_,
-    }
-
-    {
-        "$policy": "PatternBinding",
         "pattern": _term_,
-        "term": _term_
+        "term": _term_,
+        "inTerm": _term_
     }
 
 ## Example
     
     {
         "$policy": "Let",
-        "binding": {
-            "$policy": "PatternBinding",
-            "pattern": { "$policy": "Lookup", "name": "x" },
-            "term": 1
-        },
-        "inTerm": { "$policy": "Lookup", "name": "x" }
+        "pattern": { "$policy": "Lookup", "name": "x" },
+        "term": 1,
+        "in": { "$policy": "Lookup", "name": "x" }
     }
 
     let x = 1 in x
@@ -42,23 +34,11 @@ Used to bind a value to a name.
                 "type": "string",
                 "const": "Let"
             },
-            "binding": { "$ref": "#/$defs/PatternBindingTerm" },
+            "pattern": { "$ref": "#/$defs/Term" },
+            "term": { "$ref": "#/$defs/Term" },
             "in": { "$ref": "#/$defs/Term" }
         },
-        "required": [ "$policy", "binding", "in" ]
-    }
-
-    "PatternBindingTerm": {
-        "type": "object",
-        "properties": {
-            "$policy": {
-                "type": "string",
-                "const": "PatternBinding"
-            },
-            "pattern": { "$ref": "#/$defs/Term" },
-            "term": { "$ref": "#/$defs/Term" }
-        },
-        "required": [ "$policy", "mutable", "pattern", "term" ]
+        "required": [ "$policy", "pattern", "term", "in" ]
     }
 
 */

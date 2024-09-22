@@ -8,6 +8,7 @@ const termFix_1 = require("./termFix");
 const termFunction_1 = require("./termFunction");
 const termIf_1 = require("./termIf");
 const termLet_1 = require("./termLet");
+const termLetRec_1 = require("./termLetRec");
 const termLookup_1 = require("./termLookup");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
@@ -58,6 +59,7 @@ class Machine {
                     case "Function": return termFunction_1.rewriteFunction;
                     case "If": return termIf_1.rewriteIf;
                     case "Let": return termLet_1.rewriteLet;
+                    case "LetRec": return termLetRec_1.rewriteLetRec;
                     case "Lookup": return termLookup_1.rewriteLookup;
                 }
                 throw "Unexpected term";
@@ -80,6 +82,7 @@ class Machine {
                     case "Function": return termFunction_1.matchFunction;
                     case "If": return termIf_1.matchIf;
                     case "Let": return termLet_1.matchLet;
+                    case "LetRec": return termLetRec_1.matchLetRec;
                     case "Lookup": return termLookup_1.matchLookup;
                 }
                 throw "Unexpected pattern";

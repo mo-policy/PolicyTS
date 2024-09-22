@@ -2,6 +2,7 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isFix = isFix;
+exports.fixMatch = fixMatch;
 exports.rewriteFix = rewriteFix;
 exports.matchFix = matchFix;
 const term_1 = require("./term");
@@ -17,6 +18,24 @@ function isFix(term) {
 ## Rewrite Rules
 
 */
+function fixMatch(m, pattern, term) {
+    const matchResult = (0, term_1.matchTerm)(m, pattern, term);
+    if (!matchResult) {
+        return false;
+    }
+    let fixBindings = {};
+    for (const p in matchResult) {
+        fixBindings[p] = {
+            $policy: "Fix",
+            term: {
+                $policy: "Function",
+                pattern: { $policy: "Lookup", name: p },
+                term: matchResult[p]
+            }
+        };
+    }
+    return fixBindings;
+}
 function rewriteFix(m) {
     if (!(isFix(m.term))) {
         throw "expected Fix";
@@ -24,21 +43,7 @@ function rewriteFix(m) {
     ;
     if ((0, termFunction_1.isFunction)(m.term.term)) {
         const f = m.term.term;
-        const matchResult = (0, term_1.matchTerm)(m, f.pattern, f.term);
-        if (!matchResult) {
-            throw "match failed";
-        }
-        let fixBindings = {};
-        for (const p in matchResult) {
-            fixBindings[p] = {
-                $policy: "Fix",
-                term: {
-                    $policy: "Function",
-                    pattern: { $policy: "Lookup", name: p },
-                    term: matchResult[p]
-                }
-            };
-        }
+        const fixBindings = fixMatch(m, f.pattern, f.term);
         const bindings = Object.assign({}, m.bindings, fixBindings);
         const mFix = m.copyWith({ term: f.term, bindings: bindings });
         return (0, term_1.rewriteTerm)(mFix);

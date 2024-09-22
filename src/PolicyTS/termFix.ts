@@ -58,23 +58,29 @@ export function isFix(term: any): term is FixTerm {
 ## Rewrite Rules
 
 */
+
+export function fixMatch(m: Machine, pattern: any, term: any): MatchResult {
+    const matchResult = matchTerm(m, pattern, term);
+    if (!matchResult) { return false; }
+    let fixBindings: { [k: string]: any } = {};
+    for (const p in matchResult) {
+        fixBindings[p] = {
+            $policy: "Fix",
+            term: {
+                $policy: "Function",
+                pattern: { $policy: "Lookup", name: p },
+                term: matchResult[p]
+            }
+        };
+    }
+    return fixBindings;
+}
+
 export function rewriteFix(m: Machine): Machine {
     if (!(isFix(m.term))) { throw "expected Fix"; };
     if (isFunction(m.term.term)) {
         const f = m.term.term;
-        const matchResult = matchTerm(m, f.pattern, f.term);
-        if (!matchResult) { throw "match failed" }
-        let fixBindings: { [k: string]: any } = {};
-        for (const p in matchResult) {
-            fixBindings[p] = {
-                $policy: "Fix",
-                term: {
-                    $policy: "Function",
-                    pattern: { $policy: "Lookup", name: p },
-                    term: matchResult[p]
-                }
-            };
-        }
+        const fixBindings = fixMatch(m, f.pattern, f.term);
         const bindings = Object.assign({}, m.bindings, fixBindings);
         const mFix = m.copyWith({ term: f.term, bindings: bindings });
         return rewriteTerm(mFix);

@@ -120,10 +120,8 @@ class DevMachine extends machine_1.Machine {
         return super.getRewriteFunction();
     }
 }
-function develop() {
-    // let rec f = fun x -> f x in f 1
-    // let f = fix (fun f -> fun x -> f x) in f 1
-    // let f = fix (fun f -> fun x -> if "x<4" then f "x++" else 4) in f 1
+function testFix() {
+    // let f = fix (fun f -> fun x -> if "x<4" then f "x+1" else 4) in f 1
     const term = {
         $policy: "Let",
         pattern: { $policy: "Lookup", name: "f" },
@@ -159,6 +157,39 @@ function develop() {
     passOrThrow(r.term === 4);
     passOrThrow(r.bindings === m.bindings);
 }
+function testLetRec() {
+    // let rec f = (fun x -> if "x<4" then f "x+1" else 4) in f 1
+    // let f = fix (fun f -> fun x -> if "x<4" then f "x+1" else 4) in f 1
+    const term = {
+        $policy: "LetRec",
+        pattern: { $policy: "Lookup", name: "f" },
+        term: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "x" },
+            term: {
+                $policy: "If",
+                condition: "x<4",
+                then: {
+                    $policy: "Application",
+                    function: { $policy: "Lookup", name: "f" },
+                    arg: "x+1"
+                },
+                else: 4
+            }
+        },
+        in: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "f" },
+            arg: 1
+        }
+    };
+    const m = new DevMachine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 4);
+    passOrThrow(r.bindings === m.bindings);
+}
+function develop() {
+}
 const dev = false;
 if (dev) {
     // Run the test under development.
@@ -168,6 +199,8 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testLetRec();
+    testFix();
     testApplyFunction();
     testLet();
     testLookupBlocked();

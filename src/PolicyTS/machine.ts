@@ -6,6 +6,7 @@ import { matchFix, rewriteFix } from "./termFix"
 import { rewriteFunction, matchFunction } from "./termFunction"
 import { rewriteIf, matchIf } from "./termIf"
 import { rewriteLet, matchLet } from "./termLet"
+import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup } from "./termLookup"
 
 
@@ -64,6 +65,7 @@ export class Machine {
                     case "Function": return rewriteFunction;
                     case "If": return rewriteIf;
                     case "Let": return rewriteLet;
+                    case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
                 }
                 throw "Unexpected term";
@@ -86,6 +88,7 @@ export class Machine {
                     case "Function": return matchFunction;
                     case "If": return matchIf;
                     case "Let": return matchLet;
+                    case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
                 }
                 throw "Unexpected pattern";
