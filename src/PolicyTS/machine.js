@@ -11,6 +11,7 @@ const termLet_1 = require("./termLet");
 const termLetRec_1 = require("./termLetRec");
 const termLookup_1 = require("./termLookup");
 const termRef_1 = require("./termRef");
+const termSend_1 = require("./termSend");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -21,11 +22,13 @@ class Machine {
      * @param term      The current term.
      * @param blocked   The current blocked state.
      * @param bindings  The current name to value bindings.
+     * @param comm      The current channels and messages.
      */
-    constructor(term = null, blocked = false, bindings = {}) {
+    constructor(term = null, blocked = false, bindings = {}, comm = []) {
         this.term = term;
         this.blocked = blocked;
         this.bindings = bindings;
+        this.comm = comm;
     }
     /**
      * Helper for immutable coding style. Creates copy of this Machine with given value overrides.
@@ -65,6 +68,7 @@ class Machine {
                     case "LetRec": return termLetRec_1.rewriteLetRec;
                     case "Lookup": return termLookup_1.rewriteLookup;
                     case "Ref": return termRef_1.rewriteRef;
+                    case "Send": return termSend_1.rewriteSend;
                 }
                 throw "Unexpected term";
             }
@@ -91,11 +95,49 @@ class Machine {
                     case "LetRec": return termLetRec_1.matchLetRec;
                     case "Lookup": return termLookup_1.matchLookup;
                     case "Ref": return termRef_1.matchRef;
+                    case "Send": return termSend_1.matchSend;
                 }
                 throw "Unexpected pattern";
             }
         }
         return termConstant_1.matchConstant;
+    }
+    /**
+     *
+     * @param message
+     * @param channel
+     * @returns
+     */
+    send(message, channel) {
+        // look for channel in array
+        let channelMessages = false;
+        for (let i = 0; i < this.comm.length; i++) {
+            const cm = this.comm[i];
+            if (this.compare(channel, cm.channel) === 0) {
+                channelMessages = cm;
+                break;
+            }
+        }
+        // if found, use that, otherwise add one and use that
+        if (channelMessages === false) {
+            channelMessages = {
+                channel: channel,
+                messages: []
+            };
+            this.comm.push(channelMessages);
+        }
+        // create an id, using Date.valueOf
+        let id = (new Date()).valueOf();
+        if (channelMessages.messages.length > 0) {
+            const lastId = channelMessages.messages[channelMessages.messages.length - 1].id;
+            if (lastId >= id) {
+                id = lastId + 1;
+            }
+        }
+        // add the message to the end
+        const entry = { id: id, message: message };
+        channelMessages.messages.push(entry);
+        return id;
     }
     /**
      * Verifies if the given term is of the provided schema name.

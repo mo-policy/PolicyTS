@@ -276,6 +276,22 @@ function testRefAssignment() {
     passOrThrow(r.term[5] === 9);
     passOrThrow(r.bindings === m.bindings);
 }
+
+function testSend() {
+    const send = {
+        $policy: "Send",
+        message: "Hello",
+        channel: "World"
+    };
+    const term = [send, send, send];
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(Array.isArray(r.term));
+    passOrThrow(r.term.length === 3)
+    passOrThrow(r.term[0] < r.term[1] && r.term[1] < r.term[2]);
+    passOrThrow(r.bindings === m.bindings);
+
+}
 function develop() {
 }
 
@@ -289,6 +305,7 @@ if (dev) {
     develop();
     testTAPL();
 
+    testSend();
     testRefAssignment();
     testRefDereference();
     testLetRec();

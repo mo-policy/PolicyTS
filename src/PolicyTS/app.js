@@ -264,6 +264,20 @@ function testRefAssignment() {
     passOrThrow(r.term[5] === 9);
     passOrThrow(r.bindings === m.bindings);
 }
+function testSend() {
+    const send = {
+        $policy: "Send",
+        message: "Hello",
+        channel: "World"
+    };
+    const term = [send, send, send];
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(Array.isArray(r.term));
+    passOrThrow(r.term.length === 3);
+    passOrThrow(r.term[0] < r.term[1] && r.term[1] < r.term[2]);
+    passOrThrow(r.bindings === m.bindings);
+}
 function develop() {
 }
 const dev = false;
@@ -275,6 +289,7 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testSend();
     testRefAssignment();
     testRefDereference();
     testLetRec();

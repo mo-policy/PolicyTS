@@ -9,9 +9,21 @@ import { rewriteLet, matchLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup } from "./termLookup"
 import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
+import { matchSend, rewriteSend } from "./termSend"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
+
+
+type ChannelMessages = {
+    readonly channel: any,
+    messages: 
+        {
+            id: number,
+            message: any
+        }[]    
+}
+
 
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
@@ -22,15 +34,18 @@ export class Machine {
     readonly term: any;
     readonly blocked: boolean;
     readonly bindings: { readonly [k: string]: any };
+    readonly comm: ChannelMessages[];
     /**
      * @param term      The current term.
      * @param blocked   The current blocked state.
      * @param bindings  The current name to value bindings.
+     * @param comm      The current channels and messages.
      */
-    constructor(term: any = null, blocked: boolean = false, bindings: { [k: string]: any } = {}) {
+    constructor(term: any = null, blocked: boolean = false, bindings: { [k: string]: any } = {}, comm: ChannelMessages[] = []) {
         this.term = term;
         this.blocked = blocked;
         this.bindings = bindings;
+        this.comm = comm;
     }
 
     /**
@@ -71,6 +86,7 @@ export class Machine {
                     case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
                     case "Ref": return rewriteRef;
+                    case "Send": return rewriteSend;
                 }
                 throw "Unexpected term";
             }
@@ -97,12 +113,51 @@ export class Machine {
                     case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
                     case "Ref": return matchRef;
+                    case "Send": return matchSend;
                 }
                 throw "Unexpected pattern";
             }
         }
         return matchConstant;
     }
+    /**
+     * 
+     * @param message
+     * @param channel
+     * @returns
+     */
+    send(message: any, channel: any): any {
+        // look for channel in array
+        let channelMessages: false | ChannelMessages = false;
+        for (let i = 0; i < this.comm.length; i++) {
+            const cm = this.comm[i];
+            if (this.compare(channel, cm.channel) === 0) {
+                channelMessages = cm;
+                break;
+            }
+        }
+        // if found, use that, otherwise add one and use that
+        if (channelMessages === false) {
+            channelMessages = {
+                channel: channel,
+                messages: []
+            };
+            this.comm.push(channelMessages);
+        }
+        // create an id, using Date.valueOf
+        let id = (new Date()).valueOf();
+        if (channelMessages.messages.length > 0) {
+            const lastId = channelMessages.messages[channelMessages.messages.length - 1].id
+            if (lastId >= id) {
+                id = lastId + 1;
+            }
+        }
+        // add the message to the end
+        const entry = { id: id, message: message };
+        channelMessages.messages.push(entry);
+        return id;
+    }
+
     /**
      * Verifies if the given term is of the provided schema name.
      * @param term      The term to validate.
