@@ -8,6 +8,7 @@ import { rewriteIf, matchIf } from "./termIf"
 import { rewriteLet, matchLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup } from "./termLookup"
+import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
@@ -60,13 +61,16 @@ export class Machine {
             if ("$policy" in this.term) {
                 switch (this.term.$policy) {
                     case "Application": return rewriteApplication;
+                    case "Assignment": return rewriteAssignment;
                     case "Constant": return rewriteConstant;
+                    case "Dereference": return rewriteDereference;
                     case "Fix": return rewriteFix;
                     case "Function": return rewriteFunction;
                     case "If": return rewriteIf;
                     case "Let": return rewriteLet;
                     case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
+                    case "Ref": return rewriteRef;
                 }
                 throw "Unexpected term";
             }
@@ -83,13 +87,16 @@ export class Machine {
             if ("$policy" in pattern) {
                 switch (pattern.$policy) {
                     case "Application": return matchApplication;
+                    case "Assignment": return matchAssignment;
                     case "Constant": return matchConstant;
+                    case "Dereference": return matchDereference;
                     case "Fix": return matchFix;
                     case "Function": return matchFunction;
                     case "If": return matchIf;
                     case "Let": return matchLet;
                     case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
+                    case "Ref": return matchRef;
                 }
                 throw "Unexpected pattern";
             }

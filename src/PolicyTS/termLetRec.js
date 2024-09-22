@@ -50,6 +50,7 @@ function rewriteLetRec(m) {
         throw "match failed";
     }
     if (Object.keys(matchResult).length !== 1) {
+        // to do: investigate support for any pattern and term.
         throw "LetRec excpets only one name right now";
     }
     const name = Object.keys(matchResult)[0];
