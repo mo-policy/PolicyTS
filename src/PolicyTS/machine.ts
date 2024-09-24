@@ -13,6 +13,7 @@ import { matchPolicy, PolicyTerm, rewritePolicy } from "./termPolicy"
 import { matchReceive, rewriteReceive } from "./termReceive"
 import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
 import { matchSend, rewriteSend } from "./termSend"
+import { matchSequence, rewriteSequence } from "./termSequence"
 import { matchTryFinally, rewriteTryFinally } from "./termTryFinally"
 import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "./termTryWith"
 
@@ -109,6 +110,7 @@ export class Machine {
                     case "Receive": return rewriteReceive;
                     case "Ref": return rewriteRef;
                     case "Send": return rewriteSend;
+                    case "Sequence": return rewriteSequence;
                     case "TryFinally": return rewriteTryFinally;
                     case "TryWith": return rewriteTryWith;
                 }
@@ -142,6 +144,7 @@ export class Machine {
                     case "Receive": return matchReceive;
                     case "Ref": return matchRef;
                     case "Send": return matchSend;
+                    case "Sequence": return matchSequence;
                     case "TryFinally": return matchTryFinally;
                     case "TryWith": return matchTryWith;
                 }

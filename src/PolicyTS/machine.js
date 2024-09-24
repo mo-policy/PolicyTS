@@ -15,6 +15,7 @@ const termPolicy_1 = require("./termPolicy");
 const termReceive_1 = require("./termReceive");
 const termRef_1 = require("./termRef");
 const termSend_1 = require("./termSend");
+const termSequence_1 = require("./termSequence");
 const termTryFinally_1 = require("./termTryFinally");
 const termTryWith_1 = require("./termTryWith");
 /**
@@ -79,6 +80,7 @@ class Machine {
                     case "Receive": return termReceive_1.rewriteReceive;
                     case "Ref": return termRef_1.rewriteRef;
                     case "Send": return termSend_1.rewriteSend;
+                    case "Sequence": return termSequence_1.rewriteSequence;
                     case "TryFinally": return termTryFinally_1.rewriteTryFinally;
                     case "TryWith": return termTryWith_1.rewriteTryWith;
                 }
@@ -112,6 +114,7 @@ class Machine {
                     case "Receive": return termReceive_1.matchReceive;
                     case "Ref": return termRef_1.matchRef;
                     case "Send": return termSend_1.matchSend;
+                    case "Sequence": return termSequence_1.matchSequence;
                     case "TryFinally": return termTryFinally_1.matchTryFinally;
                     case "TryWith": return termTryWith_1.matchTryWith;
                 }

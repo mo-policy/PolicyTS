@@ -473,6 +473,20 @@ function testPolicyNestedInner() {
     passOrThrow(r.bindings === m.bindings);
     passOrThrow(r.policies.length === 0);
 }
+function testSequence() {
+    // 1; 2
+    const term = {
+        $policy: "Sequence",
+        terms: [
+            1,
+            2
+        ]
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
 class DevMachine extends machine_1.Machine {
     copyWith(values) {
         return Object.assign(new DevMachine(), this, values);
@@ -572,6 +586,7 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testSequence();
     testPolicy1();
     testPolicy2();
     testPolicyNestedOuter();
