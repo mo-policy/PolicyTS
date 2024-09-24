@@ -11,6 +11,7 @@ const termLet_1 = require("./termLet");
 const termLetRec_1 = require("./termLetRec");
 const termLookup_1 = require("./termLookup");
 const termMatch_1 = require("./termMatch");
+const termPolicy_1 = require("./termPolicy");
 const termReceive_1 = require("./termReceive");
 const termRef_1 = require("./termRef");
 const termSend_1 = require("./termSend");
@@ -28,11 +29,12 @@ class Machine {
      * @param bindings  The current name to value bindings.
      * @param comm      The current channels and messages.
      */
-    constructor(term = null, blocked = false, bindings = {}, comm = []) {
+    constructor(term = null, blocked = false, bindings = {}, comm = [], policies = []) {
         this.term = term;
         this.blocked = blocked;
         this.bindings = bindings;
         this.comm = comm;
+        this.policies = policies;
     }
     /**
      * Helper for immutable coding style. Creates copy of this Machine with given value overrides.
@@ -73,6 +75,7 @@ class Machine {
                     case "LetRec": return termLetRec_1.rewriteLetRec;
                     case "Lookup": return termLookup_1.rewriteLookup;
                     case "Match": return termMatch_1.rewriteMatch;
+                    case "Policy": return termPolicy_1.rewritePolicy;
                     case "Receive": return termReceive_1.rewriteReceive;
                     case "Ref": return termRef_1.rewriteRef;
                     case "Send": return termSend_1.rewriteSend;
@@ -105,6 +108,7 @@ class Machine {
                     case "LetRec": return termLetRec_1.matchLetRec;
                     case "Lookup": return termLookup_1.matchLookup;
                     case "Match": return termMatch_1.matchMatch;
+                    case "Policy": return termPolicy_1.matchPolicy;
                     case "Receive": return termReceive_1.matchReceive;
                     case "Ref": return termRef_1.matchRef;
                     case "Send": return termSend_1.matchSend;

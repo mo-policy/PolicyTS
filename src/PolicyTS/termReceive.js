@@ -82,39 +82,24 @@ function rewriteReceive(m) {
             }
             else {
                 lastId = resultOfReserve.id;
-                for (let i = 0; i < m.term.rules.length; i++) {
-                    const rule = m.term.rules[i];
-                    const matchResult = (0, term_1.matchTerm)(m, rule.pattern, resultOfReserve.message);
-                    if (matchResult !== false) {
-                        const bindings = Object.assign({}, m.bindings, matchResult);
-                        let guardPassed = true;
-                        if ("guard" in rule) {
-                            const resultOfGuard = (0, term_1.rewriteTerm)(m.copyWith({ term: rule.guard, bindings: bindings }));
-                            if (resultOfGuard.blocked) {
-                                // to do, return a blocked match term
-                                throw "guard blocked";
-                            }
-                            else if (typeof resultOfGuard.term !== "boolean") {
-                                throw "guard not boolean";
-                            }
-                            else {
-                                guardPassed = resultOfGuard.term;
-                            }
+                const matchingRule = (0, termMatch_1.findMatchingRule)(m, m.term.rules, resultOfReserve.message);
+                if (matchingRule.matchResult !== false && matchingRule.rule !== undefined) {
+                    if (matchingRule.resultOfGuard !== undefined) {
+                        if (matchingRule.resultOfGuard.blocked) {
+                            // to do, return a blocked match term
+                            throw "guard blocked";
                         }
-                        if (guardPassed) {
-                            if (m.receive(resultOfChannel.term, lastId)) {
-                                const resultOfRule = (0, term_1.rewriteTerm)(m.copyWith({ term: rule.term, bindings: bindings }));
-                                return m.copyWith({ term: resultOfRule.term });
-                            }
-                            else {
-                                throw "receive returned false";
-                            }
+                        else if (matchingRule.resultOfGuard.term !== true) {
+                            throw "unexpected guard value";
                         }
-                        else {
-                            if (!(m.release(resultOfChannel.term, lastId))) {
-                                throw "release returned false";
-                            }
-                        }
+                    }
+                    const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
+                    if (m.receive(resultOfChannel.term, lastId)) {
+                        const resultOfRule = (0, term_1.rewriteTerm)(m.copyWith({ term: matchingRule.rule.term, bindings: bindings }));
+                        return m.copyWith({ term: resultOfRule.term });
+                    }
+                    else {
+                        throw "receive returned false";
                     }
                 }
             }

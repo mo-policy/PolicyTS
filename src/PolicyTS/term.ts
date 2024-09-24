@@ -11,6 +11,13 @@ export function rewriteTerm(m: Machine): Machine {
     if (m.blocked) {
         return m;
     } else {
+        if (m.policies.length > 0) {
+            // look for rule in each policy matching the current term
+            // if none found, continue
+            // else, evaluate and return the matching rule's term
+
+            return m;
+        }
         if (Array.isArray(m.term)) {
             // rewrite the elements of machine.term
             const nextTerm = [];

@@ -9,6 +9,7 @@ import { rewriteLet, matchLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup } from "./termLookup"
 import { matchMatch, rewriteMatch } from "./termMatch"
+import { matchPolicy, rewritePolicy } from "./termPolicy"
 import { matchReceive, rewriteReceive } from "./termReceive"
 import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
 import { matchSend, rewriteSend } from "./termSend"
@@ -39,17 +40,25 @@ export class Machine {
     readonly blocked: boolean;
     readonly bindings: { readonly [k: string]: any };
     readonly comm: ChannelMessages[];
+    readonly policies: any[];
     /**
      * @param term      The current term.
      * @param blocked   The current blocked state.
      * @param bindings  The current name to value bindings.
      * @param comm      The current channels and messages.
      */
-    constructor(term: any = null, blocked: boolean = false, bindings: { [k: string]: any } = {}, comm: ChannelMessages[] = []) {
+    constructor(
+        term: any = null,
+        blocked: boolean = false,
+        bindings: { [k: string]: any } = {},
+        comm: ChannelMessages[] = [],
+        policies: any[] = []
+    ) {
         this.term = term;
         this.blocked = blocked;
         this.bindings = bindings;
         this.comm = comm;
+        this.policies = policies;
     }
 
     /**
@@ -91,6 +100,7 @@ export class Machine {
                     case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
                     case "Match": return rewriteMatch;
+                    case "Policy": return rewritePolicy;
                     case "Receive": return rewriteReceive;
                     case "Ref": return rewriteRef;
                     case "Send": return rewriteSend;
@@ -123,6 +133,7 @@ export class Machine {
                     case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
                     case "Match": return matchMatch;
+                    case "Policy": return matchPolicy;
                     case "Receive": return matchReceive;
                     case "Ref": return matchRef;
                     case "Send": return matchSend;

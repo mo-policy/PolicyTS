@@ -136,8 +136,48 @@ Look for rule with a pattern that matches term result.
             return value
         If the guard is not boolean, throw.
 If no matching rule is found, throw
-
 */
+
+export type MatchingRule = {
+    matchResult: MatchResult,
+    rule?: RuleTerm,
+    resultOfGuard?: Machine,
+    remainingRules?: RuleTerm[]
+}
+export function findMatchingRule(m: Machine, rules: RuleTerm[], value: any): MatchingRule {
+    for (let i = 0; i < rules.length; i++) {
+        const rule = rules[i];
+        const matchResult = matchTerm(m, rule.pattern, value);
+        if (matchResult !== false) {
+            const bindings = Object.assign({}, m.bindings, matchResult);
+            let guardPassed = true;
+            if ("guard" in rule) {
+                const resultOfGuard = rewriteTerm(m.copyWith({ term: rule.guard, bindings: bindings }));
+                if ((resultOfGuard.blocked) || (typeof resultOfGuard.term !== "boolean")) {
+                    return {
+                        matchResult: matchResult,
+                        rule: rule,
+                        resultOfGuard: resultOfGuard,
+                        remainingRules: rules.slice(i)
+                    };
+                } else {
+                    guardPassed = resultOfGuard.term;
+                }
+            }
+            if (guardPassed) {
+                return {
+                    matchResult: matchResult,
+                    rule: rule,
+                    remainingRules: rules.slice(i)
+                };
+            }
+        }
+    }
+    return {
+        matchResult: false
+    };
+}
+
 export function rewriteMatch(m: Machine): Machine {
     if (!(isMatch(m.term))) { throw "expected MatchTerm"; };
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
@@ -145,39 +185,30 @@ export function rewriteMatch(m: Machine): Machine {
         const blockedMatch = Object.assign({}, m.term, { channel: resultOfTerm.term });
         return m.copyWith({ term: blockedMatch, blocked: true });
     } else {
-        for (let i = 0; i < m.term.rules.length; i++) {
-            const rule = m.term.rules[i];
-            const matchResult = matchTerm(m, rule.pattern, resultOfTerm.term);
-            if (matchResult !== false) {
-                const bindings = Object.assign({}, m.bindings, matchResult);
-                let guardPassed = true;
-                if ("guard" in rule) {
-                    const resultOfGuard = rewriteTerm(m.copyWith({ term: rule.guard, bindings: bindings }));
-                    if (resultOfGuard.blocked) {
-                        // to do, return a blocked match term
-                        throw "guard blocked"
-                    } else if (typeof resultOfGuard.term !== "boolean") {
-                        throw "guard not boolean"
-                    } else {
-                        guardPassed = resultOfGuard.term;
-                    }
-                }
-                if (guardPassed) {
-                    const resultOfRule = rewriteTerm(m.copyWith({ term: rule.term, bindings: bindings }));
-                    return m.copyWith({ term: resultOfRule.term });
+        const matchingRule = findMatchingRule(m, m.term.rules, resultOfTerm.term);
+        if (matchingRule.matchResult === false || matchingRule.rule === undefined) {
+            throw "no rule passed";
+        } else {
+            if (matchingRule.resultOfGuard !== undefined) {
+                if (matchingRule.resultOfGuard.blocked) {
+                    // to do, return a blocked match term
+                    throw "guard blocked"
+                } else if (matchingRule.resultOfGuard.term !== true) {
+                    throw "unexpected guard value"
                 }
             }
+            const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
+            const resultOfRule = rewriteTerm(m.copyWith({ term: matchingRule.rule.term, bindings: bindings }));
+            return m.copyWith({ term: resultOfRule.term });
         }
-        throw "no rule passed";
     }
 }
 
 
 /*
 ## Match Rules
-
-
 */
+
 export function matchMatch(pattern: any, value: any): MatchResult {
     if (!(isMatch(pattern))) { throw "expected Match"; };
     // to do
