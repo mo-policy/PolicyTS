@@ -245,6 +245,25 @@ function testSend() {
     passOrThrow(r.term === null);
     passOrThrow(r.bindings === m.bindings);
 }
+function testReceive() {
+    // receive on "World" with
+    // | x -> x
+    const term = {
+        $policy: "Receive",
+        channel: "World",
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "x" },
+                term: { $policy: "Lookup", name: "x" }
+            }
+        ]
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === "Hello");
+    passOrThrow(r.bindings === m.bindings);
+}
 class DevMachine extends machine_1.Machine {
     copyWith(values) {
         return Object.assign(new DevMachine(), this, values);
@@ -344,6 +363,7 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testReceive();
     testSend();
     testMatch();
     testMatchGuard();

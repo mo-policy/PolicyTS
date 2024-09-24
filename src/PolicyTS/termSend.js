@@ -31,8 +31,8 @@ function rewriteSend(m) {
     if (resultOfChannel.blocked) {
         throw "blocked";
     }
-    const resultOfSend = m.send(resultOfMessage.term, resultOfChannel.term);
-    return m.copyWith({ term: resultOfSend });
+    const sendId = m.send(resultOfMessage.term, resultOfChannel.term);
+    return m.copyWith({ term: sendId });
 }
 /*
 ## Match Rules

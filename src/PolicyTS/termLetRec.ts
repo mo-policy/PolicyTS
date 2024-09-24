@@ -133,7 +133,7 @@ export function rewriteLetRec(m: Machine): Machine {
         in: m.term.in
     };
     const letMachine = m.copyWith({ term: letTerm });
-    return rewriteLet(letMachine);
+    return rewriteTerm(letMachine);
 }
 
 /*

@@ -11,6 +11,7 @@ const termLet_1 = require("./termLet");
 const termLetRec_1 = require("./termLetRec");
 const termLookup_1 = require("./termLookup");
 const termMatch_1 = require("./termMatch");
+const termReceive_1 = require("./termReceive");
 const termRef_1 = require("./termRef");
 const termSend_1 = require("./termSend");
 /**
@@ -69,6 +70,7 @@ class Machine {
                     case "LetRec": return termLetRec_1.rewriteLetRec;
                     case "Lookup": return termLookup_1.rewriteLookup;
                     case "Match": return termMatch_1.rewriteMatch;
+                    case "Receive": return termReceive_1.rewriteReceive;
                     case "Ref": return termRef_1.rewriteRef;
                     case "Send": return termSend_1.rewriteSend;
                 }
@@ -97,6 +99,7 @@ class Machine {
                     case "LetRec": return termLetRec_1.matchLetRec;
                     case "Lookup": return termLookup_1.matchLookup;
                     case "Match": return termMatch_1.matchMatch;
+                    case "Receive": return termReceive_1.matchReceive;
                     case "Ref": return termRef_1.matchRef;
                     case "Send": return termSend_1.matchSend;
                 }
@@ -141,6 +144,15 @@ class Machine {
         const entry = { id: id, message: message };
         channelMessages.messages.push(entry);
         return null;
+    }
+    reserve(channel, id = undefined) {
+        return { id: 1, message: "Hello" };
+    }
+    receive(channel, id) {
+        return true;
+    }
+    release(channel, id) {
+        return true;
     }
     /**
      * Verifies if the given term is of the provided schema name.

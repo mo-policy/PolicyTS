@@ -5,7 +5,6 @@ exports.isLetRec = isLetRec;
 exports.rewriteLetRec = rewriteLetRec;
 exports.matchLetRec = matchLetRec;
 const term_1 = require("./term");
-const termLet_1 = require("./termLet");
 function isLetRec(term) {
     return (term !== null) &&
         (typeof term === "object") &&
@@ -68,7 +67,7 @@ function rewriteLetRec(m) {
         in: m.term.in
     };
     const letMachine = m.copyWith({ term: letTerm });
-    return (0, termLet_1.rewriteLet)(letMachine);
+    return (0, term_1.rewriteTerm)(letMachine);
 }
 /*
 ## Match Rules

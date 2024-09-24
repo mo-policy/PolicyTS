@@ -9,6 +9,7 @@ import { rewriteLet, matchLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup } from "./termLookup"
 import { matchMatch, rewriteMatch } from "./termMatch"
+import { matchReceive, rewriteReceive } from "./termReceive"
 import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
 import { matchSend, rewriteSend } from "./termSend"
 
@@ -87,6 +88,7 @@ export class Machine {
                     case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
                     case "Match": return rewriteMatch;
+                    case "Receive": return rewriteReceive;
                     case "Ref": return rewriteRef;
                     case "Send": return rewriteSend;
                 }
@@ -115,6 +117,7 @@ export class Machine {
                     case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
                     case "Match": return matchMatch;
+                    case "Receive": return matchReceive;
                     case "Ref": return matchRef;
                     case "Send": return matchSend;
                 }
@@ -160,6 +163,19 @@ export class Machine {
         channelMessages.messages.push(entry);
         return null;
     }
+
+    reserve(channel: any, id: any = undefined): { id: any, message: any } {
+        return { id: 1, message: "Hello" };
+    }
+
+    receive(channel: any, id: any): boolean {
+        return true;
+    }
+
+    release(channel: any, id: any): boolean {
+        return true;
+    }
+
 
     /**
      * Verifies if the given term is of the provided schema name.
