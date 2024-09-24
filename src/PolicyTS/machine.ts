@@ -12,6 +12,7 @@ import { matchMatch, rewriteMatch } from "./termMatch"
 import { matchReceive, rewriteReceive } from "./termReceive"
 import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
 import { matchSend, rewriteSend } from "./termSend"
+import { matchTryFinally, rewriteTryFinally } from "./termTryFinally"
 import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "./termTryWith"
 
 
@@ -93,6 +94,7 @@ export class Machine {
                     case "Receive": return rewriteReceive;
                     case "Ref": return rewriteRef;
                     case "Send": return rewriteSend;
+                    case "TryFinally": return rewriteTryFinally;
                     case "TryWith": return rewriteTryWith;
                 }
                 throw "Unexpected term";
@@ -124,6 +126,7 @@ export class Machine {
                     case "Receive": return matchReceive;
                     case "Ref": return matchRef;
                     case "Send": return matchSend;
+                    case "TryFinally": return matchTryFinally;
                     case "TryWith": return matchTryWith;
                 }
                 throw "Unexpected pattern";

@@ -14,6 +14,7 @@ const termMatch_1 = require("./termMatch");
 const termReceive_1 = require("./termReceive");
 const termRef_1 = require("./termRef");
 const termSend_1 = require("./termSend");
+const termTryFinally_1 = require("./termTryFinally");
 const termTryWith_1 = require("./termTryWith");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
@@ -75,6 +76,7 @@ class Machine {
                     case "Receive": return termReceive_1.rewriteReceive;
                     case "Ref": return termRef_1.rewriteRef;
                     case "Send": return termSend_1.rewriteSend;
+                    case "TryFinally": return termTryFinally_1.rewriteTryFinally;
                     case "TryWith": return termTryWith_1.rewriteTryWith;
                 }
                 throw "Unexpected term";
@@ -106,6 +108,7 @@ class Machine {
                     case "Receive": return termReceive_1.matchReceive;
                     case "Ref": return termRef_1.matchRef;
                     case "Send": return termSend_1.matchSend;
+                    case "TryFinally": return termTryFinally_1.matchTryFinally;
                     case "TryWith": return termTryWith_1.matchTryWith;
                 }
                 throw "Unexpected pattern";

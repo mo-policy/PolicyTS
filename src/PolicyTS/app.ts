@@ -189,6 +189,73 @@ function testTryWith() {
     passOrThrow(r.bindings === m.bindings);
 }
 
+function testTryFinally() {
+    // try 1 finally 2
+    const term = {
+        $policy: "TryFinally",
+        term: 1,
+        finally: 2
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testTryFinallyTermException() {
+    // try throw 1 finally 2
+    const term = {
+        $policy: "TryFinally",
+        term: {
+            $policy: "Exception",
+            term: 1
+        },
+        finally: 2
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term.$policy === "Exception");
+    passOrThrow(r.term.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testTryFinallyException() {
+    // try 1 finally throw 2
+    const term = {
+        $policy: "TryFinally",
+        term: 1,
+        finally: {
+            $policy: "Exception",
+            term: 2
+        }
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term.$policy === "Exception");
+    passOrThrow(r.term.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testTryFinallyException2() {
+    // try throw 1 finally throw 2
+    const term = {
+        $policy: "TryFinally",
+        term: {
+            $policy: "Exception",
+            term: 1
+        },
+        finally: {
+            $policy: "Exception",
+            term: 2
+        }
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term.$policy === "Exception");
+    passOrThrow(r.term.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+
 function testRefDereference() {
     // let x = ref 5 in !x
     const term = {
@@ -423,6 +490,10 @@ if (dev) {
     develop();
     testTAPL();
 
+    testTryFinally();
+    testTryFinallyException();
+    testTryFinallyException2();
+    testTryFinallyTermException();
     testTryWith();
     testReceive();
     testSend();
