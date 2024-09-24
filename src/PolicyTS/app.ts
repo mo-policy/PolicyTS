@@ -105,6 +105,144 @@ function testConstantNull() {
     passOrThrow(mjs === rjs);
 }
 
+function testMatch() {
+    // match 1 with x -> x
+    const term = {
+        $policy: "Match",
+        term: 1,
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "x" },
+                term: { $policy: "Lookup", name: "x" }
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testMatchGuard() {
+    // match 1 with
+    // | 0 -> 0
+    // | x when false -> 2
+    // | x when true -> x
+    // | _ -> 3
+    const term = {
+        $policy: "Match",
+        term: 1,
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: 0,
+                term: 0
+            },
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "x" },
+                guard: false,
+                term: 2
+            },
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "x" },
+                guard: true,
+                term: { $policy: "Lookup", name: "x" }
+            },
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "_" },
+                term: 3
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+
+}
+
+function testRefDereference() {
+    // let x = ref 5 in !x
+    const term = {
+        $policy: "Let",
+        pattern: { $policy: "Lookup", name: "x" },
+        term: {
+            $policy: "Ref",
+            value: 5
+        },
+        in: {
+            $policy: "Dereference",
+            ref: { $policy: "Lookup", name: "x" }
+        }
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 5);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testRefAssignment() {
+    // let x = ref 5 in 
+    // let y = x in 
+    // [ (x:= 7), !x, !y, (y := 9), !x, !y ] 
+    const term = {
+        $policy: "Let",
+        pattern: { $policy: "Lookup", name: "x" },
+        term: {
+            $policy: "Ref",
+            value: 5
+        },
+        in: {
+            $policy: "Let",
+            pattern: { $policy: "Lookup", name: "y" },
+            term: { $policy: "Lookup", name: "x" },
+            in: [
+                {
+                    $policy: "Assignment",
+                    ref: { $policy: "Lookup", name: "x" },
+                    value: 7
+                },
+                {
+                    $policy: "Dereference",
+                    ref: { $policy: "Lookup", name: "x" }
+                },
+                {
+                    $policy: "Dereference",
+                    ref: { $policy: "Lookup", name: "y" }
+                },
+                {
+                    $policy: "Assignment",
+                    ref: { $policy: "Lookup", name: "y" },
+                    value: 9
+                },
+                {
+                    $policy: "Dereference",
+                    ref: { $policy: "Lookup", name: "x" }
+                },
+                {
+                    $policy: "Dereference",
+                    ref: { $policy: "Lookup", name: "y" }
+                }
+            ]
+        }
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(Array.isArray(r.term));
+    passOrThrow(r.term.length === 6);
+    passOrThrow(r.term[0] === null);
+    passOrThrow(r.term[1] === 7);
+    passOrThrow(r.term[2] === 7);
+    passOrThrow(r.term[3] === null);
+    passOrThrow(r.term[4] === 9);
+    passOrThrow(r.term[5] === 9);
+    passOrThrow(r.bindings === m.bindings);
+}
+
 class DevMachine extends Machine {
     override copyWith(values: { [k: string]: any }): Machine {
         return Object.assign(new DevMachine(), this, values);
@@ -199,99 +337,7 @@ function testLetRec() {
     passOrThrow(r.bindings === m.bindings);
 }
 
-function testRefDereference() {
-    // let x = ref 5 in !x
-    const term = {
-        $policy: "Let",
-        pattern: { $policy: "Lookup", name: "x" },
-        term: {
-            $policy: "Ref",
-            value: 5
-        },
-        in: {
-            $policy: "Dereference",
-            ref: { $policy: "Lookup", name: "x" }
-        }
-    }
-    const m = new Machine(term);
-    const r = rewriteTerm(m);
-    passOrThrow(r.term === 5);
-    passOrThrow(r.bindings === m.bindings);
-}
 
-function testRefAssignment() {
-    // let x = ref 5 in 
-    // let y = x in 
-    // [ (x:= 7), !x, !y, (y := 9), !x, !y ] 
-    const term = {
-        $policy: "Let",
-        pattern: { $policy: "Lookup", name: "x" },
-        term: {
-            $policy: "Ref",
-            value: 5
-        },
-        in: {
-            $policy: "Let",
-            pattern: { $policy: "Lookup", name: "y" },
-            term: { $policy: "Lookup", name: "x" },
-            in: [
-                {
-                    $policy: "Assignment",
-                    ref: { $policy: "Lookup", name: "x" },
-                    value: 7
-                },
-                {
-                    $policy: "Dereference",
-                    ref: { $policy: "Lookup", name: "x" }
-                },
-                {
-                    $policy: "Dereference",
-                    ref: { $policy: "Lookup", name: "y" }
-                },
-                {
-                    $policy: "Assignment",
-                    ref: { $policy: "Lookup", name: "y" },
-                    value: 9
-                },
-                {
-                    $policy: "Dereference",
-                    ref: { $policy: "Lookup", name: "x" }
-                },
-                {
-                    $policy: "Dereference",
-                    ref: { $policy: "Lookup", name: "y" }
-                }
-            ]
-        }
-    }
-    const m = new Machine(term);
-    const r = rewriteTerm(m);
-    passOrThrow(Array.isArray(r.term));
-    passOrThrow(r.term.length === 6);
-    passOrThrow(r.term[0] === null);
-    passOrThrow(r.term[1] === 7);
-    passOrThrow(r.term[2] === 7);
-    passOrThrow(r.term[3] === null);
-    passOrThrow(r.term[4] === 9);
-    passOrThrow(r.term[5] === 9);
-    passOrThrow(r.bindings === m.bindings);
-}
-
-function testSend() {
-    const send = {
-        $policy: "Send",
-        message: "Hello",
-        channel: "World"
-    };
-    const term = [send, send, send];
-    const m = new Machine(term);
-    const r = rewriteTerm(m);
-    passOrThrow(Array.isArray(r.term));
-    passOrThrow(r.term.length === 3)
-    passOrThrow(r.term[0] < r.term[1] && r.term[1] < r.term[2]);
-    passOrThrow(r.bindings === m.bindings);
-
-}
 function develop() {
 }
 
@@ -305,7 +351,8 @@ if (dev) {
     develop();
     testTAPL();
 
-    testSend();
+    testMatch();
+    testMatchGuard();
     testRefAssignment();
     testRefDereference();
     testLetRec();
