@@ -143,16 +143,78 @@ class Machine {
         // add the message to the end
         const entry = { id: id, message: message };
         channelMessages.messages.push(entry);
-        return null;
     }
-    reserve(channel, id = undefined) {
-        return { id: 1, message: "Hello" };
+    /**
+     *
+     * @param channel   The channel of the receive term.
+     * @param id        The last id to be received, or -1.
+     * @returns         The next id and message on the given channel, or id = -1.
+     */
+    reserve(channel, id = -1) {
+        // look for channel in array
+        let channelMessages = false;
+        for (let i = 0; i < this.comm.length; i++) {
+            const cm = this.comm[i];
+            if (this.compare(channel, cm.channel) === 0) {
+                channelMessages = cm;
+                break;
+            }
+        }
+        if (channelMessages === false) {
+            return { id: -1, message: undefined };
+        }
+        else {
+            // messages are sorted
+            for (let msg of channelMessages.messages) {
+                if (msg.id > id) {
+                    return msg;
+                }
+            }
+            return { id: -1, message: undefined };
+        }
     }
     receive(channel, id) {
-        return true;
+        // look for channel in array
+        let channelMessages = false;
+        for (let i = 0; i < this.comm.length; i++) {
+            const cm = this.comm[i];
+            if (this.compare(channel, cm.channel) === 0) {
+                channelMessages = cm;
+                break;
+            }
+        }
+        if (channelMessages !== false) {
+            // look for message with id and delete it
+            for (let i = 0; i < channelMessages.messages.length; i++) {
+                const msg = channelMessages.messages[0];
+                if (msg.id === id) {
+                    channelMessages.messages.splice(i, 1);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     release(channel, id) {
-        return true;
+        // look for channel in array
+        let channelMessages = false;
+        for (let i = 0; i < this.comm.length; i++) {
+            const cm = this.comm[i];
+            if (this.compare(channel, cm.channel) === 0) {
+                channelMessages = cm;
+                break;
+            }
+        }
+        if (channelMessages !== false) {
+            // look for message with id and return true
+            for (let i = 0; i < channelMessages.messages.length; i++) {
+                const msg = channelMessages.messages[0];
+                if (msg.id === id) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
     /**
      * Verifies if the given term is of the provided schema name.

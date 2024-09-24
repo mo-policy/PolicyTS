@@ -246,22 +246,37 @@ function testSend() {
     passOrThrow(r.bindings === m.bindings);
 }
 function testReceive() {
-    // receive on "World" with
-    // | x -> x
-    const term = {
-        $policy: "Receive",
-        channel: "World",
-        rules: [
-            {
-                $policy: "Rule",
-                pattern: { $policy: "Lookup", name: "x" },
-                term: { $policy: "Lookup", name: "x" }
-            }
+    /*
+        [
+            send "Hello" on "World",
+            receive on "World" with
+            | x -> x
         ]
-    };
+    */
+    const term = [
+        {
+            $policy: "Send",
+            channel: "World",
+            message: "Hello"
+        },
+        {
+            $policy: "Receive",
+            channel: "World",
+            rules: [
+                {
+                    $policy: "Rule",
+                    pattern: { $policy: "Lookup", name: "x" },
+                    term: { $policy: "Lookup", name: "x" }
+                }
+            ]
+        }
+    ];
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    passOrThrow(r.term === "Hello");
+    passOrThrow(Array.isArray(r.term));
+    passOrThrow(r.term.length === 2);
+    passOrThrow(r.term[0] === null);
+    passOrThrow(r.term[1] === "Hello");
     passOrThrow(r.bindings === m.bindings);
 }
 class DevMachine extends machine_1.Machine {

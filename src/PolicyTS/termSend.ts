@@ -73,8 +73,8 @@ export function rewriteSend(m: Machine): Machine {
     if (resultOfChannel.blocked) {
         throw "blocked";
     }
-    const sendId = m.send(resultOfMessage.term, resultOfChannel.term);
-    return m.copyWith({ term: sendId });
+    m.send(resultOfMessage.term, resultOfChannel.term);
+    return m.copyWith({ term: null });
 }
 
 

@@ -132,7 +132,7 @@ export class Machine {
      * @param channel
      * @returns
      */
-    send(message: any, channel: any): any {
+    send(message: any, channel: any) {
         // look for channel in array
         let channelMessages: false | ChannelMessages = false;
         for (let i = 0; i < this.comm.length; i++) {
@@ -161,21 +161,81 @@ export class Machine {
         // add the message to the end
         const entry = { id: id, message: message };
         channelMessages.messages.push(entry);
-        return null;
     }
 
-    reserve(channel: any, id: any = undefined): { id: any, message: any } {
-        return { id: 1, message: "Hello" };
+    /**
+     * 
+     * @param channel   The channel of the receive term.
+     * @param id        The last id to be received, or -1.
+     * @returns         The next id and message on the given channel, or id = -1.
+     */
+    reserve(channel: any, id: number = -1): { id: number, message: any } {
+        // look for channel in array
+        let channelMessages: false | ChannelMessages = false;
+        for (let i = 0; i < this.comm.length; i++) {
+            const cm = this.comm[i];
+            if (this.compare(channel, cm.channel) === 0) {
+                channelMessages = cm;
+                break;
+            }
+        }
+        if (channelMessages === false) {
+            return { id: -1, message: undefined };
+        } else {
+            // messages are sorted
+            for (let msg of channelMessages.messages) {
+                if (msg.id > id) {
+                    return msg;
+                }
+            }
+            return { id: -1, message: undefined };
+        }
     }
 
-    receive(channel: any, id: any): boolean {
-        return true;
+    receive(channel: any, id: number): boolean {
+        // look for channel in array
+        let channelMessages: false | ChannelMessages = false;
+        for (let i = 0; i < this.comm.length; i++) {
+            const cm = this.comm[i];
+            if (this.compare(channel, cm.channel) === 0) {
+                channelMessages = cm;
+                break;
+            }
+        }
+        if (channelMessages !== false) {
+            // look for message with id and delete it
+            for (let i = 0; i < channelMessages.messages.length; i++) {
+                const msg = channelMessages.messages[0];
+                if (msg.id === id) {
+                    channelMessages.messages.splice(i, 1);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    release(channel: any, id: any): boolean {
-        return true;
+    release(channel: any, id: number): boolean {
+        // look for channel in array
+        let channelMessages: false | ChannelMessages = false;
+        for (let i = 0; i < this.comm.length; i++) {
+            const cm = this.comm[i];
+            if (this.compare(channel, cm.channel) === 0) {
+                channelMessages = cm;
+                break;
+            }
+        }
+        if (channelMessages !== false) {
+            // look for message with id and return true
+            for (let i = 0; i < channelMessages.messages.length; i++) {
+                const msg = channelMessages.messages[0];
+                if (msg.id === id) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
-
 
     /**
      * Verifies if the given term is of the provided schema name.

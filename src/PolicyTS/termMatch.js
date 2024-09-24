@@ -23,12 +23,18 @@ function isRule(term) {
     return false;
 }
 function isMatch(term) {
-    return (term !== null) &&
+    if ((term !== null) &&
         (typeof term === "object") &&
         ("$policy" in term) && (term.$policy === "Match") &&
         ("term" in term) &&
-        ("rules" in term) && (Array.isArray(term.rules)) &&
-        (Object.keys(term).length === 3);
+        ("rules" in term) && (Array.isArray(term.rules))) {
+        for (let i = 0; i < term.rules.length; i++) {
+            if (!(isRule(term.rules[i]))) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 /*
 ## Rewrite Rules

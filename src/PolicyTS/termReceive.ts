@@ -85,7 +85,7 @@ export type RuleTerm = {
 
 export type ReceiveTerm = {
     $policy: "Receive",
-    id?: any,
+    id?: number,
     channel: any,
     rules: RuleTerm[]
 }
@@ -107,12 +107,25 @@ export function isRule(term: any): term is RuleTerm {
 }
 
 export function isReceive(term: any): term is ReceiveTerm {
-    return (term !== null) &&
+    if ((term !== null) &&
         (typeof term === "object") &&
         ("$policy" in term) && (term.$policy === "Receive") &&
         ("channel" in term) &&
-        ("rules" in term) && (Array.isArray(term.rules)) &&
-        (Object.keys(term).length === 3);
+        ("rules" in term) && (Array.isArray(term.rules))
+    ) {
+        for (let i = 0; i < term.rules.length; i++) {
+            if (!(isRule(term.rules[i]))) {
+                return false;
+            }
+        }
+        const kl = Object.keys(term).length;
+        if (kl === 3) {
+            return true;
+        } else if (kl === 4) {
+            return ("id" in term) && (typeof term.id === "number");
+        }
+    }
+    return false;
 }
 
 /*
@@ -150,8 +163,11 @@ export function rewriteReceive(m: Machine): Machine {
         return m.copyWith({ term: blockedReceive, blocked: true });
     } else {
         let lastId = m.term.id;
+        if (lastId === undefined) {
+            lastId = -1;
+        }
         while (true) {
-            // { id: any, message: any }
+            // { id: number, message: any }
             const resultOfReserve = m.reserve(resultOfChannel.term, lastId);
             if (resultOfReserve.id === lastId) {
                 let termUpdate: { [k: string]: any } = { channel: resultOfChannel.term };

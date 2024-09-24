@@ -257,9 +257,20 @@ function testSend() {
 }
 
 function testReceive() {
-    // receive on "World" with
-    // | x -> x
-    const term = {
+    /*
+        [
+            send "Hello" on "World",
+            receive on "World" with
+            | x -> x
+        ]
+    */
+    const term = [
+        {
+            $policy: "Send",
+            channel: "World",
+            message: "Hello"
+        },
+        {
         $policy: "Receive",
         channel: "World",
         rules: [
@@ -269,10 +280,14 @@ function testReceive() {
                 term: { $policy: "Lookup", name: "x" }
             }
         ]
-    }
+        }
+    ]
     const m = new Machine(term);
     const r = rewriteTerm(m);
-    passOrThrow(r.term === "Hello");
+    passOrThrow(Array.isArray(r.term));
+    passOrThrow(r.term.length === 2);
+    passOrThrow(r.term[0] === null);
+    passOrThrow(r.term[1] === "Hello");
     passOrThrow(r.bindings === m.bindings);
 }
 
