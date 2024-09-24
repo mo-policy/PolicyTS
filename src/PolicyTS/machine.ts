@@ -12,6 +12,7 @@ import { matchMatch, rewriteMatch } from "./termMatch"
 import { matchReceive, rewriteReceive } from "./termReceive"
 import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
 import { matchSend, rewriteSend } from "./termSend"
+import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "./termTryWith"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
@@ -81,6 +82,7 @@ export class Machine {
                     case "Assignment": return rewriteAssignment;
                     case "Constant": return rewriteConstant;
                     case "Dereference": return rewriteDereference;
+                    case "Exception": return rewriteException;
                     case "Fix": return rewriteFix;
                     case "Function": return rewriteFunction;
                     case "If": return rewriteIf;
@@ -91,6 +93,7 @@ export class Machine {
                     case "Receive": return rewriteReceive;
                     case "Ref": return rewriteRef;
                     case "Send": return rewriteSend;
+                    case "TryWith": return rewriteTryWith;
                 }
                 throw "Unexpected term";
             }
@@ -110,6 +113,7 @@ export class Machine {
                     case "Assignment": return matchAssignment;
                     case "Constant": return matchConstant;
                     case "Dereference": return matchDereference;
+                    case "Exception": return matchException;
                     case "Fix": return matchFix;
                     case "Function": return matchFunction;
                     case "If": return matchIf;
@@ -120,6 +124,7 @@ export class Machine {
                     case "Receive": return matchReceive;
                     case "Ref": return matchRef;
                     case "Send": return matchSend;
+                    case "TryWith": return matchTryWith;
                 }
                 throw "Unexpected pattern";
             }

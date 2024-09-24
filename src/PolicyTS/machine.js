@@ -14,6 +14,7 @@ const termMatch_1 = require("./termMatch");
 const termReceive_1 = require("./termReceive");
 const termRef_1 = require("./termRef");
 const termSend_1 = require("./termSend");
+const termTryWith_1 = require("./termTryWith");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -63,6 +64,7 @@ class Machine {
                     case "Assignment": return termRef_1.rewriteAssignment;
                     case "Constant": return termConstant_1.rewriteConstant;
                     case "Dereference": return termRef_1.rewriteDereference;
+                    case "Exception": return termTryWith_1.rewriteException;
                     case "Fix": return termFix_1.rewriteFix;
                     case "Function": return termFunction_1.rewriteFunction;
                     case "If": return termIf_1.rewriteIf;
@@ -73,6 +75,7 @@ class Machine {
                     case "Receive": return termReceive_1.rewriteReceive;
                     case "Ref": return termRef_1.rewriteRef;
                     case "Send": return termSend_1.rewriteSend;
+                    case "TryWith": return termTryWith_1.rewriteTryWith;
                 }
                 throw "Unexpected term";
             }
@@ -92,6 +95,7 @@ class Machine {
                     case "Assignment": return termRef_1.matchAssignment;
                     case "Constant": return termConstant_1.matchConstant;
                     case "Dereference": return termRef_1.matchDereference;
+                    case "Exception": return termTryWith_1.matchException;
                     case "Fix": return termFix_1.matchFix;
                     case "Function": return termFunction_1.matchFunction;
                     case "If": return termIf_1.matchIf;
@@ -102,6 +106,7 @@ class Machine {
                     case "Receive": return termReceive_1.matchReceive;
                     case "Ref": return termRef_1.matchRef;
                     case "Send": return termSend_1.matchSend;
+                    case "TryWith": return termTryWith_1.matchTryWith;
                 }
                 throw "Unexpected pattern";
             }

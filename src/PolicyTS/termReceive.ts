@@ -75,35 +75,13 @@ Receive a value on a channel.
 
 import { Machine, MatchResult } from "./machine"
 import { matchTerm, rewriteTerm } from "./term";
-
-export type RuleTerm = {
-    $policy: "Rule",
-    pattern: any,
-    guard?: any,
-    term: any
-}
+import { isRule, RuleTerm } from "./termMatch";
 
 export type ReceiveTerm = {
     $policy: "Receive",
     id?: number,
     channel: any,
     rules: RuleTerm[]
-}
-
-export function isRule(term: any): term is RuleTerm {
-    if ((term !== null) &&
-        (typeof term === "object") &&
-        ("$policy" in term) && (term.$policy === "Rule") &&
-        ("pattern" in term) &&
-        ("term" in term)) {
-        const kl = Object.keys(term).length;
-        if (kl === 3) {
-            return true;
-        } else if (kl === 4) {
-            return ("guard" in term);
-        }
-    }
-    return false;
 }
 
 export function isReceive(term: any): term is ReceiveTerm {

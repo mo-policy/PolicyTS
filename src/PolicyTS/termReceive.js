@@ -1,27 +1,11 @@
 "use strict";
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isRule = isRule;
 exports.isReceive = isReceive;
 exports.rewriteReceive = rewriteReceive;
 exports.matchReceive = matchReceive;
 const term_1 = require("./term");
-function isRule(term) {
-    if ((term !== null) &&
-        (typeof term === "object") &&
-        ("$policy" in term) && (term.$policy === "Rule") &&
-        ("pattern" in term) &&
-        ("term" in term)) {
-        const kl = Object.keys(term).length;
-        if (kl === 3) {
-            return true;
-        }
-        else if (kl === 4) {
-            return ("guard" in term);
-        }
-    }
-    return false;
-}
+const termMatch_1 = require("./termMatch");
 function isReceive(term) {
     if ((term !== null) &&
         (typeof term === "object") &&
@@ -29,7 +13,7 @@ function isReceive(term) {
         ("channel" in term) &&
         ("rules" in term) && (Array.isArray(term.rules))) {
         for (let i = 0; i < term.rules.length; i++) {
-            if (!(isRule(term.rules[i]))) {
+            if (!((0, termMatch_1.isRule)(term.rules[i]))) {
                 return false;
             }
         }

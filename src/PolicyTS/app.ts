@@ -165,6 +165,30 @@ function testMatchGuard() {
 
 }
 
+function testTryWith() {
+    // try
+    //     throw "error"
+    // with x -> "error caught"
+    const term = {
+        $policy: "TryWith",
+        term: {
+            $policy: "Exception",
+            term: "error"
+        },
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "x" },
+                term: "error caught"
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === "error caught");
+    passOrThrow(r.bindings === m.bindings);
+}
+
 function testRefDereference() {
     // let x = ref 5 in !x
     const term = {
@@ -399,6 +423,7 @@ if (dev) {
     develop();
     testTAPL();
 
+    testTryWith();
     testReceive();
     testSend();
     testMatch();
