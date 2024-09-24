@@ -233,6 +233,18 @@ function testRefAssignment() {
     passOrThrow(r.term[5] === 9);
     passOrThrow(r.bindings === m.bindings);
 }
+function testSend() {
+    // send "Hello" on "World"
+    const term = {
+        $policy: "Send",
+        channel: "World",
+        message: "Hello"
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === null);
+    passOrThrow(r.bindings === m.bindings);
+}
 class DevMachine extends machine_1.Machine {
     copyWith(values) {
         return Object.assign(new DevMachine(), this, values);
@@ -332,6 +344,7 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testSend();
     testMatch();
     testMatchGuard();
     testRefAssignment();

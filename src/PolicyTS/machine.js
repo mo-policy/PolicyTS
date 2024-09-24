@@ -140,7 +140,7 @@ class Machine {
         // add the message to the end
         const entry = { id: id, message: message };
         channelMessages.messages.push(entry);
-        return id;
+        return null;
     }
     /**
      * Verifies if the given term is of the provided schema name.

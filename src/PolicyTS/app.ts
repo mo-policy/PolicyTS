@@ -243,6 +243,19 @@ function testRefAssignment() {
     passOrThrow(r.bindings === m.bindings);
 }
 
+function testSend() {
+    // send "Hello" on "World"
+    const term = {
+        $policy: "Send",
+        channel: "World",
+        message: "Hello"
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === null);
+    passOrThrow(r.bindings === m.bindings);
+}
+
 class DevMachine extends Machine {
     override copyWith(values: { [k: string]: any }): Machine {
         return Object.assign(new DevMachine(), this, values);
@@ -351,6 +364,7 @@ if (dev) {
     develop();
     testTAPL();
 
+    testSend();
     testMatch();
     testMatchGuard();
     testRefAssignment();
