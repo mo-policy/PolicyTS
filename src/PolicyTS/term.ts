@@ -1,6 +1,7 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
 import { Machine, MatchResult } from "./machine"
+import { findMatchingRule } from "./termMatch";
 
 /**
  * The top level rewrite function for all terms.
@@ -15,8 +16,24 @@ export function rewriteTerm(m: Machine): Machine {
             // look for rule in each policy matching the current term
             // if none found, continue
             // else, evaluate and return the matching rule's term
-
-            return m;
+            for (let i = 0; i < m.policies.length; i++) {
+                const policy = m.policies[i];
+                const matchingRule = findMatchingRule(policy.machine, policy.term.rules, m.term);
+                if (matchingRule.matchResult !== false && matchingRule.rule !== undefined) {
+                    if (matchingRule.resultOfGuard !== undefined) {
+                        if (matchingRule.resultOfGuard.blocked) {
+                            // to do, return a blocked match term
+                            throw "guard blocked"
+                        } else if (matchingRule.resultOfGuard.term !== true) {
+                            throw "unexpected guard value"
+                        }
+                    }
+                    const policies = m.policies.slice(0, i);
+                    const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
+                    const resultOfRule = rewriteTerm(policy.machine.copyWith({ term: matchingRule.rule.term, policies: policies, bindings: bindings }));
+                    return policy.machine.copyWith({ term: resultOfRule.term });
+                }
+            }
         }
         if (Array.isArray(m.term)) {
             // rewrite the elements of machine.term

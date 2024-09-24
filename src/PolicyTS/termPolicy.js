@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isPolicy = isPolicy;
 exports.rewritePolicy = rewritePolicy;
 exports.matchPolicy = matchPolicy;
+const term_1 = require("./term");
 const termMatch_1 = require("./termMatch");
 function isPolicy(term) {
     if ((term !== null) &&
@@ -22,7 +23,8 @@ function isPolicy(term) {
 /*
 ## Rewrite Rules
 
-
+Add the Policy term to end Machine.policies array.
+Reduce Policy.term.
 
 */
 function rewritePolicy(m) {
@@ -30,7 +32,10 @@ function rewritePolicy(m) {
         throw "expected PolicyTerm";
     }
     ;
-    return m;
+    const policies = m.policies.slice();
+    policies.push({ machine: m, term: m.term });
+    const resultOfTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term, policies: policies }));
+    return m.copyWith({ term: resultOfTerm.term });
 }
 /*
 ## Match Rules

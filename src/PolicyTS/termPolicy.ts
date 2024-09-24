@@ -79,12 +79,16 @@ export function isPolicy(term: any): term is PolicyTerm {
 /*
 ## Rewrite Rules
 
-
+Add the Policy term to end Machine.policies array.
+Reduce Policy.term.
 
 */
 export function rewritePolicy(m: Machine): Machine {
     if (!(isPolicy(m.term))) { throw "expected PolicyTerm"; };
-    return m;
+    const policies = m.policies.slice();
+    policies.push({ machine: m, term: m.term });
+    const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term, policies: policies }));
+    return m.copyWith({ term: resultOfTerm.term });
 }
 
 

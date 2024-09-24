@@ -382,6 +382,118 @@ function testReceive() {
     passOrThrow(r.bindings === m.bindings);
 }
 
+function testPolicy1() {
+    // policy 1 with
+    // | 1 -> 2
+    const term = {
+        $policy: "Policy",
+        term: 1,
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: 1,
+                term: 2
+            }
+        ]
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testPolicy2() {
+    // policy 1 with
+    // | 2 -> 2
+    const term = {
+        $policy: "Policy",
+        term: 1,
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: 2,
+                term: 2
+            }
+        ]
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testPolicyNestedOuter() {
+    /*
+    policy 
+        policy 1 with
+        | 2 -> 2
+    with 
+    | 1 -> 3
+    */
+    const term = {
+        $policy: "Policy",
+        term: {
+            $policy: "Policy",
+            term: 1,
+            rules: [
+                {
+                    $policy: "Rule",
+                    pattern: 2,
+                    term: 2
+                }
+            ]
+        },
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: 1,
+                term: 3
+            }
+        ]
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 3);
+    passOrThrow(r.bindings === m.bindings);
+    passOrThrow(r.policies.length === 0);
+}
+
+function testPolicyNestedInner() {
+    /*
+    policy 
+        policy 1 with
+        | 1 -> 2
+    with 
+    | 2 -> 3
+    */
+    const term = {
+        $policy: "Policy",
+        term: {
+            $policy: "Policy",
+            term: 1,
+            rules: [
+                {
+                    $policy: "Rule",
+                    pattern: 1,
+                    term: 2
+                }
+            ]
+        },
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: 2,
+                term: 3
+            }
+        ]
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 3);
+    passOrThrow(r.bindings === m.bindings);
+    passOrThrow(r.policies.length === 0);
+}
+
 class DevMachine extends Machine {
     override copyWith(values: { [k: string]: any }): Machine {
         return Object.assign(new DevMachine(), this, values);
@@ -490,6 +602,10 @@ if (dev) {
     develop();
     testTAPL();
 
+    testPolicy1();
+    testPolicy2();
+    testPolicyNestedOuter();
+    testPolicyNestedInner();
     testTryFinally();
     testTryFinallyException();
     testTryFinallyException2();

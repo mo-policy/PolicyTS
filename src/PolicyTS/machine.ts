@@ -9,7 +9,7 @@ import { rewriteLet, matchLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup } from "./termLookup"
 import { matchMatch, rewriteMatch } from "./termMatch"
-import { matchPolicy, rewritePolicy } from "./termPolicy"
+import { matchPolicy, PolicyTerm, rewritePolicy } from "./termPolicy"
 import { matchReceive, rewriteReceive } from "./termReceive"
 import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
 import { matchSend, rewriteSend } from "./termSend"
@@ -29,6 +29,11 @@ type ChannelMessages = {
         }[]    
 }
 
+type ActivePolicy = {
+    machine: Machine,
+    term: PolicyTerm
+}
+
 
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
@@ -40,7 +45,7 @@ export class Machine {
     readonly blocked: boolean;
     readonly bindings: { readonly [k: string]: any };
     readonly comm: ChannelMessages[];
-    readonly policies: any[];
+    readonly policies: ActivePolicy[];
     /**
      * @param term      The current term.
      * @param blocked   The current blocked state.
@@ -52,7 +57,7 @@ export class Machine {
         blocked: boolean = false,
         bindings: { [k: string]: any } = {},
         comm: ChannelMessages[] = [],
-        policies: any[] = []
+        policies: ActivePolicy[] = []
     ) {
         this.term = term;
         this.blocked = blocked;
