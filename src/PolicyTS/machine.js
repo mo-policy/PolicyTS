@@ -19,6 +19,7 @@ const termSend_1 = require("./termSend");
 const termSequence_1 = require("./termSequence");
 const termTryFinally_1 = require("./termTryFinally");
 const termTryWith_1 = require("./termTryWith");
+const termEval_1 = require("./termEval");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -68,6 +69,7 @@ class Machine {
                     case "Application": return termApplication_1.rewriteApplication;
                     case "Assignment": return termRef_1.rewriteAssignment;
                     case "Dereference": return termRef_1.rewriteDereference;
+                    case "Eval": return termEval_1.rewriteEval;
                     case "Exception": return termTryWith_1.rewriteException;
                     case "Fix": return termFix_1.rewriteFix;
                     case "ForToIterator": return termLoop_1.rewriteForToIterator;
@@ -107,6 +109,7 @@ class Machine {
                     case "Application": return termApplication_1.matchApplication;
                     case "Assignment": return termRef_1.matchAssignment;
                     case "Dereference": return termRef_1.matchDereference;
+                    case "Eval": termEval_1.matchEval;
                     case "Exception": return termTryWith_1.matchException;
                     case "Fix": return termFix_1.matchFix;
                     case "ForToIterator": return termLoop_1.matchForToIterator;

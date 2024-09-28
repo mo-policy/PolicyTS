@@ -17,6 +17,7 @@ import { matchSend, rewriteSend } from "./termSend"
 import { matchSequence, rewriteSequence } from "./termSequence"
 import { matchTryFinally, rewriteTryFinally } from "./termTryFinally"
 import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "./termTryWith"
+import { matchEval, rewriteEval } from "./termEval"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
@@ -98,6 +99,7 @@ export class Machine {
                     case "Application": return rewriteApplication;
                     case "Assignment": return rewriteAssignment;
                     case "Dereference": return rewriteDereference;
+                    case "Eval": return rewriteEval;
                     case "Exception": return rewriteException;
                     case "Fix": return rewriteFix;
                     case "ForToIterator": return rewriteForToIterator;
@@ -137,6 +139,7 @@ export class Machine {
                     case "Application": return matchApplication;
                     case "Assignment": return matchAssignment;
                     case "Dereference": return matchDereference;
+                    case "Eval": matchEval;
                     case "Exception": return matchException;
                     case "Fix": return matchFix;
                     case "ForToIterator": return matchForToIterator;

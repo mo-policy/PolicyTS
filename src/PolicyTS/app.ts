@@ -96,6 +96,22 @@ function testQuote() {
     const rjs = JSON.stringify(r);
     passOrThrow(mjs === rjs);
 }
+
+function testEval() {
+    // {= { $policy: "Lookup", name: "x"} @} =}
+    const term = {
+        $policy: "Eval",
+        code: { $policy: "Lookup", name: "x" }
+    };
+    const bindings: { [k: string]: any } = {
+        "x": 1
+    }
+    const m = new Machine(term, false, bindings);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === bindings);
+}
+
 function testQuoteTerm1() {
     // {@ 1 @}
     const term = { $policy: "Quote", quote: 1 };
@@ -690,6 +706,8 @@ if (dev) {
     develop();
     testTAPL();
 
+    testEval();
+    testQuote();
     testLookupMember();
     testLookupIndex();
     testWhile();

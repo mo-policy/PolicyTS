@@ -89,6 +89,20 @@ function testQuote() {
     const rjs = JSON.stringify(r);
     passOrThrow(mjs === rjs);
 }
+function testEval() {
+    // {= { $policy: "Lookup", name: "x"} @} =}
+    const term = {
+        $policy: "Eval",
+        code: { $policy: "Lookup", name: "x" }
+    };
+    const bindings = {
+        "x": 1
+    };
+    const m = new machine_1.Machine(term, false, bindings);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === bindings);
+}
 function testQuoteTerm1() {
     // {@ 1 @}
     const term = { $policy: "Quote", quote: 1 };
@@ -654,6 +668,8 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testEval();
+    testQuote();
     testLookupMember();
     testLookupIndex();
     testWhile();
