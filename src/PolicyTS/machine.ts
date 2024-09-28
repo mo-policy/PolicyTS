@@ -8,7 +8,7 @@ import { rewriteIf, matchIf } from "./termIf"
 import { rewriteLet, matchLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup } from "./termLookup"
-import { matchForToIterator, matchLoop, rewriteForToIterator, rewriteLoop } from "./termLoop"
+import { matchForToIterator, matchLoop, matchWhileIterator, rewriteForToIterator, rewriteLoop, rewriteWhileIterator } from "./termLoop"
 import { matchMatch, rewriteMatch } from "./termMatch"
 import { matchPolicy, PolicyTerm, rewritePolicy } from "./termPolicy"
 import { matchReceive, rewriteReceive } from "./termReceive"
@@ -116,6 +116,7 @@ export class Machine {
                     case "Sequence": return rewriteSequence;
                     case "TryFinally": return rewriteTryFinally;
                     case "TryWith": return rewriteTryWith;
+                    case "WhileIterator": return rewriteWhileIterator;
                 }
                 throw "Unexpected term";
             }
@@ -152,6 +153,7 @@ export class Machine {
                     case "Sequence": return matchSequence;
                     case "TryFinally": return matchTryFinally;
                     case "TryWith": return matchTryWith;
+                    case "WhileIterator": return matchWhileIterator;
                 }
                 throw "Unexpected pattern";
             }

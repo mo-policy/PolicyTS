@@ -532,6 +532,28 @@ function testForTo() {
     passOrThrow(r.term === null);
     passOrThrow(r.bindings === m.bindings);
 }
+function testWhile() {
+    // while (fun null -> true) do
+    //     1
+    const term =
+    {
+        $policy: "Loop",
+        iterator: {
+            $policy: "WhileIterator",
+            done: false,
+            condition: {
+                $policy: "Function",
+                pattern: null,
+                term: true
+            }
+        },
+        term: 1
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === null);
+    passOrThrow(r.bindings === m.bindings);
+}
 
 class DevMachine extends Machine {
     override copyWith(values: { [k: string]: any }): Machine {
@@ -629,6 +651,7 @@ function testLetRec() {
 
 
 function develop() {
+    testWhile();
 }
 
 const dev = false;
@@ -641,6 +664,7 @@ if (dev) {
     develop();
     testTAPL();
 
+    testWhile();
     testForTo();
     testSequence();
     testPolicy1();

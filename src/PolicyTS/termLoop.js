@@ -2,12 +2,16 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isForToIterator = isForToIterator;
+exports.isWhileIterator = isWhileIterator;
 exports.isLoop = isLoop;
 exports.rewriteForToIterator = rewriteForToIterator;
+exports.rewriteWhileIterator = rewriteWhileIterator;
 exports.rewriteLoop = rewriteLoop;
 exports.matchForToIterator = matchForToIterator;
+exports.matchWhileIterator = matchWhileIterator;
 exports.matchLoop = matchLoop;
 const term_1 = require("./term");
+const termFunction_1 = require("./termFunction");
 function isForToIterator(term) {
     if ((term !== null) &&
         (typeof term === "object") &&
@@ -15,7 +19,7 @@ function isForToIterator(term) {
         ("done" in term) && (typeof term.done === "boolean") &&
         ("value" in term) &&
         ("to" in term) &&
-        ("step" in term)) {
+        ("step" in term) && (term.step === -1 || term.step === 1)) {
         const kl = Object.keys(term).length;
         if (kl === 5) {
             return true;
@@ -25,6 +29,14 @@ function isForToIterator(term) {
         }
     }
     return false;
+}
+function isWhileIterator(term) {
+    return (term !== null) &&
+        (typeof term === "object") &&
+        ("$policy" in term) && (term.$policy === "WhileIterator") &&
+        ("done" in term) && (typeof term.done === "boolean") &&
+        ("condition" in term) &&
+        (Object.keys(term).length === 3);
 }
 function isLoop(term) {
     if ((term !== null) &&
@@ -42,10 +54,6 @@ function isLoop(term) {
     }
     return false;
 }
-function isIterator(term) {
-    return (("done" in term && (typeof term.done === "boolean")) &&
-        ("value" in term));
-}
 /*
 ## Rewrite Rules
 
@@ -54,6 +62,10 @@ ForToIteratorTerm
     if step > 0 and value > to then return done = true
     if step < 0 and value < to then return done = true
     return value + step
+
+WhileTeratorTerm
+    apply condition function
+    set done to result of condition
 
 LoopTerm
     while true
@@ -85,6 +97,28 @@ function rewriteForToIterator(m) {
     }
     return m.copyWith({ term: nextIterator });
 }
+function rewriteWhileIterator(m) {
+    if (!(isWhileIterator(m.term))) {
+        throw "expected WhileIteratorTerm";
+    }
+    if (!((0, termFunction_1.isFunction)(m.term.condition))) {
+        throw "expected FunctionTerm";
+    }
+    if (m.term.done) {
+        return m;
+    }
+    const appTerm = {
+        $policy: "Application",
+        function: m.term.condition,
+        arg: null
+    };
+    const resultOfCondition = (0, term_1.rewriteTerm)(m.copyWith({ term: appTerm }));
+    if (typeof resultOfCondition.term !== "boolean") {
+        throw "exepected boolean";
+    }
+    const nextIterator = Object.assign({}, m.term, { "done": resultOfCondition.term });
+    return m.copyWith({ term: nextIterator });
+}
 function rewriteLoop(m) {
     if (!(isLoop(m.term))) {
         throw "expected LoopTerm";
@@ -96,15 +130,12 @@ function rewriteLoop(m) {
         if (iteratorResult.blocked) {
             throw "blocked";
         }
-        if (!(isIterator(iteratorResult.term))) {
-            throw "expected Iterator";
-        }
         iterator = iteratorResult.term;
         if (iterator.done) {
             return m.copyWith({ term: null });
         }
         let bindings = m.bindings;
-        if ("pattern" in m.term) {
+        if ("pattern" in m.term && "value" in iterator) {
             const matchResult = (0, term_1.matchTerm)(m, m.term.pattern, iterator.value);
             if (matchResult === false) {
                 throw "match failed";
@@ -123,6 +154,14 @@ function rewriteLoop(m) {
 function matchForToIterator(pattern, value) {
     if (!(isForToIterator(pattern))) {
         throw "expected ForToIterator";
+    }
+    ;
+    // to do
+    return false;
+}
+function matchWhileIterator(pattern, value) {
+    if (!(isWhileIterator(pattern))) {
+        throw "expected WhileIterator";
     }
     ;
     // to do

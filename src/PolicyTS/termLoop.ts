@@ -30,6 +30,7 @@ for (let x of y) {
 
 import { Machine, MatchResult } from "./machine"
 import { matchTerm, rewriteTerm } from "./term";
+import { isFunction } from "./termFunction";
 
 
 export type ForToIteratorTerm = {
@@ -39,6 +40,12 @@ export type ForToIteratorTerm = {
     value: number,
     to: number,
     step: number
+}
+
+export type WhileIteratorTerm = {
+    $policy: "WhileIterator",
+    done: boolean,
+    condition: any  // function which returns true or false
 }
 
 export type LoopTerm = {
@@ -54,7 +61,7 @@ export function isForToIterator(term: any): term is ForToIteratorTerm {
         ("done" in term) && (typeof term.done === "boolean") &&
         ("value" in term) &&
         ("to" in term) &&
-        ("step" in term)) {
+        ("step" in term) && (term.step === -1 || term.step === 1)) {
         const kl = Object.keys(term).length;
         if (kl === 5) {
             return true;
@@ -63,6 +70,15 @@ export function isForToIterator(term: any): term is ForToIteratorTerm {
         }
     }
     return false;
+}
+
+export function isWhileIterator(term: any): term is WhileIteratorTerm {
+    return (term !== null) &&
+        (typeof term === "object") &&
+        ("$policy" in term) && (term.$policy === "WhileIterator") &&
+        ("done" in term) && (typeof term.done === "boolean") &&
+        ("condition" in term) &&
+        (Object.keys(term).length === 3);
 }
 
 export function isLoop(term: any): term is LoopTerm {
@@ -81,11 +97,6 @@ export function isLoop(term: any): term is LoopTerm {
     return false;
 }
 
-function isIterator(term: any): term is { done: boolean, value: any } {
-    return (("done" in term && (typeof term.done === "boolean")) &&
-            ("value" in term));
-}
-
 /*
 ## Rewrite Rules
 
@@ -94,6 +105,10 @@ ForToIteratorTerm
     if step > 0 and value > to then return done = true
     if step < 0 and value < to then return done = true 
     return value + step
+
+WhileTeratorTerm
+    apply condition function
+    set done to result of condition
 
 LoopTerm
     while true
@@ -121,6 +136,22 @@ export function rewriteForToIterator(m: Machine): Machine {
     }
     return m.copyWith({ term: nextIterator });
 }
+
+export function rewriteWhileIterator(m: Machine): Machine {
+    if (!(isWhileIterator(m.term))) { throw "expected WhileIteratorTerm" }
+    if (!(isFunction(m.term.condition))) { throw "expected FunctionTerm" }
+    if (m.term.done) { return m; }
+    const appTerm = {
+        $policy: "Application",
+        function: m.term.condition,
+        arg: null
+    }
+    const resultOfCondition = rewriteTerm(m.copyWith({ term: appTerm }))
+    if (typeof resultOfCondition.term !== "boolean") { throw "exepected boolean" }
+    const nextIterator = Object.assign({}, m.term, { "done": resultOfCondition.term });
+    return m.copyWith({ term: nextIterator });
+}
+
 export function rewriteLoop(m: Machine): Machine {
     if (!(isLoop(m.term))) { throw "expected LoopTerm"; };
     let iterator = m.term.iterator;
@@ -129,15 +160,12 @@ export function rewriteLoop(m: Machine): Machine {
         if (iteratorResult.blocked) {
             throw "blocked"
         }
-        if (!(isIterator(iteratorResult.term))) {
-            throw "expected Iterator"
-        }
         iterator = iteratorResult.term;
         if (iterator.done) {
             return m.copyWith({ term: null });
         }
         let bindings = m.bindings;
-        if ("pattern" in m.term) {
+        if ("pattern" in m.term && "value" in iterator) {
             const matchResult = matchTerm(m, m.term.pattern, iterator.value);
             if (matchResult === false) { 
                 throw "match failed"
@@ -158,6 +186,12 @@ export function rewriteLoop(m: Machine): Machine {
 
 export function matchForToIterator(pattern: any, value: any): MatchResult {
     if (!(isForToIterator(pattern))) { throw "expected ForToIterator"; };
+    // to do
+    return false;
+}
+
+export function matchWhileIterator(pattern: any, value: any): MatchResult {
+    if (!(isWhileIterator(pattern))) { throw "expected WhileIterator"; };
     // to do
     return false;
 }

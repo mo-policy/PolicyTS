@@ -508,6 +508,27 @@ function testForTo() {
     passOrThrow(r.term === null);
     passOrThrow(r.bindings === m.bindings);
 }
+function testWhile() {
+    // while (fun null -> true) do
+    //     1
+    const term = {
+        $policy: "Loop",
+        iterator: {
+            $policy: "WhileIterator",
+            done: false,
+            condition: {
+                $policy: "Function",
+                pattern: null,
+                term: true
+            }
+        },
+        term: 1
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === null);
+    passOrThrow(r.bindings === m.bindings);
+}
 class DevMachine extends machine_1.Machine {
     copyWith(values) {
         return Object.assign(new DevMachine(), this, values);
@@ -597,6 +618,7 @@ function testLetRec() {
     passOrThrow(r.bindings === m.bindings);
 }
 function develop() {
+    testWhile();
 }
 const dev = false;
 if (dev) {
@@ -607,6 +629,7 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testWhile();
     testForTo();
     testSequence();
     testPolicy1();

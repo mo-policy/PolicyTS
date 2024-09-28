@@ -86,6 +86,7 @@ class Machine {
                     case "Sequence": return termSequence_1.rewriteSequence;
                     case "TryFinally": return termTryFinally_1.rewriteTryFinally;
                     case "TryWith": return termTryWith_1.rewriteTryWith;
+                    case "WhileIterator": return termLoop_1.rewriteWhileIterator;
                 }
                 throw "Unexpected term";
             }
@@ -122,6 +123,7 @@ class Machine {
                     case "Sequence": return termSequence_1.matchSequence;
                     case "TryFinally": return termTryFinally_1.matchTryFinally;
                     case "TryWith": return termTryWith_1.matchTryWith;
+                    case "WhileIterator": return termLoop_1.matchWhileIterator;
                 }
                 throw "Unexpected pattern";
             }
