@@ -47,12 +47,42 @@ export type LookupTerm = {
     name: string
 }
 
+export type LookupMemberTerm = {
+    $policy: "LookupMember",
+    term: any,
+    member: any
+}
+
+export type LookupIndexTerm = {
+    $policy: "LookupIndex",
+    term: any,
+    index: any
+}
+
 export function isLookup(term: any): term is LookupTerm {
     return (term !== null) &&
         (typeof term === "object") &&
         ("$policy" in term) && (term.$policy === "Lookup") &&
         ("name" in term) && (typeof term.name === "string") &&
         (Object.keys(term).length === 2);
+}
+
+export function isLookupMember(term: any): term is LookupMemberTerm {
+    return (term !== null) &&
+        (typeof term === "object") &&
+        ("$policy" in term) && (term.$policy === "LookupMember") &&
+        ("term" in term) &&
+        ("member" in term) && 
+        (Object.keys(term).length === 3);
+}
+
+export function isLookupIndex(term: any): term is LookupIndexTerm {
+    return (term !== null) &&
+        (typeof term === "object") &&
+        ("$policy" in term) && (term.$policy === "LookupIndex") &&
+        ("term" in term) &&
+        ("index" in term) && 
+        (Object.keys(term).length === 3);
 }
 
 /*
@@ -79,6 +109,51 @@ export function rewriteLookup(m: Machine): Machine {
     }
 }
 
+export function rewriteLookupMember(m: Machine): Machine {
+    if (!(isLookupMember(m.term))) { throw "expected LookupMemberTerm"; };
+    const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    if (resultOfTerm.blocked) {
+        throw "blocked"
+    }
+    if ((resultOfTerm.term === null) || (typeof resultOfTerm.term !== "object")) {
+        throw "not object"
+    }
+    const resultOfMember = rewriteTerm(m.copyWith({ term: m.term.member }));
+    if (resultOfMember.blocked) {
+        throw "blocked"
+    }
+    if (typeof resultOfMember.term !== "string") {
+        throw "not string"
+    }
+    if (!(resultOfMember.term in resultOfTerm.term)) {
+        throw "member not found"
+    }
+    const memberValue = resultOfTerm.term[resultOfMember.term];
+    return m.copyWith({ term: memberValue });
+}
+
+export function rewriteLookupIndex(m: Machine): Machine {
+    if (!(isLookupIndex(m.term))) { throw "expected LookupIndexTerm"; };
+    const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    if (resultOfTerm.blocked) {
+        throw "blocked"
+    }
+    if (!(Array.isArray(resultOfTerm.term))) {
+        throw "not array"
+    }
+    const resultOfIndex = rewriteTerm(m.copyWith({ term: m.term.index }));
+    if (resultOfIndex.blocked) {
+        throw "blocked"
+    }
+    if (typeof resultOfIndex.term !== "number") {
+        throw "not number"
+    }
+    if ((resultOfIndex.term < 0) || (resultOfIndex.term >= resultOfTerm.term.length)) {
+        throw "index out of range"
+    }
+    const itemValue = resultOfTerm.term[resultOfIndex.term];
+    return m.copyWith({ term: itemValue });
+}
 
 /*
 ## Match Rules
@@ -92,4 +167,16 @@ export function matchLookup(pattern: any, value: any): MatchResult {
         r[pattern.name] = value;
     }
     return r;
+}
+
+export function matchLookupMember(pattern: any, value: any): MatchResult {
+    if (!(isLookupMember(pattern))) { throw "expected LookupMember"; };
+    // to do
+    return false;
+}
+
+export function matchLookupIndex(pattern: any, value: any): MatchResult {
+    if (!(isLookupIndex(pattern))) { throw "expected LookupIndex"; };
+    // to do
+    return false;
 }

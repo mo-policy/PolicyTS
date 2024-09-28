@@ -7,7 +7,7 @@ import { rewriteFunction, matchFunction } from "./termFunction"
 import { rewriteIf, matchIf } from "./termIf"
 import { rewriteLet, matchLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
-import { rewriteLookup, matchLookup } from "./termLookup"
+import { rewriteLookup, matchLookup, rewriteLookupMember, matchLookupMember, matchLookupIndex, rewriteLookupIndex } from "./termLookup"
 import { matchForToIterator, matchLoop, matchWhileIterator, rewriteForToIterator, rewriteLoop, rewriteWhileIterator } from "./termLoop"
 import { matchMatch, rewriteMatch } from "./termMatch"
 import { matchPolicy, PolicyTerm, rewritePolicy } from "./termPolicy"
@@ -107,6 +107,8 @@ export class Machine {
                     case "Let": return rewriteLet;
                     case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
+                    case "LookupIndex": return rewriteLookupIndex;
+                    case "LookupMember": return rewriteLookupMember;
                     case "Loop": return rewriteLoop;
                     case "Match": return rewriteMatch;
                     case "Policy": return rewritePolicy;
@@ -144,6 +146,8 @@ export class Machine {
                     case "Let": return matchLet;
                     case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
+                    case "LookupIndex": return matchLookupIndex;
+                    case "LookupMember": return matchLookupMember;
                     case "Loop": return matchLoop;
                     case "Match": return matchMatch;
                     case "Policy": return matchPolicy;

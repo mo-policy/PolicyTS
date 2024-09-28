@@ -56,6 +56,30 @@ function testLookupSuccess() {
     passOrThrow(r.term === 1);
     passOrThrow(r.bindings === bindings);
 }
+function testLookupMember() {
+    // ({ x: 1 }).x
+    const term = {
+        $policy: "LookupMember",
+        term: { x: 1 },
+        member: "x"
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testLookupIndex() {
+    // ([1, 2])[0]
+    const term = {
+        $policy: "LookupIndex",
+        term: [1, 2],
+        index: 0
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
 function testConstantWrappedConstant() {
     const term = { $policy: "Constant", value: { $policy: "Constant", value: 1 } };
     const m = new machine_1.Machine(term);
@@ -618,7 +642,6 @@ function testLetRec() {
     passOrThrow(r.bindings === m.bindings);
 }
 function develop() {
-    testWhile();
 }
 const dev = false;
 if (dev) {
@@ -629,6 +652,8 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testLookupMember();
+    testLookupIndex();
     testWhile();
     testForTo();
     testSequence();

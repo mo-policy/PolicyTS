@@ -77,6 +77,8 @@ class Machine {
                     case "Let": return termLet_1.rewriteLet;
                     case "LetRec": return termLetRec_1.rewriteLetRec;
                     case "Lookup": return termLookup_1.rewriteLookup;
+                    case "LookupIndex": return termLookup_1.rewriteLookupIndex;
+                    case "LookupMember": return termLookup_1.rewriteLookupMember;
                     case "Loop": return termLoop_1.rewriteLoop;
                     case "Match": return termMatch_1.rewriteMatch;
                     case "Policy": return termPolicy_1.rewritePolicy;
@@ -114,6 +116,8 @@ class Machine {
                     case "Let": return termLet_1.matchLet;
                     case "LetRec": return termLetRec_1.matchLetRec;
                     case "Lookup": return termLookup_1.matchLookup;
+                    case "LookupIndex": return termLookup_1.matchLookupIndex;
+                    case "LookupMember": return termLookup_1.matchLookupMember;
                     case "Loop": return termLoop_1.matchLoop;
                     case "Match": return termMatch_1.matchMatch;
                     case "Policy": return termPolicy_1.matchPolicy;

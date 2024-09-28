@@ -61,6 +61,32 @@ function testLookupSuccess() {
     passOrThrow(r.bindings === bindings);
 }
 
+function testLookupMember() {
+    // ({ x: 1 }).x
+    const term = {
+        $policy: "LookupMember",
+        term: { x: 1 },
+        member: "x"
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testLookupIndex() {
+    // ([1, 2])[0]
+    const term = {
+        $policy: "LookupIndex",
+        term: [1, 2],
+        index: 0
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+
 function testConstantWrappedConstant() {
     const term = { $policy: "Constant", value: { $policy: "Constant", value: 1 } };
     const m = new Machine(term);
@@ -163,7 +189,6 @@ function testMatchGuard() {
     const r = rewriteTerm(m);
     passOrThrow(r.term === 1);
     passOrThrow(r.bindings === m.bindings);
-
 }
 
 function testTryWith() {
@@ -651,7 +676,6 @@ function testLetRec() {
 
 
 function develop() {
-    testWhile();
 }
 
 const dev = false;
@@ -664,6 +688,8 @@ if (dev) {
     develop();
     testTAPL();
 
+    testLookupMember();
+    testLookupIndex();
     testWhile();
     testForTo();
     testSequence();
