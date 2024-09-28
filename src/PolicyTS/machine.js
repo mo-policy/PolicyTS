@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Machine = void 0;
 const termApplication_1 = require("./termApplication");
-const termConstant_1 = require("./termConstant");
+const termQuote_1 = require("./termQuote");
 const termFix_1 = require("./termFix");
 const termFunction_1 = require("./termFunction");
 const termIf_1 = require("./termIf");
@@ -67,7 +67,6 @@ class Machine {
                 switch (this.term.$policy) {
                     case "Application": return termApplication_1.rewriteApplication;
                     case "Assignment": return termRef_1.rewriteAssignment;
-                    case "Constant": return termConstant_1.rewriteConstant;
                     case "Dereference": return termRef_1.rewriteDereference;
                     case "Exception": return termTryWith_1.rewriteException;
                     case "Fix": return termFix_1.rewriteFix;
@@ -82,6 +81,7 @@ class Machine {
                     case "Loop": return termLoop_1.rewriteLoop;
                     case "Match": return termMatch_1.rewriteMatch;
                     case "Policy": return termPolicy_1.rewritePolicy;
+                    case "Quote": return termQuote_1.rewriteQuote;
                     case "Receive": return termReceive_1.rewriteReceive;
                     case "Ref": return termRef_1.rewriteRef;
                     case "Send": return termSend_1.rewriteSend;
@@ -93,7 +93,7 @@ class Machine {
                 throw "Unexpected term";
             }
         }
-        return termConstant_1.rewriteConstant;
+        return termQuote_1.rewriteConstant;
     }
     /**
      * Gets a match function for the supplied pattern.
@@ -106,7 +106,6 @@ class Machine {
                 switch (pattern.$policy) {
                     case "Application": return termApplication_1.matchApplication;
                     case "Assignment": return termRef_1.matchAssignment;
-                    case "Constant": return termConstant_1.matchConstant;
                     case "Dereference": return termRef_1.matchDereference;
                     case "Exception": return termTryWith_1.matchException;
                     case "Fix": return termFix_1.matchFix;
@@ -121,6 +120,7 @@ class Machine {
                     case "Loop": return termLoop_1.matchLoop;
                     case "Match": return termMatch_1.matchMatch;
                     case "Policy": return termPolicy_1.matchPolicy;
+                    case "Quote": return termQuote_1.matchQuote;
                     case "Receive": return termReceive_1.matchReceive;
                     case "Ref": return termRef_1.matchRef;
                     case "Send": return termSend_1.matchSend;
@@ -132,7 +132,7 @@ class Machine {
                 throw "Unexpected pattern";
             }
         }
-        return termConstant_1.matchConstant;
+        return termQuote_1.matchConstant;
     }
     /**
      *

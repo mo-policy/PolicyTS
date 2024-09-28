@@ -1,38 +1,38 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
 /*
-# Constant Term
+# Quote Term
 
 A constant term holds a fully reduced value.
 
 ## Syntax
     
     {
-        "$policy": "Constant",
-        "value": _any_
+        "$policy": "Quote",
+        "quote": _any_
     }
 
 ## Example
     
     {
-        $policy": "Constant",
-        "value": "hello"
+        $policy": "Quote",
+        "quote": { $policy: "Lookup", name: "x" }
     }
 
-    "hello"
+    {@ x @}
 
 ## Schema
 
-    "ConstantTerm": {
+    "QuoteTerm": {
         "type": "object",
         "properties": {
             "$policy": {
                 "type": "string",
-                "const": "Constant"
+                "const": "Quote"
             },
-            "value": true
+            "quote": true
         },
-        "required": [ "$policy", "value" ]
+        "required": [ "$policy", "quote" ]
     }
 
 */
@@ -40,18 +40,18 @@ A constant term holds a fully reduced value.
 import { Machine, MatchResult } from "./machine"
 
 /**
- * The ConstantTerm wraps a value which is fully reduced. 
+ * The QuoteTerm wraps a value which is fully reduced. 
  */
-export type ConstantTerm = {
-    $policy: "Constant",
-    value: any
+export type QuoteTerm = {
+    $policy: "Quote",
+    quote: any
 }
 
-export function isWrappedConstant(term: any): term is ConstantTerm {
+export function isQuote(term: any): term is QuoteTerm {
     return (term !== null) &&
         (typeof term === "object") &&
-        ("$policy" in term) && (term.$policy === "Constant") &&
-        ("value" in term) &&
+        ("$policy" in term) && (term.$policy === "Quote") &&
+        ("quote" in term) &&
         (Object.keys(term).length === 2);
 }
 
@@ -61,19 +61,24 @@ export function isWrappedConstant(term: any): term is ConstantTerm {
  * @returns         True if term is a ConstantTerm, otherwise false.
  */
 export function isConstant(term: any): boolean {
-    if (isWrappedConstant(term)) {
+    if (isQuote(term)) {
         return true;
     } else {
         return !((term !== null) && (typeof term === "object") && ("$policy" in term));
     }
-
 }
 
 /*
 ## Rewrite Rules
 
-Constant terms are in fully reduced form. The rewrite function is simply a no op.
+Quote terms are in fully reduced form. The rewrite function is simply a no op.
 */
+
+export function rewriteQuote(m: Machine): Machine {
+    if (!(isQuote(m.term))) { throw "expected Quote"; };
+    return m;
+}
+
 export function rewriteConstant(m: Machine): Machine {
     if (!(isConstant(m.term))) { throw "expected Constant"; };
     return m;
@@ -84,19 +89,24 @@ export function rewriteConstant(m: Machine): Machine {
 
 
 */
+
+export function matchQuote(pattern: any, value: any): MatchResult {
+    if (isQuote(pattern)) {
+        if (pattern.quote === value) {
+            return {};
+        } else {
+            return false;
+        }
+    }
+    return false;
+}
+
+
 export function matchConstant(pattern: any, value: any): MatchResult {
-    if (isWrappedConstant(pattern)) {
-        if (pattern.value === value) {
-            return {};
-        } else {
-            return false;
-        }
+    if (pattern === value) {
+        return {};
     } else {
-        if (pattern === value) {
-            return {};
-        } else {
-            return false;
-        }
+        return false;
     }
 }
 

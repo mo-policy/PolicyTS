@@ -39,7 +39,7 @@ The lookup term is used to refer to the value bound to a name.
 
 import { Machine, MatchResult } from "./machine"
 import { rewriteTerm } from "./term";
-import { isConstant } from "./termConstant";
+import { isConstant } from "./termQuote";
 import { isFunction } from "./termFunction";
 
 export type LookupTerm = {

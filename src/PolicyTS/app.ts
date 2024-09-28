@@ -87,16 +87,18 @@ function testLookupIndex() {
     passOrThrow(r.bindings === m.bindings);
 }
 
-function testConstantWrappedConstant() {
-    const term = { $policy: "Constant", value: { $policy: "Constant", value: 1 } };
+function testQuote() {
+    // {@ {@ 1 @} @}
+    const term = { $policy: "Quote", quote: { $policy: "Quote", quote: 1 } };
     const m = new Machine(term);
     const r = rewriteTerm(m);
     const mjs = JSON.stringify(m);
     const rjs = JSON.stringify(r);
     passOrThrow(mjs === rjs);
 }
-function testConstantTerm1() {
-    const term = { $policy: "Constant", value: 1 };
+function testQuoteTerm1() {
+    // {@ 1 @}
+    const term = { $policy: "Quote", quote: 1 };
     const m = new Machine(term);
     const r = rewriteTerm(m);
     const mjs = JSON.stringify(m);
@@ -714,8 +716,8 @@ if (dev) {
     testLet();
     testLookupBlocked();
     testLookupSuccess();
-    testConstantWrappedConstant();
-    testConstantTerm1();
+    testQuote();
+    testQuoteTerm1();
     testConstantArray();
     testConstantObjectOneProperty();
     testConstantEmptyObject();

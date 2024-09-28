@@ -1,7 +1,7 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
 import { rewriteApplication, matchApplication } from "./termApplication"
-import { rewriteConstant, matchConstant } from "./termConstant"
+import { rewriteConstant, matchConstant, rewriteQuote, matchQuote } from "./termQuote"
 import { matchFix, rewriteFix } from "./termFix"
 import { rewriteFunction, matchFunction } from "./termFunction"
 import { rewriteIf, matchIf } from "./termIf"
@@ -97,7 +97,6 @@ export class Machine {
                 switch (this.term.$policy) {
                     case "Application": return rewriteApplication;
                     case "Assignment": return rewriteAssignment;
-                    case "Constant": return rewriteConstant;
                     case "Dereference": return rewriteDereference;
                     case "Exception": return rewriteException;
                     case "Fix": return rewriteFix;
@@ -112,6 +111,7 @@ export class Machine {
                     case "Loop": return rewriteLoop;
                     case "Match": return rewriteMatch;
                     case "Policy": return rewritePolicy;
+                    case "Quote": return rewriteQuote;
                     case "Receive": return rewriteReceive;
                     case "Ref": return rewriteRef;
                     case "Send": return rewriteSend;
@@ -136,7 +136,6 @@ export class Machine {
                 switch (pattern.$policy) {
                     case "Application": return matchApplication;
                     case "Assignment": return matchAssignment;
-                    case "Constant": return matchConstant;
                     case "Dereference": return matchDereference;
                     case "Exception": return matchException;
                     case "Fix": return matchFix;
@@ -151,6 +150,7 @@ export class Machine {
                     case "Loop": return matchLoop;
                     case "Match": return matchMatch;
                     case "Policy": return matchPolicy;
+                    case "Quote": return matchQuote;
                     case "Receive": return matchReceive;
                     case "Ref": return matchRef;
                     case "Send": return matchSend;

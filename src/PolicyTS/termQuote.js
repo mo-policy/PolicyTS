@@ -1,15 +1,17 @@
 "use strict";
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isWrappedConstant = isWrappedConstant;
+exports.isQuote = isQuote;
 exports.isConstant = isConstant;
+exports.rewriteQuote = rewriteQuote;
 exports.rewriteConstant = rewriteConstant;
+exports.matchQuote = matchQuote;
 exports.matchConstant = matchConstant;
-function isWrappedConstant(term) {
+function isQuote(term) {
     return (term !== null) &&
         (typeof term === "object") &&
-        ("$policy" in term) && (term.$policy === "Constant") &&
-        ("value" in term) &&
+        ("$policy" in term) && (term.$policy === "Quote") &&
+        ("quote" in term) &&
         (Object.keys(term).length === 2);
 }
 /**
@@ -18,7 +20,7 @@ function isWrappedConstant(term) {
  * @returns         True if term is a ConstantTerm, otherwise false.
  */
 function isConstant(term) {
-    if (isWrappedConstant(term)) {
+    if (isQuote(term)) {
         return true;
     }
     else {
@@ -28,8 +30,15 @@ function isConstant(term) {
 /*
 ## Rewrite Rules
 
-Constant terms are in fully reduced form. The rewrite function is simply a no op.
+Quote terms are in fully reduced form. The rewrite function is simply a no op.
 */
+function rewriteQuote(m) {
+    if (!(isQuote(m.term))) {
+        throw "expected Quote";
+    }
+    ;
+    return m;
+}
 function rewriteConstant(m) {
     if (!(isConstant(m.term))) {
         throw "expected Constant";
@@ -42,22 +51,23 @@ function rewriteConstant(m) {
 
 
 */
-function matchConstant(pattern, value) {
-    if (isWrappedConstant(pattern)) {
-        if (pattern.value === value) {
+function matchQuote(pattern, value) {
+    if (isQuote(pattern)) {
+        if (pattern.quote === value) {
             return {};
         }
         else {
             return false;
         }
+    }
+    return false;
+}
+function matchConstant(pattern, value) {
+    if (pattern === value) {
+        return {};
     }
     else {
-        if (pattern === value) {
-            return {};
-        }
-        else {
-            return false;
-        }
+        return false;
     }
 }
-//# sourceMappingURL=termConstant.js.map
+//# sourceMappingURL=termQuote.js.map

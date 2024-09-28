@@ -11,7 +11,7 @@ exports.matchLookup = matchLookup;
 exports.matchLookupMember = matchLookupMember;
 exports.matchLookupIndex = matchLookupIndex;
 const term_1 = require("./term");
-const termConstant_1 = require("./termConstant");
+const termQuote_1 = require("./termQuote");
 const termFunction_1 = require("./termFunction");
 function isLookup(term) {
     return (term !== null) &&
@@ -56,7 +56,7 @@ function rewriteLookup(m) {
         return m.copyWith({ blocked: true });
     }
     else {
-        if (((0, termConstant_1.isConstant)(binding) || (0, termFunction_1.isFunction)(binding))) {
+        if (((0, termQuote_1.isConstant)(binding) || (0, termFunction_1.isFunction)(binding))) {
             return m.copyWith({ term: binding });
         }
         else {
