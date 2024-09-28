@@ -8,6 +8,7 @@ import { rewriteIf, matchIf } from "./termIf"
 import { rewriteLet, matchLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup } from "./termLookup"
+import { matchForToIterator, matchLoop, rewriteForToIterator, rewriteLoop } from "./termLoop"
 import { matchMatch, rewriteMatch } from "./termMatch"
 import { matchPolicy, PolicyTerm, rewritePolicy } from "./termPolicy"
 import { matchReceive, rewriteReceive } from "./termReceive"
@@ -100,11 +101,13 @@ export class Machine {
                     case "Dereference": return rewriteDereference;
                     case "Exception": return rewriteException;
                     case "Fix": return rewriteFix;
+                    case "ForToIterator": return rewriteForToIterator;
                     case "Function": return rewriteFunction;
                     case "If": return rewriteIf;
                     case "Let": return rewriteLet;
                     case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
+                    case "Loop": return rewriteLoop;
                     case "Match": return rewriteMatch;
                     case "Policy": return rewritePolicy;
                     case "Receive": return rewriteReceive;
@@ -134,11 +137,13 @@ export class Machine {
                     case "Dereference": return matchDereference;
                     case "Exception": return matchException;
                     case "Fix": return matchFix;
+                    case "ForToIterator": return matchForToIterator;
                     case "Function": return matchFunction;
                     case "If": return matchIf;
                     case "Let": return matchLet;
                     case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
+                    case "Loop": return matchLoop;
                     case "Match": return matchMatch;
                     case "Policy": return matchPolicy;
                     case "Receive": return matchReceive;

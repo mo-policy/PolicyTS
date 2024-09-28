@@ -11,7 +11,7 @@ Used to bind a value to a name.
         "$policy": "Let",
         "pattern": _term_,
         "term": _term_,
-        "inTerm": _term_
+        "in": _term_
     }
 
 ## Example

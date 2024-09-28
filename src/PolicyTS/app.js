@@ -440,10 +440,10 @@ function testPolicyNestedOuter() {
 }
 function testPolicyNestedInner() {
     /*
-    policy
+    policy begin
         policy 1 with
         | 1 -> 2
-    with
+    end with
     | 2 -> 3
     */
     const term = {
@@ -485,6 +485,27 @@ function testSequence() {
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
     passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testForTo() {
+    // for i = 1 to 3 do 
+    //     null
+    const term = {
+        $policy: "Loop",
+        iterator: {
+            $policy: "ForToIterator",
+            done: false,
+            from: 1,
+            value: 1,
+            to: 3,
+            step: 1
+        },
+        pattern: { $policy: "Lookup", name: "i" },
+        term: null
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === null);
     passOrThrow(r.bindings === m.bindings);
 }
 class DevMachine extends machine_1.Machine {
@@ -586,6 +607,7 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testForTo();
     testSequence();
     testPolicy1();
     testPolicy2();

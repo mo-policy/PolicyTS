@@ -1,5 +1,6 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
+import { createHash, getHashes, Hash } from "crypto";
 import { Machine } from "./machine"
 import { rewriteTerm } from "./term"
 import { testTAPL } from "./testsTAPL"
@@ -460,10 +461,10 @@ function testPolicyNestedOuter() {
 
 function testPolicyNestedInner() {
     /*
-    policy 
+    policy begin
         policy 1 with
         | 1 -> 2
-    with 
+    end with 
     | 2 -> 3
     */
     const term = {
@@ -506,6 +507,29 @@ function testSequence() {
     const m = new Machine(term);
     const r = rewriteTerm(m);
     passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testForTo() {
+    // for i = 1 to 3 do 
+    //     null
+    const term =
+    {
+        $policy: "Loop",
+        iterator: {
+            $policy: "ForToIterator",
+            done: false,
+            from: 1,
+            value: 1,
+            to: 3,
+            step: 1
+        },
+        pattern: { $policy: "Lookup", name: "i" },
+        term: null
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === null);
     passOrThrow(r.bindings === m.bindings);
 }
 
@@ -617,6 +641,7 @@ if (dev) {
     develop();
     testTAPL();
 
+    testForTo();
     testSequence();
     testPolicy1();
     testPolicy2();

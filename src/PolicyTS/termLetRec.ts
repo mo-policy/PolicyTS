@@ -11,7 +11,7 @@ Used to bind recursive values to names.
         "$policy": "LetRec",
         "pattern": _term_,
         "term": _term_,
-        "inTerm": _term_
+        "in": _term_
     }
 
 ## Example
