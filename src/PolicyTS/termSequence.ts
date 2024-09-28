@@ -69,19 +69,17 @@ export function rewriteSequence(m: Machine): Machine {
     if (!(isSequence(m.term))) { throw "expected SequenceTerm"; };
     if (m.term.terms.length === 0) { throw "sequence with no terms" }
     const resultTerms = m.term.terms.splice(0);
-    let anyBlocked = false;
+    let nextMachine = m;
     for (let i = 0; i < resultTerms.length; i++) {
         const seqTerm = resultTerms[i];
-        const resultOfSeqTerm = rewriteTerm(m.copyWith({ term: seqTerm }));
-        resultTerms[i] = resultOfSeqTerm.term;
-        anyBlocked = resultOfSeqTerm.blocked;
-        break;
+        nextMachine = rewriteTerm(nextMachine.copyWith({ term: seqTerm }));
+        resultTerms[i] = nextMachine.term;
     }
-    if (anyBlocked) {
+    if (nextMachine.blocked) {
         const blockedTerm = Object.assign({}, m.term, { terms: resultTerms });
-        return m.copyWith({ term: blockedTerm });
+        return nextMachine.copyWith({ term: blockedTerm });
     } else {
-        return m.copyWith({ term: resultTerms[resultTerms.length - 1] });
+        return nextMachine.copyWith({ term: resultTerms[resultTerms.length - 1] });
     }
 }
 

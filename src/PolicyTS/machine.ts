@@ -18,6 +18,7 @@ import { matchSequence, rewriteSequence } from "./termSequence"
 import { matchTryFinally, rewriteTryFinally } from "./termTryFinally"
 import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "./termTryWith"
 import { matchEval, rewriteEval } from "./termEval"
+import { matchParallel, rewriteParallel } from "./termParallel"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
@@ -112,6 +113,7 @@ export class Machine {
                     case "LookupMember": return rewriteLookupMember;
                     case "Loop": return rewriteLoop;
                     case "Match": return rewriteMatch;
+                    case "Parallel": return rewriteParallel;
                     case "Policy": return rewritePolicy;
                     case "Quote": return rewriteQuote;
                     case "Receive": return rewriteReceive;
@@ -152,6 +154,7 @@ export class Machine {
                     case "LookupMember": return matchLookupMember;
                     case "Loop": return matchLoop;
                     case "Match": return matchMatch;
+                    case "Parallel": return matchParallel;
                     case "Policy": return matchPolicy;
                     case "Quote": return matchQuote;
                     case "Receive": return matchReceive;

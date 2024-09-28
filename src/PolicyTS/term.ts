@@ -2,6 +2,7 @@
 
 import { Machine, MatchResult } from "./machine"
 import { findMatchingRule } from "./termMatch";
+import { isParallel, rewriteParallel } from "./termParallel";
 
 /**
  * The top level rewrite function for all terms.
@@ -10,7 +11,12 @@ import { findMatchingRule } from "./termMatch";
  */
 export function rewriteTerm(m: Machine): Machine {
     if (m.blocked) {
-        return m;
+        if (isParallel(m.term)) {
+            const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term, blocked: false }));
+            return m.copyWith({ term: resultOfTerm.term });
+        } else {
+            return m;
+        }        
     } else {
         if (m.policies.length > 0) {
             // look for rule in each policy matching the current term
@@ -38,11 +44,12 @@ export function rewriteTerm(m: Machine): Machine {
         if (Array.isArray(m.term)) {
             // rewrite the elements of machine.term
             const nextTerm = [];
+            let nextMachine = m;
             for (let i = 0; i < m.term.length; i++) {
-                const nextMachine = rewriteTerm(m.copyWith({ term: m.term[i] }));
+                nextMachine = rewriteTerm(nextMachine.copyWith({ term: m.term[i] }));
                 nextTerm[i] = nextMachine.term;
             }
-            return m.copyWith({ term: nextTerm });
+            return nextMachine.copyWith({ term: nextTerm });
         } else {
             const f = m.getRewriteFunction();
             if ((m.term !== null) && (typeof m.term === "object")) {
@@ -51,11 +58,12 @@ export function rewriteTerm(m: Machine): Machine {
                 } else {
                     // rewrite the properties of machine.term
                     const nextTerm: { [k: string]: any } = {};
+                    let nextMachine = m;
                     for (let p in m.term) {
-                        let nextMachine = rewriteTerm(m.copyWith({ term: m.term[p] }));
+                        nextMachine = rewriteTerm(nextMachine.copyWith({ term: m.term[p] }));
                         nextTerm[p] = nextMachine.term;
                     }
-                    return m.copyWith({ term: nextTerm });
+                    return nextMachine.copyWith({ term: nextTerm });
                 }
             } else {
                 return f(m);

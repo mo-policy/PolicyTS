@@ -112,6 +112,75 @@ function testQuoteTerm1() {
     const rjs = JSON.stringify(r);
     passOrThrow(mjs === rjs);
 }
+function testParallelArray() {
+    // [x |, y] // x is blocked 
+    const bindings = {
+        "y": 2
+    };
+    const term = [
+        { $policy: "Lookup", name: "x" },
+        {
+            $policy: "Parallel",
+            term: { $policy: "Lookup", name: "y" }
+        }
+    ];
+    const expected = [{ $policy: "Lookup", name: "x" }, 2];
+    const m = new machine_1.Machine(term, false, bindings);
+    const r = (0, term_1.rewriteTerm)(m);
+    const actualJS = JSON.stringify(r.term);
+    const expectedJS = JSON.stringify(expected);
+    passOrThrow(r.blocked === true);
+    passOrThrow(actualJS === expectedJS);
+}
+function testParallelObject() {
+    // { x: x |, y: 2} // x is blocked 
+    const bindings = {
+        "y": 2
+    };
+    const term = {
+        x: { $policy: "Lookup", name: "x" },
+        y: {
+            $policy: "Parallel",
+            term: { $policy: "Lookup", name: "y" }
+        }
+    };
+    const expected = { x: { $policy: "Lookup", name: "x" }, y: 2 };
+    const m = new machine_1.Machine(term, false, bindings);
+    const r = (0, term_1.rewriteTerm)(m);
+    const actualJS = JSON.stringify(r.term);
+    const expectedJS = JSON.stringify(expected);
+    passOrThrow(r.blocked === true);
+    passOrThrow(actualJS === expectedJS);
+}
+function testParallelSequence() {
+    // x |; y   // x is blocked
+    const bindings = {
+        "y": 2
+    };
+    const term = {
+        $policy: "Sequence",
+        terms: [
+            { $policy: "Lookup", name: "x" },
+            {
+                $policy: "Parallel",
+                term: { $policy: "Lookup", name: "y" }
+            }
+        ]
+    };
+    const expected = {
+        $policy: "Sequence",
+        terms: [
+            { $policy: "Lookup", name: "x" },
+            2
+        ]
+    };
+    const m = new machine_1.Machine(term, false, bindings);
+    const r = (0, term_1.rewriteTerm)(m);
+    const actualJS = JSON.stringify(r.term);
+    const expectedJS = JSON.stringify(expected);
+    passOrThrow(r.blocked === true);
+    passOrThrow(actualJS === expectedJS);
+}
 function testConstantArray() {
     const m = new machine_1.Machine([1, true]);
     const r = (0, term_1.rewriteTerm)(m);
@@ -668,6 +737,9 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testParallelSequence();
+    testParallelObject();
+    testParallelArray();
     testEval();
     testQuote();
     testLookupMember();

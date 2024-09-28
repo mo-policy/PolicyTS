@@ -20,6 +20,7 @@ const termSequence_1 = require("./termSequence");
 const termTryFinally_1 = require("./termTryFinally");
 const termTryWith_1 = require("./termTryWith");
 const termEval_1 = require("./termEval");
+const termParallel_1 = require("./termParallel");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -82,6 +83,7 @@ class Machine {
                     case "LookupMember": return termLookup_1.rewriteLookupMember;
                     case "Loop": return termLoop_1.rewriteLoop;
                     case "Match": return termMatch_1.rewriteMatch;
+                    case "Parallel": return termParallel_1.rewriteParallel;
                     case "Policy": return termPolicy_1.rewritePolicy;
                     case "Quote": return termQuote_1.rewriteQuote;
                     case "Receive": return termReceive_1.rewriteReceive;
@@ -122,6 +124,7 @@ class Machine {
                     case "LookupMember": return termLookup_1.matchLookupMember;
                     case "Loop": return termLoop_1.matchLoop;
                     case "Match": return termMatch_1.matchMatch;
+                    case "Parallel": return termParallel_1.matchParallel;
                     case "Policy": return termPolicy_1.matchPolicy;
                     case "Quote": return termQuote_1.matchQuote;
                     case "Receive": return termReceive_1.matchReceive;

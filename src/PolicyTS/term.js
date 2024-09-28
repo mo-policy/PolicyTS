@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.rewriteTerm = rewriteTerm;
 exports.matchTerm = matchTerm;
 const termMatch_1 = require("./termMatch");
+const termParallel_1 = require("./termParallel");
 /**
  * The top level rewrite function for all terms.
  * @param m     The input machine.
@@ -11,7 +12,13 @@ const termMatch_1 = require("./termMatch");
  */
 function rewriteTerm(m) {
     if (m.blocked) {
-        return m;
+        if ((0, termParallel_1.isParallel)(m.term)) {
+            const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term, blocked: false }));
+            return m.copyWith({ term: resultOfTerm.term });
+        }
+        else {
+            return m;
+        }
     }
     else {
         if (m.policies.length > 0) {
@@ -41,11 +48,12 @@ function rewriteTerm(m) {
         if (Array.isArray(m.term)) {
             // rewrite the elements of machine.term
             const nextTerm = [];
+            let nextMachine = m;
             for (let i = 0; i < m.term.length; i++) {
-                const nextMachine = rewriteTerm(m.copyWith({ term: m.term[i] }));
+                nextMachine = rewriteTerm(nextMachine.copyWith({ term: m.term[i] }));
                 nextTerm[i] = nextMachine.term;
             }
-            return m.copyWith({ term: nextTerm });
+            return nextMachine.copyWith({ term: nextTerm });
         }
         else {
             const f = m.getRewriteFunction();
@@ -56,11 +64,12 @@ function rewriteTerm(m) {
                 else {
                     // rewrite the properties of machine.term
                     const nextTerm = {};
+                    let nextMachine = m;
                     for (let p in m.term) {
-                        let nextMachine = rewriteTerm(m.copyWith({ term: m.term[p] }));
+                        nextMachine = rewriteTerm(nextMachine.copyWith({ term: m.term[p] }));
                         nextTerm[p] = nextMachine.term;
                     }
-                    return m.copyWith({ term: nextTerm });
+                    return nextMachine.copyWith({ term: nextTerm });
                 }
             }
             else {
