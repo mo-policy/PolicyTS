@@ -20,6 +20,7 @@ import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "
 import { matchEval, rewriteEval } from "./termEval"
 import { matchParallel, rewriteParallel } from "./termParallel"
 import { matchInfix, rewriteInfix } from "./termInfix"
+import { matchAnnotation, rewriteAnnotation } from "./termAnnotation"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
@@ -98,6 +99,7 @@ export class Machine {
         if ((this.term !== null) && (typeof this.term === "object")) {
             if ("$policy" in this.term) {
                 switch (this.term.$policy) {
+                    case "Annotation": return rewriteAnnotation;
                     case "Application": return rewriteApplication;
                     case "Assignment": return rewriteAssignment;
                     case "Dereference": return rewriteDereference;
@@ -140,6 +142,7 @@ export class Machine {
         if ((pattern !== null) && (typeof pattern === "object")) {
             if ("$policy" in pattern) {
                 switch (pattern.$policy) {
+                    case "Annotation": return matchAnnotation;
                     case "Application": return matchApplication;
                     case "Assignment": return matchAssignment;
                     case "Dereference": return matchDereference;

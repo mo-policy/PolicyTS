@@ -699,6 +699,43 @@ function testInfixPlusString() {
     passOrThrow(r.bindings === m.bindings);
 }
 
+function testAnnotationIsInteger() {
+    const term = {
+        $policy: "Annotation",
+        term: 1,
+        type: "integer"
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testAnnotationIsNull() {
+    const term = {
+        $policy: "Annotation",
+        term: null,
+        type: "null"
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === null);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testAnnotationError() {
+    const term = {
+        $policy: "Annotation",
+        term: 1,
+        type: "number"
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term.$policy === "Exception");
+    passOrThrow(r.term.term === "type error");
+    passOrThrow(r.bindings === m.bindings);
+}
+
 class DevMachine extends Machine {
     override copyWith(values: { [k: string]: any }): Machine {
         return Object.assign(new DevMachine(), this, values);
@@ -807,6 +844,9 @@ if (dev) {
     develop();
     testTAPL();
 
+    testAnnotationIsInteger();
+    testAnnotationIsNull();
+    testAnnotationError();
     testInfixPlus()
     testInfixPlusString();
     testParallelSequence();

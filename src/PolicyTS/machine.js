@@ -22,6 +22,7 @@ const termTryWith_1 = require("./termTryWith");
 const termEval_1 = require("./termEval");
 const termParallel_1 = require("./termParallel");
 const termInfix_1 = require("./termInfix");
+const termAnnotation_1 = require("./termAnnotation");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -68,6 +69,7 @@ class Machine {
         if ((this.term !== null) && (typeof this.term === "object")) {
             if ("$policy" in this.term) {
                 switch (this.term.$policy) {
+                    case "Annotation": return termAnnotation_1.rewriteAnnotation;
                     case "Application": return termApplication_1.rewriteApplication;
                     case "Assignment": return termRef_1.rewriteAssignment;
                     case "Dereference": return termRef_1.rewriteDereference;
@@ -110,6 +112,7 @@ class Machine {
         if ((pattern !== null) && (typeof pattern === "object")) {
             if ("$policy" in pattern) {
                 switch (pattern.$policy) {
+                    case "Annotation": return termAnnotation_1.matchAnnotation;
                     case "Application": return termApplication_1.matchApplication;
                     case "Assignment": return termRef_1.matchAssignment;
                     case "Dereference": return termRef_1.matchDereference;
