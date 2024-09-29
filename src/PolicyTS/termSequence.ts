@@ -52,7 +52,7 @@ export function isSequence(term: any): term is SequenceTerm {
     return (term !== null) &&
         (typeof term === "object") &&
         ("$policy" in term) && (term.$policy === "Sequence") &&
-        (("terms" in term) && Array.isArray(term.terms)) &&
+        (("terms" in term) && Array.isArray(term.terms) && term.terms.length > 0) &&
         (Object.keys(term).length === 2);
 }
 
@@ -67,13 +67,17 @@ otherwise, return result of last term.
 
 export function rewriteSequence(m: Machine): Machine {
     if (!(isSequence(m.term))) { throw "expected SequenceTerm"; };
-    if (m.term.terms.length === 0) { throw "sequence with no terms" }
-    const resultTerms = m.term.terms.splice(0);
+    const resultTerms = [];
     let nextMachine = m;
-    for (let i = 0; i < resultTerms.length; i++) {
-        const seqTerm = resultTerms[i];
+    for (let i = 0; i < m.term.terms.length; i++) {
+        const seqTerm = m.term.terms[i];
         nextMachine = rewriteTerm(nextMachine.copyWith({ term: seqTerm }));
-        resultTerms[i] = nextMachine.term;
+        if (nextMachine.term !== null) {
+            resultTerms.push(nextMachine.term);
+        }        
+    }
+    if (resultTerms.length === 0) {
+        resultTerms.push(null);
     }
     if (nextMachine.blocked) {
         const blockedTerm = Object.assign({}, m.term, { terms: resultTerms });
