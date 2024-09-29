@@ -638,6 +638,32 @@ function testWhile() {
     passOrThrow(r.term === null);
     passOrThrow(r.bindings === m.bindings);
 }
+function testInfixPlus() {
+    // 1 + 2
+    const term = {
+        $policy: "Infix",
+        operator: "+",
+        left: 1,
+        right: 2
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 3);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testInfixPlusString() {
+    // "a" + "b"
+    const term = {
+        $policy: "Infix",
+        operator: "+",
+        left: "a",
+        right: "b"
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === "ab");
+    passOrThrow(r.bindings === m.bindings);
+}
 class DevMachine extends machine_1.Machine {
     copyWith(values) {
         return Object.assign(new DevMachine(), this, values);
@@ -737,6 +763,8 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testInfixPlus();
+    testInfixPlusString();
     testParallelSequence();
     testParallelObject();
     testParallelArray();

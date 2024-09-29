@@ -21,6 +21,7 @@ const termTryFinally_1 = require("./termTryFinally");
 const termTryWith_1 = require("./termTryWith");
 const termEval_1 = require("./termEval");
 const termParallel_1 = require("./termParallel");
+const termInfix_1 = require("./termInfix");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -76,6 +77,7 @@ class Machine {
                     case "ForToIterator": return termLoop_1.rewriteForToIterator;
                     case "Function": return termFunction_1.rewriteFunction;
                     case "If": return termIf_1.rewriteIf;
+                    case "Infix": return termInfix_1.rewriteInfix;
                     case "Let": return termLet_1.rewriteLet;
                     case "LetRec": return termLetRec_1.rewriteLetRec;
                     case "Lookup": return termLookup_1.rewriteLookup;
@@ -117,6 +119,7 @@ class Machine {
                     case "ForToIterator": return termLoop_1.matchForToIterator;
                     case "Function": return termFunction_1.matchFunction;
                     case "If": return termIf_1.matchIf;
+                    case "Infix": return termInfix_1.matchInfix;
                     case "Let": return termLet_1.matchLet;
                     case "LetRec": return termLetRec_1.matchLetRec;
                     case "Lookup": return termLookup_1.matchLookup;

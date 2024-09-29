@@ -2,7 +2,7 @@
 
 import { Machine, MatchResult } from "./machine"
 import { findMatchingRule } from "./termMatch";
-import { isParallel, rewriteParallel } from "./termParallel";
+import { isParallel } from "./termParallel";
 
 /**
  * The top level rewrite function for all terms.

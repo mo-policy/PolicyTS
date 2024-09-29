@@ -19,6 +19,7 @@ import { matchTryFinally, rewriteTryFinally } from "./termTryFinally"
 import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "./termTryWith"
 import { matchEval, rewriteEval } from "./termEval"
 import { matchParallel, rewriteParallel } from "./termParallel"
+import { matchInfix, rewriteInfix } from "./termInfix"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
@@ -106,6 +107,7 @@ export class Machine {
                     case "ForToIterator": return rewriteForToIterator;
                     case "Function": return rewriteFunction;
                     case "If": return rewriteIf;
+                    case "Infix": return rewriteInfix;
                     case "Let": return rewriteLet;
                     case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
@@ -147,6 +149,7 @@ export class Machine {
                     case "ForToIterator": return matchForToIterator;
                     case "Function": return matchFunction;
                     case "If": return matchIf;
+                    case "Infix": return matchInfix;
                     case "Let": return matchLet;
                     case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
