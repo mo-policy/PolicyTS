@@ -19,7 +19,7 @@ const termSend_1 = require("./termSend");
 const termSequence_1 = require("./termSequence");
 const termTryFinally_1 = require("./termTryFinally");
 const termTryWith_1 = require("./termTryWith");
-const termEval_1 = require("./termEval");
+const termRewrite_1 = require("./termRewrite");
 const termParallel_1 = require("./termParallel");
 const termInfix_1 = require("./termInfix");
 const termAnnotation_1 = require("./termAnnotation");
@@ -73,7 +73,6 @@ class Machine {
                     case "Application": return termApplication_1.rewriteApplication;
                     case "Assignment": return termRef_1.rewriteAssignment;
                     case "Dereference": return termRef_1.rewriteDereference;
-                    case "Eval": return termEval_1.rewriteEval;
                     case "Exception": return termTryWith_1.rewriteException;
                     case "Fix": return termFix_1.rewriteFix;
                     case "ForToIterator": return termLoop_1.rewriteForToIterator;
@@ -92,6 +91,7 @@ class Machine {
                     case "Quote": return termQuote_1.rewriteQuote;
                     case "Receive": return termReceive_1.rewriteReceive;
                     case "Ref": return termRef_1.rewriteRef;
+                    case "Rewrite": return termRewrite_1.rewriteRewrite;
                     case "Send": return termSend_1.rewriteSend;
                     case "Sequence": return termSequence_1.rewriteSequence;
                     case "TryFinally": return termTryFinally_1.rewriteTryFinally;
@@ -116,7 +116,6 @@ class Machine {
                     case "Application": return termApplication_1.matchApplication;
                     case "Assignment": return termRef_1.matchAssignment;
                     case "Dereference": return termRef_1.matchDereference;
-                    case "Eval": termEval_1.matchEval;
                     case "Exception": return termTryWith_1.matchException;
                     case "Fix": return termFix_1.matchFix;
                     case "ForToIterator": return termLoop_1.matchForToIterator;
@@ -135,6 +134,7 @@ class Machine {
                     case "Quote": return termQuote_1.matchQuote;
                     case "Receive": return termReceive_1.matchReceive;
                     case "Ref": return termRef_1.matchRef;
+                    case "Rewrite": termRewrite_1.matchRewrite;
                     case "Send": return termSend_1.matchSend;
                     case "Sequence": return termSequence_1.matchSequence;
                     case "TryFinally": return termTryFinally_1.matchTryFinally;

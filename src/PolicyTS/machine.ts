@@ -17,7 +17,7 @@ import { matchSend, rewriteSend } from "./termSend"
 import { matchSequence, rewriteSequence } from "./termSequence"
 import { matchTryFinally, rewriteTryFinally } from "./termTryFinally"
 import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "./termTryWith"
-import { matchEval, rewriteEval } from "./termEval"
+import { matchRewrite, rewriteRewrite } from "./termRewrite"
 import { matchParallel, rewriteParallel } from "./termParallel"
 import { matchInfix, rewriteInfix } from "./termInfix"
 import { matchAnnotation, rewriteAnnotation } from "./termAnnotation"
@@ -101,7 +101,6 @@ export class Machine {
                     case "Application": return rewriteApplication;
                     case "Assignment": return rewriteAssignment;
                     case "Dereference": return rewriteDereference;
-                    case "Eval": return rewriteEval;
                     case "Exception": return rewriteException;
                     case "Fix": return rewriteFix;
                     case "ForToIterator": return rewriteForToIterator;
@@ -120,6 +119,7 @@ export class Machine {
                     case "Quote": return rewriteQuote;
                     case "Receive": return rewriteReceive;
                     case "Ref": return rewriteRef;
+                    case "Rewrite": return rewriteRewrite;
                     case "Send": return rewriteSend;
                     case "Sequence": return rewriteSequence;
                     case "TryFinally": return rewriteTryFinally;
@@ -144,7 +144,6 @@ export class Machine {
                     case "Application": return matchApplication;
                     case "Assignment": return matchAssignment;
                     case "Dereference": return matchDereference;
-                    case "Eval": matchEval;
                     case "Exception": return matchException;
                     case "Fix": return matchFix;
                     case "ForToIterator": return matchForToIterator;
@@ -163,6 +162,7 @@ export class Machine {
                     case "Quote": return matchQuote;
                     case "Receive": return matchReceive;
                     case "Ref": return matchRef;
+                    case "Rewrite": matchRewrite;
                     case "Send": return matchSend;
                     case "Sequence": return matchSequence;
                     case "TryFinally": return matchTryFinally;

@@ -97,10 +97,10 @@ function testQuote() {
     passOrThrow(mjs === rjs);
 }
 
-function testEval() {
+function testRewrite() {
     // {= { $policy: "Lookup", name: "x"} @} =}
     const term = {
-        $policy: "Eval",
+        $policy: "Rewrite",
         code: { $policy: "Lookup", name: "x" }
     };
     const bindings: { [k: string]: any } = {
@@ -901,7 +901,7 @@ if (dev) {
     testParallelSequence();
     testParallelObject();
     testParallelArray();
-    testEval();
+    testRewrite();
     testQuote();
     testLookupMember();
     testLookupIndex();

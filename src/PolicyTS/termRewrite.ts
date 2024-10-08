@@ -1,21 +1,21 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
 /*
-# Eval Term
+# Rewrite Term
 
-The eval term is used to execute dynamic code.
+The rewrite term is used to execute dynamic code.
 
 ## Syntax
     
     {
-        "$policy": "Eval",
+        "$policy": "Rewrite",
         "code": _term_
     }
 
 ## Example
     
     {
-        $policy": "Eval",
+        $policy": "Rewrite",
         "code": { $policy: "Lookup", name: "x" }
     }
 
@@ -23,12 +23,12 @@ The eval term is used to execute dynamic code.
 
 ## Schema
 
-    "EvalTerm": {
+    "RewriteTerm": {
         "type": "object",
         "properties": {
             "$policy": {
                 "type": "string",
-                "const": "Eval"
+                "const": "Rewrite"
             },
             "code": { "$ref": "#/$defs/Term" }
         }
@@ -40,15 +40,15 @@ The eval term is used to execute dynamic code.
 import { Machine, MatchResult } from "./machine"
 import { rewriteTerm } from "./term";
 
-export type EvalTerm = {
-    $policy: "Eval",
+export type RewriteTerm = {
+    $policy: "Rewrite",
     code: any
 }
 
-export function isEval(term: any): term is EvalTerm {
+export function isRewrite(term: any): term is RewriteTerm {
     return (term !== null) &&
         (typeof term === "object") &&
-        ("$policy" in term) && (term.$policy === "Eval") &&
+        ("$policy" in term) && (term.$policy === "Rewrite") &&
         ("code" in term) &&
         (Object.keys(term).length === 2);
 }
@@ -57,12 +57,12 @@ export function isEval(term: any): term is EvalTerm {
 ## Rewrite Rules
 
 Rewrite term.code
-if blocked, return blocked eval
+if blocked, return blocked rewrite
 Rewrite result of term.code
 
 */
-export function rewriteEval(m: Machine): Machine {
-    if (!(isEval(m.term))) { throw "expected EvalTerm"; };
+export function rewriteRewrite(m: Machine): Machine {
+    if (!(isRewrite(m.term))) { throw "expected RewriteTerm"; };
     const resultOfCode = rewriteTerm(m.copyWith({ term: m.term.code }));
     if (resultOfCode.blocked) {
         throw "blocked"
@@ -77,8 +77,8 @@ export function rewriteEval(m: Machine): Machine {
 
 
 */
-export function matchEval(pattern: any, value: any): MatchResult {
-    if (!(isEval(pattern))) { throw "expected Eval"; };
+export function matchRewrite(pattern: any, value: any): MatchResult {
+    if (!(isRewrite(pattern))) { throw "expected Rewrite"; };
     // todo
     return false;
 }

@@ -90,10 +90,10 @@ function testQuote() {
     const rjs = JSON.stringify(r);
     passOrThrow(mjs === rjs);
 }
-function testEval() {
+function testRewrite() {
     // {= { $policy: "Lookup", name: "x"} @} =}
     const term = {
-        $policy: "Eval",
+        $policy: "Rewrite",
         code: { $policy: "Lookup", name: "x" }
     };
     const bindings = {
@@ -859,7 +859,7 @@ else {
     testParallelSequence();
     testParallelObject();
     testParallelArray();
-    testEval();
+    testRewrite();
     testQuote();
     testLookupMember();
     testLookupIndex();
