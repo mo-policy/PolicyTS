@@ -87,6 +87,8 @@ export function rewriteInfix(m: Machine): Machine {
     switch (m.term.operator) {
         case "=":
             result = (m.compare(resultOfLeft.term, resultOfRight.term) === 0); break;
+        case "<>":
+            result = (m.compare(resultOfLeft.term, resultOfRight.term) !== 0); break;
         case "<":
             result = (m.compare(resultOfLeft.term, resultOfRight.term) < 0); break;
         case ">":
@@ -101,6 +103,8 @@ export function rewriteInfix(m: Machine): Machine {
             result = resultOfLeft.term - resultOfRight.term; break;
         case "*":
             result = resultOfLeft.term * resultOfRight.term; break;
+        case "^":
+            result = resultOfLeft.term ^ resultOfRight.term; break;
         case "/":
             result = resultOfLeft.term / resultOfRight.term; break;
         case "%":
