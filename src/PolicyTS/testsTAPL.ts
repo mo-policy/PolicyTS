@@ -562,7 +562,7 @@ const fix = {
 
 import { Machine } from "./machine"
 import { rewriteTerm } from "./term"
-import { passOrThrow } from "./app"
+import { passOrThrow } from "./tests"
 
 export function testTAPL() {
     testFactorial();

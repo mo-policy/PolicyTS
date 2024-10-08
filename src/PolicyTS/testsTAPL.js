@@ -532,7 +532,7 @@ const fix = {
 };
 const machine_1 = require("./machine");
 const term_1 = require("./term");
-const app_1 = require("./app");
+const tests_1 = require("./tests");
 function testTAPL() {
     testFactorial();
     testRealnatTimes22();
@@ -655,8 +655,8 @@ function testFactorial() {
     };
     const m0 = new MachineWithSucc(termFactorial0);
     const r0 = (0, term_1.rewriteTerm)(m0);
-    (0, app_1.passOrThrow)(r0.term === 1);
-    (0, app_1.passOrThrow)(r0.bindings === m0.bindings);
+    (0, tests_1.passOrThrow)(r0.term === 1);
+    (0, tests_1.passOrThrow)(r0.bindings === m0.bindings);
     const termFactorial1 = {
         $policy: "Application",
         function: realnat,
@@ -672,8 +672,8 @@ function testFactorial() {
     };
     const m1 = new MachineWithSucc(termFactorial1);
     const r1 = (0, term_1.rewriteTerm)(m1);
-    (0, app_1.passOrThrow)(r1.term === 1);
-    (0, app_1.passOrThrow)(r1.bindings === m1.bindings);
+    (0, tests_1.passOrThrow)(r1.term === 1);
+    (0, tests_1.passOrThrow)(r1.bindings === m1.bindings);
     const termFactorial2 = {
         $policy: "Application",
         function: realnat,
@@ -693,8 +693,8 @@ function testFactorial() {
     };
     const m2 = new MachineWithSucc(termFactorial2);
     const r2 = (0, term_1.rewriteTerm)(m2);
-    (0, app_1.passOrThrow)(r2.term === 2);
-    (0, app_1.passOrThrow)(r2.bindings === m2.bindings);
+    (0, tests_1.passOrThrow)(r2.term === 2);
+    (0, tests_1.passOrThrow)(r2.bindings === m2.bindings);
     const termFactorial3 = {
         $policy: "Application",
         function: realnat,
@@ -718,8 +718,8 @@ function testFactorial() {
     };
     const m3 = new MachineWithSucc(termFactorial3);
     const r3 = (0, term_1.rewriteTerm)(m3);
-    (0, app_1.passOrThrow)(r3.term === 6);
-    (0, app_1.passOrThrow)(r3.bindings === m3.bindings);
+    (0, tests_1.passOrThrow)(r3.term === 6);
+    (0, tests_1.passOrThrow)(r3.bindings === m3.bindings);
     const termFactorial4 = {
         $policy: "Application",
         function: realnat,
@@ -747,8 +747,8 @@ function testFactorial() {
     };
     const m4 = new MachineWithSucc(termFactorial4);
     const r4 = (0, term_1.rewriteTerm)(m4);
-    (0, app_1.passOrThrow)(r4.term === 24);
-    (0, app_1.passOrThrow)(r4.bindings === m4.bindings);
+    (0, tests_1.passOrThrow)(r4.term === 24);
+    (0, tests_1.passOrThrow)(r4.bindings === m4.bindings);
 }
 function testRealnatTimes22() {
     // realnat ((times c2) c2);   (From #1)
@@ -783,8 +783,8 @@ function testRealnatTimes22() {
     };
     const m = new MachineWithSucc(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === 4);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === 4);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testRealnat2() {
     // realnat 2
@@ -803,8 +803,8 @@ function testRealnat2() {
     };
     const m = new MachineWithSucc(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === 2);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === 2);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testRealnat0() {
     // realnat 0
@@ -815,8 +815,8 @@ function testRealnat0() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === 0);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === 0);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testRealeq01() {
     // (equal 0) 1
@@ -835,8 +835,8 @@ function testRealeq01() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === false);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === false);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testRealeq00() {
     // (equal 0) 0
@@ -851,8 +851,8 @@ function testRealeq00() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === true);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === true);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testChurchboolFalse() {
     // churchbool false
@@ -863,8 +863,8 @@ function testChurchboolFalse() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testChurchboolTrue() {
     // churchbool true
@@ -875,8 +875,8 @@ function testChurchboolTrue() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testRealboolFls() {
     // realbool fls
@@ -887,8 +887,8 @@ function testRealboolFls() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === false);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === false);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testRealboolTru() {
     // realbool tru
@@ -899,8 +899,8 @@ function testRealboolTru() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === true);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === true);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testEqual33() {
     // (equal 3) 3
@@ -947,8 +947,8 @@ function testEqual33() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testEqual32() {
     // (equal 3) 2
@@ -991,8 +991,8 @@ function testEqual32() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testEqual01() {
     // (equal 0) 1
@@ -1011,8 +1011,8 @@ function testEqual01() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testEqual00() {
     // (equal 0) 0
@@ -1027,8 +1027,8 @@ function testEqual00() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testIszroSubtract321() {
     // 0 = 3 - 2 - 1
@@ -1080,8 +1080,8 @@ function testIszroSubtract321() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testIszroSubtract10() {
     // iszro ((substract1 1) 0)
@@ -1104,8 +1104,8 @@ function testIszroSubtract10() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testIszroSubtract00() {
     // iszro ((substract1 0) 0)
@@ -1124,8 +1124,8 @@ function testIszroSubtract00() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 // iszro (prd (scc c0))
 function testIszroPrd1() {
@@ -1144,8 +1144,8 @@ function testIszroPrd1() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 // iszro (scc c0)
 function testIszro1() {
@@ -1160,8 +1160,8 @@ function testIszro1() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testIszro0() {
     const term = {
@@ -1171,8 +1171,8 @@ function testIszro0() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testSnd() {
     // snd ((pair v) w)
@@ -1193,8 +1193,8 @@ function testSnd() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === w);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === w);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 // fst (pair v w) →∗ v   (From #1)
 function testFst() {
@@ -1216,8 +1216,8 @@ function testFst() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === v);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === v);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testNotFls() {
     // not fls
@@ -1228,8 +1228,8 @@ function testNotFls() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testNotTru() {
     // not tru
@@ -1240,8 +1240,8 @@ function testNotTru() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testOrFlsFls() {
     // or fls fls
@@ -1257,8 +1257,8 @@ function testOrFlsFls() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testOrFlsTru() {
     // or fls tru
@@ -1274,8 +1274,8 @@ function testOrFlsTru() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testOrTruTru() {
     // or tru tru
@@ -1291,8 +1291,8 @@ function testOrTruTru() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testOrTruFls() {
     // or tru fls
@@ -1308,8 +1308,8 @@ function testOrTruFls() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testAndFlsFls() {
     // and fls fls
@@ -1325,8 +1325,8 @@ function testAndFlsFls() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testAndFlsTru() {
     // and fls tru
@@ -1342,8 +1342,8 @@ function testAndFlsTru() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testAndTruFls() {
     // and tru fls  (From #1)
@@ -1359,8 +1359,8 @@ function testAndTruFls() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsFls(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsFls(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testAndTruTru() {
     // and tru tru  (From #1)
@@ -1376,8 +1376,8 @@ function testAndTruTru() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(equalsTru(r.term));
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(equalsTru(r.term));
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testTestCombinator() {
     // test b v w   (From #1)
@@ -1401,8 +1401,8 @@ function testTestCombinator() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === v);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === v);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testFls() {
     // tru "a" "b"
@@ -1419,8 +1419,8 @@ function testFls() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === b);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === b);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 function testTru() {
     // tru "a" "b"
@@ -1437,7 +1437,7 @@ function testTru() {
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    (0, app_1.passOrThrow)(r.term === a);
-    (0, app_1.passOrThrow)(r.bindings === m.bindings);
+    (0, tests_1.passOrThrow)(r.term === a);
+    (0, tests_1.passOrThrow)(r.bindings === m.bindings);
 }
 //# sourceMappingURL=testsTAPL.js.map
