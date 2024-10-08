@@ -23,6 +23,7 @@ const termRewrite_1 = require("./termRewrite");
 const termParallel_1 = require("./termParallel");
 const termInfix_1 = require("./termInfix");
 const termAnnotation_1 = require("./termAnnotation");
+const termExternal_1 = require("./termExternal");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -74,6 +75,7 @@ class Machine {
                     case "Assignment": return termRef_1.rewriteAssignment;
                     case "Dereference": return termRef_1.rewriteDereference;
                     case "Exception": return termTryWith_1.rewriteException;
+                    case "External": return termExternal_1.rewriteExternal;
                     case "Fix": return termFix_1.rewriteFix;
                     case "ForToIterator": return termLoop_1.rewriteForToIterator;
                     case "Function": return termFunction_1.rewriteFunction;
@@ -117,6 +119,7 @@ class Machine {
                     case "Assignment": return termRef_1.matchAssignment;
                     case "Dereference": return termRef_1.matchDereference;
                     case "Exception": return termTryWith_1.matchException;
+                    case "External": return termExternal_1.matchExternal;
                     case "Fix": return termFix_1.matchFix;
                     case "ForToIterator": return termLoop_1.matchForToIterator;
                     case "Function": return termFunction_1.matchFunction;

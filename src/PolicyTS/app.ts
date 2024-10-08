@@ -112,6 +112,32 @@ function testRewrite() {
     passOrThrow(r.bindings === bindings);
 }
 
+function testExternal() {
+    // let f = fun x -> { ... external ... } in f 1
+    const term = {
+        $policy: "Let",
+        pattern: { $policy: "Lookup", name: "f" },
+        term: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "x" },
+            term: {
+                $policy: "External",
+                external: (m: Machine) => {
+                    const x = m.bindings["x"] as number;
+                    return m.copyWith({ term: x + 1 });
+                }
+            }
+        },
+        in: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "f" },
+            arg: 1
+        }
+    };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 2);
+}
 function testQuoteTerm1() {
     // {@ 1 @}
     const term = { $policy: "Quote", quote: 1 };
@@ -881,9 +907,10 @@ function termHash(term: any): Buffer {
 
 
 function develop() {
+    testExternal();
 }
 
-const dev = false;
+const dev = true;
 
 if (dev) {
     // Run the test under development.

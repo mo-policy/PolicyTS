@@ -21,6 +21,7 @@ import { matchRewrite, rewriteRewrite } from "./termRewrite"
 import { matchParallel, rewriteParallel } from "./termParallel"
 import { matchInfix, rewriteInfix } from "./termInfix"
 import { matchAnnotation, rewriteAnnotation } from "./termAnnotation"
+import { matchExternal, rewriteExternal } from "./termExternal"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
@@ -102,6 +103,7 @@ export class Machine {
                     case "Assignment": return rewriteAssignment;
                     case "Dereference": return rewriteDereference;
                     case "Exception": return rewriteException;
+                    case "External": return rewriteExternal;
                     case "Fix": return rewriteFix;
                     case "ForToIterator": return rewriteForToIterator;
                     case "Function": return rewriteFunction;
@@ -145,6 +147,7 @@ export class Machine {
                     case "Assignment": return matchAssignment;
                     case "Dereference": return matchDereference;
                     case "Exception": return matchException;
+                    case "External": return matchExternal;
                     case "Fix": return matchFix;
                     case "ForToIterator": return matchForToIterator;
                     case "Function": return matchFunction;

@@ -104,6 +104,32 @@ function testRewrite() {
     passOrThrow(r.term === 1);
     passOrThrow(r.bindings === bindings);
 }
+function testExternal() {
+    // let f = fun x -> { ... external ... } in f 1
+    const term = {
+        $policy: "Let",
+        pattern: { $policy: "Lookup", name: "f" },
+        term: {
+            $policy: "Function",
+            pattern: { $policy: "Lookup", name: "x" },
+            term: {
+                $policy: "External",
+                external: (m) => {
+                    const x = m.bindings["x"];
+                    return m.copyWith({ term: x + 1 });
+                }
+            }
+        },
+        in: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "f" },
+            arg: 1
+        }
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 2);
+}
 function testQuoteTerm1() {
     // {@ 1 @}
     const term = { $policy: "Quote", quote: 1 };
@@ -841,8 +867,9 @@ function termHash(term) {
     return hash.digest();
 }
 function develop() {
+    testExternal();
 }
-const dev = false;
+const dev = true;
 if (dev) {
     // Run the test under development.
     develop();
