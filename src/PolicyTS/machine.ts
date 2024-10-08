@@ -25,21 +25,19 @@ import { matchAnnotation, rewriteAnnotation } from "./termAnnotation"
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
 
+type Message = {
+    id: number,
+    message: any
+}
 
 type ChannelMessages = {
-    readonly channel: any,
-    messages: 
-        {
-            id: number,
-            message: any
-        }[]    
+    [key: string]: Message[];
 }
 
 type ActivePolicy = {
     machine: Machine,
     term: PolicyTerm
 }
-
 
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
@@ -50,7 +48,7 @@ export class Machine {
     readonly term: any;
     readonly blocked: boolean;
     readonly bindings: { readonly [k: string]: any };
-    readonly comm: ChannelMessages[];
+    readonly comm: ChannelMessages;
     readonly policies: ActivePolicy[];
     /**
      * @param term      The current term.
@@ -62,7 +60,7 @@ export class Machine {
         term: any = null,
         blocked: boolean = false,
         bindings: { [k: string]: any } = {},
-        comm: ChannelMessages[] = [],
+        comm: ChannelMessages = {},
         policies: ActivePolicy[] = []
     ) {
         this.term = term;
@@ -183,34 +181,25 @@ export class Machine {
      * @returns
      */
     send(message: any, channel: any) {
-        // look for channel in array
-        let channelMessages: false | ChannelMessages = false;
-        for (let i = 0; i < this.comm.length; i++) {
-            const cm = this.comm[i];
-            if (this.compare(channel, cm.channel) === 0) {
-                channelMessages = cm;
-                break;
-            }
+        // look for channel
+        const key = JSON.stringify(channel);
+        let messages: Message[] = [];
+        if (key in this.comm) {
+            messages = this.comm[key];
         }
-        // if found, use that, otherwise add one and use that
-        if (channelMessages === false) {
-            channelMessages = {
-                channel: channel,
-                messages: []
-            };
-            this.comm.push(channelMessages);
-        }
+
         // create an id, using Date.valueOf
         let id = (new Date()).valueOf();
-        if (channelMessages.messages.length > 0) {
-            const lastId = channelMessages.messages[channelMessages.messages.length - 1].id
+        if (messages.length > 0) {
+            const lastId = messages[messages.length - 1].id
             if (lastId >= id) {
                 id = lastId + 1;
             }
         }
         // add the message to the end
         const entry = { id: id, message: message };
-        channelMessages.messages.push(entry);
+        messages.push(entry);
+        this.comm[key] = messages;
     }
 
     /**
@@ -220,44 +209,29 @@ export class Machine {
      * @returns         The next id and message on the given channel, or id = -1.
      */
     reserve(channel: any, id: number = -1): { id: number, message: any } {
-        // look for channel in array
-        let channelMessages: false | ChannelMessages = false;
-        for (let i = 0; i < this.comm.length; i++) {
-            const cm = this.comm[i];
-            if (this.compare(channel, cm.channel) === 0) {
-                channelMessages = cm;
-                break;
-            }
-        }
-        if (channelMessages === false) {
-            return { id: -1, message: undefined };
-        } else {
-            // messages are sorted
-            for (let msg of channelMessages.messages) {
+        const key = JSON.stringify(channel);
+        if (key in this.comm) {
+            const messages = this.comm[key];
+            for (let msg of messages) {
                 if (msg.id > id) {
                     return msg;
                 }
             }
-            return { id: -1, message: undefined };
         }
+        return { id: -1, message: undefined };
     }
 
     receive(channel: any, id: number): boolean {
-        // look for channel in array
-        let channelMessages: false | ChannelMessages = false;
-        for (let i = 0; i < this.comm.length; i++) {
-            const cm = this.comm[i];
-            if (this.compare(channel, cm.channel) === 0) {
-                channelMessages = cm;
-                break;
-            }
-        }
-        if (channelMessages !== false) {
-            // look for message with id and delete it
-            for (let i = 0; i < channelMessages.messages.length; i++) {
-                const msg = channelMessages.messages[0];
+        const key = JSON.stringify(channel);
+        if (key in this.comm) {
+            const messages = this.comm[key];
+            for (let i = 0; i < messages.length; i++) {
+                const msg = messages[i];
                 if (msg.id === id) {
-                    channelMessages.messages.splice(i, 1);
+                    messages.splice(i, 1);
+                    if (messages.length === 0) {
+                        delete this.comm[key];
+                    }
                     return true;
                 }
             }
@@ -266,19 +240,11 @@ export class Machine {
     }
 
     release(channel: any, id: number): boolean {
-        // look for channel in array
-        let channelMessages: false | ChannelMessages = false;
-        for (let i = 0; i < this.comm.length; i++) {
-            const cm = this.comm[i];
-            if (this.compare(channel, cm.channel) === 0) {
-                channelMessages = cm;
-                break;
-            }
-        }
-        if (channelMessages !== false) {
-            // look for message with id and return true
-            for (let i = 0; i < channelMessages.messages.length; i++) {
-                const msg = channelMessages.messages[0];
+        const key = JSON.stringify(channel);
+        if (key in this.comm) {
+            const messages = this.comm[key];
+            for (let i = 0; i < messages.length; i++) {
+                const msg = messages[i];
                 if (msg.id === id) {
                     return true;
                 }

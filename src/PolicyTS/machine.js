@@ -35,7 +35,7 @@ class Machine {
      * @param bindings  The current name to value bindings.
      * @param comm      The current channels and messages.
      */
-    constructor(term = null, blocked = false, bindings = {}, comm = [], policies = []) {
+    constructor(term = null, blocked = false, bindings = {}, comm = {}, policies = []) {
         this.term = term;
         this.blocked = blocked;
         this.bindings = bindings;
@@ -153,34 +153,24 @@ class Machine {
      * @returns
      */
     send(message, channel) {
-        // look for channel in array
-        let channelMessages = false;
-        for (let i = 0; i < this.comm.length; i++) {
-            const cm = this.comm[i];
-            if (this.compare(channel, cm.channel) === 0) {
-                channelMessages = cm;
-                break;
-            }
-        }
-        // if found, use that, otherwise add one and use that
-        if (channelMessages === false) {
-            channelMessages = {
-                channel: channel,
-                messages: []
-            };
-            this.comm.push(channelMessages);
+        // look for channel
+        const key = JSON.stringify(channel);
+        let messages = [];
+        if (key in this.comm) {
+            messages = this.comm[key];
         }
         // create an id, using Date.valueOf
         let id = (new Date()).valueOf();
-        if (channelMessages.messages.length > 0) {
-            const lastId = channelMessages.messages[channelMessages.messages.length - 1].id;
+        if (messages.length > 0) {
+            const lastId = messages[messages.length - 1].id;
             if (lastId >= id) {
                 id = lastId + 1;
             }
         }
         // add the message to the end
         const entry = { id: id, message: message };
-        channelMessages.messages.push(entry);
+        messages.push(entry);
+        this.comm[key] = messages;
     }
     /**
      *
@@ -189,44 +179,28 @@ class Machine {
      * @returns         The next id and message on the given channel, or id = -1.
      */
     reserve(channel, id = -1) {
-        // look for channel in array
-        let channelMessages = false;
-        for (let i = 0; i < this.comm.length; i++) {
-            const cm = this.comm[i];
-            if (this.compare(channel, cm.channel) === 0) {
-                channelMessages = cm;
-                break;
-            }
-        }
-        if (channelMessages === false) {
-            return { id: -1, message: undefined };
-        }
-        else {
-            // messages are sorted
-            for (let msg of channelMessages.messages) {
+        const key = JSON.stringify(channel);
+        if (key in this.comm) {
+            const messages = this.comm[key];
+            for (let msg of messages) {
                 if (msg.id > id) {
                     return msg;
                 }
             }
-            return { id: -1, message: undefined };
         }
+        return { id: -1, message: undefined };
     }
     receive(channel, id) {
-        // look for channel in array
-        let channelMessages = false;
-        for (let i = 0; i < this.comm.length; i++) {
-            const cm = this.comm[i];
-            if (this.compare(channel, cm.channel) === 0) {
-                channelMessages = cm;
-                break;
-            }
-        }
-        if (channelMessages !== false) {
-            // look for message with id and delete it
-            for (let i = 0; i < channelMessages.messages.length; i++) {
-                const msg = channelMessages.messages[0];
+        const key = JSON.stringify(channel);
+        if (key in this.comm) {
+            const messages = this.comm[key];
+            for (let i = 0; i < messages.length; i++) {
+                const msg = messages[i];
                 if (msg.id === id) {
-                    channelMessages.messages.splice(i, 1);
+                    messages.splice(i, 1);
+                    if (messages.length === 0) {
+                        delete this.comm[key];
+                    }
                     return true;
                 }
             }
@@ -234,19 +208,11 @@ class Machine {
         return false;
     }
     release(channel, id) {
-        // look for channel in array
-        let channelMessages = false;
-        for (let i = 0; i < this.comm.length; i++) {
-            const cm = this.comm[i];
-            if (this.compare(channel, cm.channel) === 0) {
-                channelMessages = cm;
-                break;
-            }
-        }
-        if (channelMessages !== false) {
-            // look for message with id and return true
-            for (let i = 0; i < channelMessages.messages.length; i++) {
-                const msg = channelMessages.messages[0];
+        const key = JSON.stringify(channel);
+        if (key in this.comm) {
+            const messages = this.comm[key];
+            for (let i = 0; i < messages.length; i++) {
+                const msg = messages[i];
                 if (msg.id === id) {
                     return true;
                 }
