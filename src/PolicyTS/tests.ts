@@ -1037,10 +1037,9 @@ function termHash(term: any): Buffer {
 
 
 function develop() {
-    testMatchAsPattern();
 }
 
-const dev = true;
+const dev = false;
 
 if (dev) {
     // Run the test under development.
@@ -1083,6 +1082,7 @@ if (dev) {
     testMatchList();
     testMatchMapEmpty();
     testMatchMap();
+    testMatchAsPattern();
     testMatchGuard();
     testRefAssignment();
     testRefDereference();

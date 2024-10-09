@@ -994,9 +994,8 @@ function termHash(term) {
     return hash.digest();
 }
 function develop() {
-    testMatchAsPattern();
 }
-const dev = true;
+const dev = false;
 if (dev) {
     // Run the test under development.
     develop();
@@ -1038,6 +1037,7 @@ else {
     testMatchList();
     testMatchMapEmpty();
     testMatchMap();
+    testMatchAsPattern();
     testMatchGuard();
     testRefAssignment();
     testRefDereference();
