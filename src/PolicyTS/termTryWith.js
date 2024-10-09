@@ -5,8 +5,6 @@ exports.isTryWith = isTryWith;
 exports.isException = isException;
 exports.rewriteTryWith = rewriteTryWith;
 exports.rewriteException = rewriteException;
-exports.matchTryWith = matchTryWith;
-exports.matchException = matchException;
 const term_1 = require("./term");
 const termMatch_1 = require("./termMatch");
 function isTryWith(term) {
@@ -76,26 +74,5 @@ function rewriteException(m) {
     }
     ;
     return m;
-}
-/*
-## Match Rules
-
-
-*/
-function matchTryWith(pattern, value) {
-    if (!(isTryWith(pattern))) {
-        throw "expected TryWith";
-    }
-    ;
-    // to do
-    return false;
-}
-function matchException(pattern, value) {
-    if (!(isException(pattern))) {
-        throw "expected Exception";
-    }
-    ;
-    // to do
-    return false;
 }
 //# sourceMappingURL=termTryWith.js.map

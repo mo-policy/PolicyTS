@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isPolicy = isPolicy;
 exports.rewritePolicy = rewritePolicy;
-exports.matchPolicy = matchPolicy;
 const term_1 = require("./term");
 const termMatch_1 = require("./termMatch");
 function isPolicy(term) {
@@ -36,18 +35,5 @@ function rewritePolicy(m) {
     policies.push({ machine: m, term: m.term });
     const resultOfTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term, policies: policies }));
     return m.copyWith({ term: resultOfTerm.term });
-}
-/*
-## Match Rules
-
-
-*/
-function matchPolicy(pattern, value) {
-    if (!(isPolicy(pattern))) {
-        throw "expected Policy";
-    }
-    ;
-    // to do
-    return false;
 }
 //# sourceMappingURL=termPolicy.js.map

@@ -111,12 +111,3 @@ export function rewriteApplication(m: Machine): Machine {
         }
     }
 }
-
-
-/*
-## Match Rules
-*/
-export function matchApplication(pattern: any, value: any): MatchResult {
-    // to do
-    return false;
-}

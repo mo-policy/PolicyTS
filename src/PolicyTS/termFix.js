@@ -4,7 +4,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isFix = isFix;
 exports.fixMatch = fixMatch;
 exports.rewriteFix = rewriteFix;
-exports.matchFix = matchFix;
 const term_1 = require("./term");
 const termFunction_1 = require("./termFunction");
 function isFix(term) {
@@ -56,12 +55,5 @@ function rewriteFix(m) {
         };
         return m.copyWith({ term: nextFix });
     }
-}
-/*
-## Match Rules
-*/
-function matchFix(pattern, value) {
-    // to do
-    return false;
 }
 //# sourceMappingURL=termFix.js.map

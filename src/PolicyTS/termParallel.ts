@@ -69,14 +69,3 @@ export function rewriteParallel(m: Machine): Machine {
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
     return m.copyWith({ term: resultOfTerm.term, blocked: resultOfTerm.blocked });
 }
-
-/*
-## Match Rules
-
-
-*/
-export function matchParallel(pattern: any, value: any): MatchResult {
-    if (!(isParallel(pattern))) { throw "expected Parallel"; };
-    // todo
-    return false;
-}

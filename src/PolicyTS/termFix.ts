@@ -93,11 +93,3 @@ export function rewriteFix(m: Machine): Machine {
         return m.copyWith({ term: nextFix });
     }
 }
-
-/*
-## Match Rules
-*/
-export function matchFix(pattern: any, value: any): MatchResult {
-    // to do
-    return false;
-}

@@ -92,7 +92,7 @@ export function rewriteFunction(m: Machine): Machine {
 /*
 ## Match Rules
 */
-export function matchFunction(pattern: any, value: any): MatchResult {
+export function matchFunction(m: Machine, pattern: any, value: any): MatchResult {
     // to do
     return false;
 }

@@ -249,7 +249,7 @@ function testConstantNull() {
     passOrThrow(mjs === rjs);
 }
 
-function testMatch() {
+function testMatch1() {
     // match 1 with x -> x
     const term = {
         $policy: "Match",
@@ -268,6 +268,107 @@ function testMatch() {
     passOrThrow(r.bindings === m.bindings);
 }
 
+function testMatchNull() {
+    // match null with null -> 1
+    const term = {
+        $policy: "Match",
+        term: null,
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: null,
+                term: 1
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testMatchListEmpty() {
+    // match [] with false -> 1 | [] -> 2
+    const term = {
+        $policy: "Match",
+        term: [],
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: false,
+                term: 1
+            },
+            {
+                $policy: "Rule",
+                pattern: [],
+                term: 2
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testMatchList() {
+    // match [2, false] with false -> 1 | [x, false] -> x
+    const term = {
+        $policy: "Match",
+        term: [2, false],
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: false,
+                term: 1
+            },
+            {
+                $policy: "Rule",
+                pattern: [{ $policy: "Lookup", name: "x"}, false],
+                term: { $policy: "Lookup", name: "x" }
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+function testMatchMapEmpty() {
+    // match {} with {} -> 1
+    const term = {
+        $policy: "Match",
+        term: [],
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: {},
+                term: 1
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testMatchMap() {
+    // match { a: 1, b: "hello" } with {b: "hello", a: x} -> x
+    const term = {
+        $policy: "Match",
+        term: { a: 1, b: "hello" },
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: { b: "hello", a: { $policy: "Lookup", name: "x" } },
+                term: { $policy: "Lookup", name: "x" }
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
 function testMatchGuard() {
     // match 1 with
     // | 0 -> 0
@@ -946,7 +1047,12 @@ if (dev) {
     testTryWith();
     testReceive();
     testSend();
-    testMatch();
+    testMatch1();
+    testMatchNull();
+    testMatchListEmpty();
+    testMatchList();
+    testMatchMapEmpty();
+    testMatchMap();
     testMatchGuard();
     testRefAssignment();
     testRefDereference();

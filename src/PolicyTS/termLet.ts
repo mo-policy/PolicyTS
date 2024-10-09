@@ -94,7 +94,7 @@ export function rewriteLet(m: Machine): Machine {
 /*
 ## Match Rules
 */
-export function matchLet(pattern: any, value: any): MatchResult {
+export function matchLet(m: Machine, pattern: any, value: any): MatchResult {
     // to do
     return false;
 }

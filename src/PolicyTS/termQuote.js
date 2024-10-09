@@ -7,6 +7,7 @@ exports.rewriteQuote = rewriteQuote;
 exports.rewriteConstant = rewriteConstant;
 exports.matchQuote = matchQuote;
 exports.matchConstant = matchConstant;
+const term_1 = require("./term");
 function isQuote(term) {
     return (term !== null) &&
         (typeof term === "object") &&
@@ -51,7 +52,7 @@ function rewriteConstant(m) {
 
 
 */
-function matchQuote(pattern, value) {
+function matchQuote(m, pattern, value) {
     if (isQuote(pattern)) {
         if (pattern.quote === value) {
             return {};
@@ -62,12 +63,63 @@ function matchQuote(pattern, value) {
     }
     return false;
 }
-function matchConstant(pattern, value) {
-    if (pattern === value) {
-        return {};
+function matchConstant(m, pattern, value) {
+    if (pattern === null) {
+        if (value === null) {
+            return {};
+        }
+    }
+    else if (Array.isArray(pattern)) {
+        if (Array.isArray(value) && pattern.length === value.length) {
+            let allMatched = true;
+            let arrayResult = {};
+            for (let i = 0; i < pattern.length; i++) {
+                if (allMatched) {
+                    const itemResult = (0, term_1.matchTerm)(m, pattern[i], value[i]);
+                    if (itemResult === false) {
+                        allMatched = false;
+                    }
+                    else {
+                        arrayResult = Object.assign(arrayResult, itemResult);
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            if (allMatched) {
+                return arrayResult;
+            }
+        }
+    }
+    else if (typeof pattern === "object") {
+        let allMatched = true;
+        let mapResult = {};
+        for (const p in pattern) {
+            if (p in value) {
+                if (allMatched) {
+                    const elementResult = (0, term_1.matchTerm)(m, pattern[p], value[p]);
+                    if (elementResult === false) {
+                        allMatched = false;
+                    }
+                    else {
+                        mapResult = Object.assign(mapResult, elementResult);
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        if (allMatched) {
+            return mapResult;
+        }
     }
     else {
-        return false;
+        if (m.compare(pattern, value) === 0) {
+            return {};
+        }
     }
+    return false;
 }
 //# sourceMappingURL=termQuote.js.map

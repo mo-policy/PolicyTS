@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isApplication = isApplication;
 exports.rewriteApplication = rewriteApplication;
-exports.matchApplication = matchApplication;
 const term_1 = require("./term");
 const termFunction_1 = require("./termFunction");
 function isApplication(term) {
@@ -72,12 +71,5 @@ function rewriteApplication(m) {
             }
         }
     }
-}
-/*
-## Match Rules
-*/
-function matchApplication(pattern, value) {
-    // to do
-    return false;
 }
 //# sourceMappingURL=termApplication.js.map

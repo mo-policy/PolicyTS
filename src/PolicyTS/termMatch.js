@@ -5,7 +5,6 @@ exports.isRule = isRule;
 exports.isMatch = isMatch;
 exports.findMatchingRule = findMatchingRule;
 exports.rewriteMatch = rewriteMatch;
-exports.matchMatch = matchMatch;
 const term_1 = require("./term");
 function isRule(term) {
     if ((term !== null) &&
@@ -101,16 +100,5 @@ function rewriteMatch(m) {
             return m.copyWith({ term: resultOfRule.term });
         }
     }
-}
-/*
-## Match Rules
-*/
-function matchMatch(pattern, value) {
-    if (!(isMatch(pattern))) {
-        throw "expected Match";
-    }
-    ;
-    // to do
-    return false;
 }
 //# sourceMappingURL=termMatch.js.map

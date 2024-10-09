@@ -63,15 +63,3 @@ export function rewriteExternal(m: Machine): Machine {
     const externalResult = m.term.external(m);
     return externalResult;
 }
-
-
-/*
-## Match Rules
-
-
-*/
-export function matchExternal(pattern: any, value: any): MatchResult {
-    if (!(isExternal(pattern))) { throw "expected External"; };
-    // todo
-    return false;
-}

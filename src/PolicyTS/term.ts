@@ -74,6 +74,6 @@ export function rewriteTerm(m: Machine): Machine {
 
 export function matchTerm(m: Machine, pattern: any, value: any): MatchResult {
     const f = m.getMatchFunction(pattern);
-    return f(pattern, value);
+    return f(m, pattern, value);
 }
 

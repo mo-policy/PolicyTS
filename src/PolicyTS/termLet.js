@@ -48,7 +48,7 @@ function rewriteLet(m) {
 /*
 ## Match Rules
 */
-function matchLet(pattern, value) {
+function matchLet(m, pattern, value) {
     // to do
     return false;
 }

@@ -80,6 +80,6 @@ function rewriteTerm(m) {
 }
 function matchTerm(m, pattern, value) {
     const f = m.getMatchFunction(pattern);
-    return f(pattern, value);
+    return f(m, pattern, value);
 }
 //# sourceMappingURL=term.js.map

@@ -1,27 +1,28 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
-import { rewriteApplication, matchApplication } from "./termApplication"
+import { rewriteApplication } from "./termApplication"
 import { rewriteConstant, matchConstant, rewriteQuote, matchQuote } from "./termQuote"
-import { matchFix, rewriteFix } from "./termFix"
-import { rewriteFunction, matchFunction } from "./termFunction"
-import { rewriteIf, matchIf } from "./termIf"
-import { rewriteLet, matchLet } from "./termLet"
+import { rewriteFix } from "./termFix"
+import { matchFunction, rewriteFunction } from "./termFunction"
+import { rewriteIf } from "./termIf"
+import { matchLet, rewriteLet } from "./termLet"
 import { matchLetRec, rewriteLetRec } from "./termLetRec"
-import { rewriteLookup, matchLookup, rewriteLookupMember, matchLookupMember, matchLookupIndex, rewriteLookupIndex } from "./termLookup"
-import { matchForToIterator, matchLoop, matchWhileIterator, rewriteForToIterator, rewriteLoop, rewriteWhileIterator } from "./termLoop"
-import { matchMatch, rewriteMatch } from "./termMatch"
-import { matchPolicy, PolicyTerm, rewritePolicy } from "./termPolicy"
-import { matchReceive, rewriteReceive } from "./termReceive"
-import { matchAssignment, matchDereference, matchRef, rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
-import { matchSend, rewriteSend } from "./termSend"
-import { matchSequence, rewriteSequence } from "./termSequence"
-import { matchTryFinally, rewriteTryFinally } from "./termTryFinally"
-import { matchException, matchTryWith, rewriteException, rewriteTryWith } from "./termTryWith"
-import { matchRewrite, rewriteRewrite } from "./termRewrite"
-import { matchParallel, rewriteParallel } from "./termParallel"
-import { matchInfix, rewriteInfix } from "./termInfix"
+import { rewriteLookup, matchLookup, rewriteLookupMember, rewriteLookupIndex } from "./termLookup"
+import { rewriteForToIterator, rewriteLoop, rewriteWhileIterator } from "./termLoop"
+import { rewriteMatch } from "./termMatch"
+import { PolicyTerm, rewritePolicy } from "./termPolicy"
+import { rewriteReceive } from "./termReceive"
+import { rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
+import { rewriteSend } from "./termSend"
+import { rewriteSequence } from "./termSequence"
+import { rewriteTryFinally } from "./termTryFinally"
+import { rewriteException, rewriteTryWith } from "./termTryWith"
+import { rewriteRewrite } from "./termRewrite"
+import { rewriteParallel } from "./termParallel"
+import { rewriteInfix } from "./termInfix"
 import { matchAnnotation, rewriteAnnotation } from "./termAnnotation"
-import { matchExternal, rewriteExternal } from "./termExternal"
+import { rewriteExternal } from "./termExternal"
+import { matchAsPattern } from "./termAsPattern"
 
 
 export type MatchResult = ({ readonly [k: string]: any } | false)
@@ -138,41 +139,19 @@ export class Machine {
      * @param pattern   The pattern used to determine the match function.
      * @returns         A match function for the supplied pattern.
      */
-    getMatchFunction(pattern: any): ((pattern: any, value: any) => MatchResult) {
+    getMatchFunction(pattern: any): ((m: Machine, pattern: any, value: any) => MatchResult) {
         if ((pattern !== null) && (typeof pattern === "object")) {
             if ("$policy" in pattern) {
                 switch (pattern.$policy) {
                     case "Annotation": return matchAnnotation;
-                    case "Application": return matchApplication;
-                    case "Assignment": return matchAssignment;
-                    case "Dereference": return matchDereference;
-                    case "Exception": return matchException;
-                    case "External": return matchExternal;
-                    case "Fix": return matchFix;
-                    case "ForToIterator": return matchForToIterator;
+                    case "AsPattern": return matchAsPattern;
                     case "Function": return matchFunction;
-                    case "If": return matchIf;
-                    case "Infix": return matchInfix;
                     case "Let": return matchLet;
                     case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
-                    case "LookupIndex": return matchLookupIndex;
-                    case "LookupMember": return matchLookupMember;
-                    case "Loop": return matchLoop;
-                    case "Match": return matchMatch;
-                    case "Parallel": return matchParallel;
-                    case "Policy": return matchPolicy;
                     case "Quote": return matchQuote;
-                    case "Receive": return matchReceive;
-                    case "Ref": return matchRef;
-                    case "Rewrite": matchRewrite;
-                    case "Send": return matchSend;
-                    case "Sequence": return matchSequence;
-                    case "TryFinally": return matchTryFinally;
-                    case "TryWith": return matchTryWith;
-                    case "WhileIterator": return matchWhileIterator;
+                    default: return matchConstant;
                 }
-                throw "Unexpected pattern";
             }
         }
         return matchConstant;

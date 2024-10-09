@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isTryFinally = isTryFinally;
 exports.rewriteTryFinally = rewriteTryFinally;
-exports.matchTryFinally = matchTryFinally;
 const term_1 = require("./term");
 const termTryWith_1 = require("./termTryWith");
 function isTryFinally(term) {
@@ -44,18 +43,5 @@ function rewriteTryFinally(m) {
         }
         return m.copyWith({ term: resultOfTerm.term });
     }
-}
-/*
-## Match Rules
-
-
-*/
-function matchTryFinally(pattern, value) {
-    if (!(isTryFinally(pattern))) {
-        throw "expected TryFinally";
-    }
-    ;
-    // to do
-    return false;
 }
 //# sourceMappingURL=termTryFinally.js.map

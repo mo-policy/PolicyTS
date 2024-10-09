@@ -203,14 +203,3 @@ export function rewriteMatch(m: Machine): Machine {
         }
     }
 }
-
-
-/*
-## Match Rules
-*/
-
-export function matchMatch(pattern: any, value: any): MatchResult {
-    if (!(isMatch(pattern))) { throw "expected Match"; };
-    // to do
-    return false;
-}

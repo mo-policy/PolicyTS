@@ -70,15 +70,3 @@ export function rewriteRewrite(m: Machine): Machine {
     const resultOfEval = rewriteTerm(m.copyWith({ term: resultOfCode.term }));
     return m.copyWith({ term: resultOfEval.term });
 }
-
-
-/*
-## Match Rules
-
-
-*/
-export function matchRewrite(pattern: any, value: any): MatchResult {
-    if (!(isRewrite(pattern))) { throw "expected Rewrite"; };
-    // todo
-    return false;
-}

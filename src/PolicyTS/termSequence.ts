@@ -86,13 +86,3 @@ export function rewriteSequence(m: Machine): Machine {
         return nextMachine.copyWith({ term: resultTerms[resultTerms.length - 1] });
     }
 }
-
-/*
-## Match Rules
-*/
-
-export function matchSequence(pattern: any, value: any): MatchResult {
-    if (!(isSequence(pattern))) { throw "expected Sequence"; };
-    // to do
-    return false;
-}

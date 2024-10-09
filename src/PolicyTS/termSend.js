@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isSend = isSend;
 exports.rewriteSend = rewriteSend;
-exports.matchSend = matchSend;
 const term_1 = require("./term");
 function isSend(term) {
     return (term !== null) &&
@@ -33,18 +32,5 @@ function rewriteSend(m) {
     }
     m.send(resultOfMessage.term, resultOfChannel.term);
     return m.copyWith({ term: null });
-}
-/*
-## Match Rules
-
-
-*/
-function matchSend(pattern, value) {
-    if (!(isSend(pattern))) {
-        throw "expected Send";
-    }
-    ;
-    // to do
-    return false;
 }
 //# sourceMappingURL=termSend.js.map

@@ -139,7 +139,7 @@ export function rewriteLetRec(m: Machine): Machine {
 /*
 ## Match Rules
 */
-export function matchLetRec(pattern: any, value: any): MatchResult {
+export function matchLetRec(m: Machine, pattern: any, value: any): MatchResult {
     // to do
     return false;
 }

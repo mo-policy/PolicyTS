@@ -45,7 +45,7 @@ function rewriteFunction(m) {
 /*
 ## Match Rules
 */
-function matchFunction(pattern, value) {
+function matchFunction(m, pattern, value) {
     // to do
     return false;
 }

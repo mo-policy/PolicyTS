@@ -100,11 +100,3 @@ export function rewriteIf(m: Machine): Machine {
         }
     }
 }
-
-/*
-## Match Rules
-*/
-export function matchIf(pattern: any, value: any): MatchResult {
-    // to do
-    return false
-}

@@ -178,15 +178,3 @@ export function rewriteReceive(m: Machine): Machine {
         }
     }
 }
-
-
-/*
-## Match Rules
-
-
-*/
-export function matchReceive(pattern: any, value: any): MatchResult {
-    if (!(isReceive(pattern))) { throw "expected Receive"; };
-    // to do
-    return false;
-}

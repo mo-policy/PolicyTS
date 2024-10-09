@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isExternal = isExternal;
 exports.rewriteExternal = rewriteExternal;
-exports.matchExternal = matchExternal;
 function isExternal(term) {
     return (term !== null) &&
         (typeof term === "object") &&
@@ -23,18 +22,5 @@ function rewriteExternal(m) {
     ;
     const externalResult = m.term.external(m);
     return externalResult;
-}
-/*
-## Match Rules
-
-
-*/
-function matchExternal(pattern, value) {
-    if (!(isExternal(pattern))) {
-        throw "expected External";
-    }
-    ;
-    // todo
-    return false;
 }
 //# sourceMappingURL=termExternal.js.map

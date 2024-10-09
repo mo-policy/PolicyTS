@@ -98,7 +98,7 @@ function rewriteAnnotation(m) {
 
 
 */
-function matchAnnotation(pattern, value) {
+function matchAnnotation(m, pattern, value) {
     if (!(isAnnotation(pattern))) {
         throw "expected Annotation";
     }

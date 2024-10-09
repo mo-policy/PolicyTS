@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isIf = isIf;
 exports.rewriteIf = rewriteIf;
-exports.matchIf = matchIf;
 const term_1 = require("./term");
 function isIf(term) {
     if ((term !== null) &&
@@ -58,12 +57,5 @@ function rewriteIf(m) {
             throw "condition not boolean";
         }
     }
-}
-/*
-## Match Rules
-*/
-function matchIf(pattern, value) {
-    // to do
-    return false;
 }
 //# sourceMappingURL=termIf.js.map

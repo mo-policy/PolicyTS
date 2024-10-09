@@ -7,9 +7,6 @@ exports.isLoop = isLoop;
 exports.rewriteForToIterator = rewriteForToIterator;
 exports.rewriteWhileIterator = rewriteWhileIterator;
 exports.rewriteLoop = rewriteLoop;
-exports.matchForToIterator = matchForToIterator;
-exports.matchWhileIterator = matchWhileIterator;
-exports.matchLoop = matchLoop;
 const term_1 = require("./term");
 const termFunction_1 = require("./termFunction");
 function isForToIterator(term) {
@@ -147,32 +144,5 @@ function rewriteLoop(m) {
             throw "blocked";
         }
     }
-}
-/*
-## Match Rules
-*/
-function matchForToIterator(pattern, value) {
-    if (!(isForToIterator(pattern))) {
-        throw "expected ForToIterator";
-    }
-    ;
-    // to do
-    return false;
-}
-function matchWhileIterator(pattern, value) {
-    if (!(isWhileIterator(pattern))) {
-        throw "expected WhileIterator";
-    }
-    ;
-    // to do
-    return false;
-}
-function matchLoop(pattern, value) {
-    if (!(isLoop(pattern))) {
-        throw "expected Loop";
-    }
-    ;
-    // to do
-    return false;
 }
 //# sourceMappingURL=termLoop.js.map

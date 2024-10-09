@@ -160,23 +160,11 @@ export function rewriteLookupIndex(m: Machine): Machine {
 
 
 */
-export function matchLookup(pattern: any, value: any): MatchResult {
+export function matchLookup(m: Machine, pattern: any, value: any): MatchResult {
     if (!(isLookup(pattern))) { throw "expected Lookup"; };
     let r: { [k: string]: any } = {};
     if (pattern.name !== "_") {
         r[pattern.name] = value;
     }
     return r;
-}
-
-export function matchLookupMember(pattern: any, value: any): MatchResult {
-    if (!(isLookupMember(pattern))) { throw "expected LookupMember"; };
-    // to do
-    return false;
-}
-
-export function matchLookupIndex(pattern: any, value: any): MatchResult {
-    if (!(isLookupIndex(pattern))) { throw "expected LookupIndex"; };
-    // to do
-    return false;
 }

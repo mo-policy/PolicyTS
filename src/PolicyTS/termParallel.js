@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isParallel = isParallel;
 exports.rewriteParallel = rewriteParallel;
-exports.matchParallel = matchParallel;
 const term_1 = require("./term");
 function isParallel(term) {
     return (term !== null) &&
@@ -26,18 +25,5 @@ function rewriteParallel(m) {
     ;
     const resultOfTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
     return m.copyWith({ term: resultOfTerm.term, blocked: resultOfTerm.blocked });
-}
-/*
-## Match Rules
-
-
-*/
-function matchParallel(pattern, value) {
-    if (!(isParallel(pattern))) {
-        throw "expected Parallel";
-    }
-    ;
-    // todo
-    return false;
 }
 //# sourceMappingURL=termParallel.js.map

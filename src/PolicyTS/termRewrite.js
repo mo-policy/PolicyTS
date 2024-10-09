@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isRewrite = isRewrite;
 exports.rewriteRewrite = rewriteRewrite;
-exports.matchRewrite = matchRewrite;
 const term_1 = require("./term");
 function isRewrite(term) {
     return (term !== null) &&
@@ -31,18 +30,5 @@ function rewriteRewrite(m) {
     }
     const resultOfEval = (0, term_1.rewriteTerm)(m.copyWith({ term: resultOfCode.term }));
     return m.copyWith({ term: resultOfEval.term });
-}
-/*
-## Match Rules
-
-
-*/
-function matchRewrite(pattern, value) {
-    if (!(isRewrite(pattern))) {
-        throw "expected Rewrite";
-    }
-    ;
-    // todo
-    return false;
 }
 //# sourceMappingURL=termRewrite.js.map

@@ -24,6 +24,7 @@ const termParallel_1 = require("./termParallel");
 const termInfix_1 = require("./termInfix");
 const termAnnotation_1 = require("./termAnnotation");
 const termExternal_1 = require("./termExternal");
+const termAsPattern_1 = require("./termAsPattern");
 /**
  * The heart of the term rewrite system is the Machine class. Each rewrite rule
  * takes a Machine as input and returns a Machine as a result.
@@ -115,36 +116,14 @@ class Machine {
             if ("$policy" in pattern) {
                 switch (pattern.$policy) {
                     case "Annotation": return termAnnotation_1.matchAnnotation;
-                    case "Application": return termApplication_1.matchApplication;
-                    case "Assignment": return termRef_1.matchAssignment;
-                    case "Dereference": return termRef_1.matchDereference;
-                    case "Exception": return termTryWith_1.matchException;
-                    case "External": return termExternal_1.matchExternal;
-                    case "Fix": return termFix_1.matchFix;
-                    case "ForToIterator": return termLoop_1.matchForToIterator;
+                    case "AsPattern": return termAsPattern_1.matchAsPattern;
                     case "Function": return termFunction_1.matchFunction;
-                    case "If": return termIf_1.matchIf;
-                    case "Infix": return termInfix_1.matchInfix;
                     case "Let": return termLet_1.matchLet;
                     case "LetRec": return termLetRec_1.matchLetRec;
                     case "Lookup": return termLookup_1.matchLookup;
-                    case "LookupIndex": return termLookup_1.matchLookupIndex;
-                    case "LookupMember": return termLookup_1.matchLookupMember;
-                    case "Loop": return termLoop_1.matchLoop;
-                    case "Match": return termMatch_1.matchMatch;
-                    case "Parallel": return termParallel_1.matchParallel;
-                    case "Policy": return termPolicy_1.matchPolicy;
                     case "Quote": return termQuote_1.matchQuote;
-                    case "Receive": return termReceive_1.matchReceive;
-                    case "Ref": return termRef_1.matchRef;
-                    case "Rewrite": termRewrite_1.matchRewrite;
-                    case "Send": return termSend_1.matchSend;
-                    case "Sequence": return termSequence_1.matchSequence;
-                    case "TryFinally": return termTryFinally_1.matchTryFinally;
-                    case "TryWith": return termTryWith_1.matchTryWith;
-                    case "WhileIterator": return termLoop_1.matchWhileIterator;
+                    default: return termQuote_1.matchConstant;
                 }
-                throw "Unexpected pattern";
             }
         }
         return termQuote_1.matchConstant;

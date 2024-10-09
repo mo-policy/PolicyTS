@@ -3,7 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isReceive = isReceive;
 exports.rewriteReceive = rewriteReceive;
-exports.matchReceive = matchReceive;
 const term_1 = require("./term");
 const termMatch_1 = require("./termMatch");
 function isReceive(term) {
@@ -105,18 +104,5 @@ function rewriteReceive(m) {
             }
         }
     }
-}
-/*
-## Match Rules
-
-
-*/
-function matchReceive(pattern, value) {
-    if (!(isReceive(pattern))) {
-        throw "expected Receive";
-    }
-    ;
-    // to do
-    return false;
 }
 //# sourceMappingURL=termReceive.js.map

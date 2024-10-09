@@ -38,6 +38,7 @@ A constant term holds a fully reduced value.
 */
 
 import { Machine, MatchResult } from "./machine"
+import { matchTerm } from "./term";
 
 /**
  * The QuoteTerm wraps a value which is fully reduced. 
@@ -90,7 +91,7 @@ export function rewriteConstant(m: Machine): Machine {
 
 */
 
-export function matchQuote(pattern: any, value: any): MatchResult {
+export function matchQuote(m: Machine, pattern: any, value: any): MatchResult {
     if (isQuote(pattern)) {
         if (pattern.quote === value) {
             return {};
@@ -101,12 +102,56 @@ export function matchQuote(pattern: any, value: any): MatchResult {
     return false;
 }
 
-
-export function matchConstant(pattern: any, value: any): MatchResult {
-    if (pattern === value) {
-        return {};
+export function matchConstant(m: Machine, pattern: any, value: any): MatchResult {
+    if (pattern === null) {
+        if (value === null) {
+            return {};
+        }
+    } else if (Array.isArray(pattern)) {
+        if (Array.isArray(value) && pattern.length === value.length) {
+            let allMatched = true;
+            let arrayResult: MatchResult = {};
+            for (let i = 0; i < pattern.length; i++) {
+                if (allMatched) {
+                    const itemResult = matchTerm(m, pattern[i], value[i]);
+                    if (itemResult === false) {
+                        allMatched = false;
+                    } else {
+                        arrayResult = Object.assign(arrayResult, itemResult);
+                    }
+                } else {
+                    break;
+                }
+            }
+            if (allMatched) {
+                return arrayResult;
+            }
+        }
+    } else if (typeof pattern === "object") {
+        let allMatched = true;
+        let mapResult: MatchResult = {};
+        for (const p in pattern) {
+            if (p in value) {
+                if (allMatched) {
+                    const elementResult = matchTerm(m, pattern[p], value[p]);
+                    if (elementResult === false) {
+                        allMatched = false;
+                    } else {
+                        mapResult = Object.assign(mapResult, elementResult);
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        if (allMatched) {
+            return mapResult;
+        }
     } else {
-        return false;
+        if (m.compare(pattern, value) === 0) {
+            return {};
+        }
     }
+    return false;
 }
 

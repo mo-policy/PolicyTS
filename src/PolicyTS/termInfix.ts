@@ -75,61 +75,59 @@ rewrite right
 */
 export function rewriteInfix(m: Machine): Machine {
     if (!(isInfix(m.term))) { throw "expected InfixTerm"; };
+    let result = undefined;
     const resultOfLeft = rewriteTerm(m.copyWith({ term: m.term.left }));
     if (resultOfLeft.blocked) {
         throw "blocked"
     }
-    const resultOfRight = rewriteTerm(m.copyWith({ term: m.term.right }));
-    if (resultOfRight.blocked) {
-        throw "blocked"
-    }
-    let result = undefined;
-    switch (m.term.operator) {
-        case "=":
-            result = (m.compare(resultOfLeft.term, resultOfRight.term) === 0); break;
-        case "<>":
-            result = (m.compare(resultOfLeft.term, resultOfRight.term) !== 0); break;
-        case "<":
-            result = (m.compare(resultOfLeft.term, resultOfRight.term) < 0); break;
-        case ">":
-            result = (m.compare(resultOfLeft.term, resultOfRight.term) > 0); break;
-        case "<=":
-            result = (m.compare(resultOfLeft.term, resultOfRight.term) <= 0); break;
-        case ">=":
-            result = (m.compare(resultOfLeft.term, resultOfRight.term) >= 0); break;
-        case "+":
-            result = resultOfLeft.term + resultOfRight.term; break;
-        case "-":
-            result = resultOfLeft.term - resultOfRight.term; break;
-        case "*":
-            result = resultOfLeft.term * resultOfRight.term; break;
-        case "^":
-            result = resultOfLeft.term ^ resultOfRight.term; break;
-        case "/":
-            result = resultOfLeft.term / resultOfRight.term; break;
-        case "%":
-            result = resultOfLeft.term % resultOfRight.term; break;
-        case "&&":
-            result = resultOfLeft.term && resultOfRight.term; break;
-        case "||":
-            result = resultOfLeft.term || resultOfRight.term; break;
-        default:
-            throw "unknown operator"
+    if (m.term.operator === "&&") {
+        if (resultOfLeft.term) {
+            const resultOfRight = rewriteTerm(m.copyWith({ term: m.term.right }));
+            result = resultOfRight.term;
+        }
+    } else if (m.term.operator === "||") {
+        if (resultOfLeft.term) {
+            result = true;
+        } else {
+            const resultOfRight = rewriteTerm(m.copyWith({ term: m.term.right }));
+            result = resultOfRight.term;
+        }
+    } else {
+        const resultOfRight = rewriteTerm(m.copyWith({ term: m.term.right }));
+        if (resultOfRight.blocked) {
+            throw "blocked"
+        }
+        switch (m.term.operator) {
+            case "=":
+                result = (m.compare(resultOfLeft.term, resultOfRight.term) === 0); break;
+            case "<>":
+                result = (m.compare(resultOfLeft.term, resultOfRight.term) !== 0); break;
+            case "<":
+                result = (m.compare(resultOfLeft.term, resultOfRight.term) < 0); break;
+            case ">":
+                result = (m.compare(resultOfLeft.term, resultOfRight.term) > 0); break;
+            case "<=":
+                result = (m.compare(resultOfLeft.term, resultOfRight.term) <= 0); break;
+            case ">=":
+                result = (m.compare(resultOfLeft.term, resultOfRight.term) >= 0); break;
+            case "+":
+                result = resultOfLeft.term + resultOfRight.term; break;
+            case "-":
+                result = resultOfLeft.term - resultOfRight.term; break;
+            case "*":
+                result = resultOfLeft.term * resultOfRight.term; break;
+            case "^":
+                result = resultOfLeft.term ^ resultOfRight.term; break;
+            case "/":
+                result = resultOfLeft.term / resultOfRight.term; break;
+            case "%":
+                result = resultOfLeft.term % resultOfRight.term; break;
+            default:
+                throw "unknown operator"
+        }
     }
     if (result === undefined) {
         throw "undefined"
     }
     return m.copyWith({ term: result });
-}
-
-
-/*
-## Match Rules
-
-
-*/
-export function matchInfix(pattern: any, value: any): MatchResult {
-    if (!(isInfix(pattern))) { throw "expected Infix"; };
-    // todo
-    return false;
 }

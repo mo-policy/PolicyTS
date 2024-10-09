@@ -7,9 +7,6 @@ exports.isAssignment = isAssignment;
 exports.rewriteRef = rewriteRef;
 exports.rewriteDereference = rewriteDereference;
 exports.rewriteAssignment = rewriteAssignment;
-exports.matchRef = matchRef;
-exports.matchDereference = matchDereference;
-exports.matchAssignment = matchAssignment;
 const term_1 = require("./term");
 function isRef(term) {
     return (term !== null) &&
@@ -84,20 +81,5 @@ function rewriteAssignment(m) {
     }
     resultOfRef.term.value = resultOfValue.term;
     return m.copyWith({ term: null });
-}
-/*
-## Match Rules
-*/
-function matchRef(pattern, value) {
-    // to do
-    return false;
-}
-function matchDereference(pattern, value) {
-    // to do
-    return false;
-}
-function matchAssignment(pattern, value) {
-    // to do
-    return false;
 }
 //# sourceMappingURL=termRef.js.map

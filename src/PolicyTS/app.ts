@@ -6,11 +6,15 @@ import { rewriteTerm } from "./term";
 
 if (process.argv.length === 3) {
     let plfile = process.argv[2];
-    const js = readFileSync(plfile).toString();
-    let term = JSON.parse(js);
-
-    const m = new Machine(term);
-    const r = rewriteTerm(m);
+    const m = new Machine();
+    const r = rewriteFile(m, plfile);
     const rjs = JSON.stringify(r.term);
     process.stdout.write(rjs);
+}
+
+export function rewriteFile(m: Machine, file: string) {
+    const js = readFileSync(file).toString();
+    let term = JSON.parse(js);
+    const fileResult = rewriteTerm(m.copyWith({ term: term }));
+    return fileResult;
 }

@@ -90,15 +90,3 @@ export function rewritePolicy(m: Machine): Machine {
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term, policies: policies }));
     return m.copyWith({ term: resultOfTerm.term });
 }
-
-
-/*
-## Match Rules
-
-
-*/
-export function matchPolicy(pattern: any, value: any): MatchResult {
-    if (!(isPolicy(pattern))) { throw "expected Policy"; };
-    // to do
-    return false;
-}

@@ -90,14 +90,3 @@ export function rewriteTryFinally(m: Machine): Machine {
         return m.copyWith({ term: resultOfTerm.term });
     }
 }
-
-/*
-## Match Rules
-
-
-*/
-export function matchTryFinally(pattern: any, value: any): MatchResult {
-    if (!(isTryFinally(pattern))) { throw "expected TryFinally"; };
-    // to do
-    return false;
-}

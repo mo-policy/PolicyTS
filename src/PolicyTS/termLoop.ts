@@ -178,26 +178,3 @@ export function rewriteLoop(m: Machine): Machine {
         }
     }
 }
-
-
-/*
-## Match Rules
-*/
-
-export function matchForToIterator(pattern: any, value: any): MatchResult {
-    if (!(isForToIterator(pattern))) { throw "expected ForToIterator"; };
-    // to do
-    return false;
-}
-
-export function matchWhileIterator(pattern: any, value: any): MatchResult {
-    if (!(isWhileIterator(pattern))) { throw "expected WhileIterator"; };
-    // to do
-    return false;
-}
-
-export function matchLoop(pattern: any, value: any): MatchResult {
-    if (!(isLoop(pattern))) { throw "expected Loop"; };
-    // to do
-    return false;
-}

@@ -135,20 +135,3 @@ export function rewriteException(m: Machine): Machine {
     if (!(isException(m.term))) { throw "expected ExceptionTerm"; };
     return m;
 }
-
-/*
-## Match Rules
-
-
-*/
-export function matchTryWith(pattern: any, value: any): MatchResult {
-    if (!(isTryWith(pattern))) { throw "expected TryWith"; };
-    // to do
-    return false;
-}
-
-export function matchException(pattern: any, value: any): MatchResult {
-    if (!(isException(pattern))) { throw "expected Exception"; };
-    // to do
-    return false;
-}

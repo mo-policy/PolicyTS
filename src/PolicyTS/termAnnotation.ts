@@ -143,7 +143,7 @@ export function rewriteAnnotation(m: Machine): Machine {
 
 
 */
-export function matchAnnotation(pattern: any, value: any): MatchResult {
+export function matchAnnotation(m: Machine, pattern: any, value: any): MatchResult {
     if (!(isAnnotation(pattern))) { throw "expected Annotation"; };
     // todo
     return false;

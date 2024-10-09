@@ -8,8 +8,6 @@ exports.rewriteLookup = rewriteLookup;
 exports.rewriteLookupMember = rewriteLookupMember;
 exports.rewriteLookupIndex = rewriteLookupIndex;
 exports.matchLookup = matchLookup;
-exports.matchLookupMember = matchLookupMember;
-exports.matchLookupIndex = matchLookupIndex;
 const term_1 = require("./term");
 const termQuote_1 = require("./termQuote");
 const termFunction_1 = require("./termFunction");
@@ -119,7 +117,7 @@ function rewriteLookupIndex(m) {
 
 
 */
-function matchLookup(pattern, value) {
+function matchLookup(m, pattern, value) {
     if (!(isLookup(pattern))) {
         throw "expected Lookup";
     }
@@ -129,21 +127,5 @@ function matchLookup(pattern, value) {
         r[pattern.name] = value;
     }
     return r;
-}
-function matchLookupMember(pattern, value) {
-    if (!(isLookupMember(pattern))) {
-        throw "expected LookupMember";
-    }
-    ;
-    // to do
-    return false;
-}
-function matchLookupIndex(pattern, value) {
-    if (!(isLookupIndex(pattern))) {
-        throw "expected LookupIndex";
-    }
-    ;
-    // to do
-    return false;
 }
 //# sourceMappingURL=termLookup.js.map

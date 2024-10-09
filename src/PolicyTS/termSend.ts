@@ -76,15 +76,3 @@ export function rewriteSend(m: Machine): Machine {
     m.send(resultOfMessage.term, resultOfChannel.term);
     return m.copyWith({ term: null });
 }
-
-
-/*
-## Match Rules
-
-
-*/
-export function matchSend(pattern: any, value: any): MatchResult {
-    if (!(isSend(pattern))) { throw "expected Send"; };
-    // to do
-    return false;
-}

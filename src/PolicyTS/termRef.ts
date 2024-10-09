@@ -166,21 +166,3 @@ export function rewriteAssignment(m: Machine): Machine {
     resultOfRef.term.value = resultOfValue.term;
     return m.copyWith({ term: null });
 }
-
-/*
-## Match Rules
-*/
-export function matchRef(pattern: any, value: any): MatchResult {
-    // to do
-    return false
-}
-
-export function matchDereference(pattern: any, value: any): MatchResult {
-    // to do
-    return false
-}
-
-export function matchAssignment(pattern: any, value: any): MatchResult {
-    // to do
-    return false
-}
