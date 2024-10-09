@@ -268,6 +268,35 @@ function testMatch1() {
     passOrThrow(r.bindings === m.bindings);
 }
 
+function testMatchAsPattern() {
+    // match 2 with | 1 -> 1 | 2 as x -> x
+    const term = {
+        $policy: "Match",
+        term: 2,
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: 1,
+                term: 1
+            },
+            {
+                $policy: "Rule",
+                pattern: {
+                    $policy: "AsPattern",
+                    term: 2,
+                    name: "x"
+                },
+                term: { $policy: "Lookup", name: "x" }
+            }
+        ]
+    }
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === 2);
+    passOrThrow(r.bindings === m.bindings);
+}
+
+
 function testMatchNull() {
     // match null with null -> 1
     const term = {
@@ -1008,9 +1037,10 @@ function termHash(term: any): Buffer {
 
 
 function develop() {
+    testMatchAsPattern();
 }
 
-const dev = false;
+const dev = true;
 
 if (dev) {
     // Run the test under development.
