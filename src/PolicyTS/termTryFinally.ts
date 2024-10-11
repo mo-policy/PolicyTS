@@ -44,7 +44,7 @@ Reduce term and catch exceptions
 */
 
 import { Machine, MatchResult } from "./machine"
-import { matchTerm, rewriteTerm } from "./term";
+import { matchTerm, rewriteTerm, stepsMinusOne } from "./term";
 import { isRule, RuleTerm } from "./termMatch";
 import { isException } from "./termTryWith";
 
@@ -75,18 +75,25 @@ else return result of term
 */
 export function rewriteTryFinally(m: Machine): Machine {
     if (!(isTryFinally(m.term))) { throw "expected TryFinallyTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     } else {
-        const resultOfFinally = rewriteTerm(m.copyWith({ term: m.term.finally }));
+        const resultOfFinally = rewriteTerm(m.copyWith({ term: m.term.finally, steps: steps }));
+        Object.assign(blockedTerm, { term: resultOfTerm.term });
+        steps = resultOfTerm.steps;
         if (resultOfFinally.blocked) {
-            throw "blocked"
+            return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
         } else {
+            steps = stepsMinusOne(steps);
             if (isException(resultOfFinally.term)) {
-                return m.copyWith({ term: resultOfFinally.term });
+                return m.copyWith({ term: resultOfFinally.term, steps: steps });
             }
         }
-        return m.copyWith({ term: resultOfTerm.term });
+        return m.copyWith({ term: resultOfTerm.term, steps: steps });
     }
 }

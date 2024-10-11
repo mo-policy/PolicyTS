@@ -43,8 +43,8 @@ A term for evaluation based on a boolean condition.
 
 */
 
-import { Machine, MatchResult } from "./machine"
-import { rewriteTerm } from "./term"
+import { Machine } from "./machine"
+import { rewriteTerm, stepsMinusOne } from "./term"
 
 export type IfTerm = {
     $policy: "If",
@@ -80,21 +80,27 @@ the value null is returned.
 */
 export function rewriteIf(m: Machine): Machine {
     if (!(isIf(m.term))) { throw "expected IfTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfCondition = rewriteTerm(m.copyWith({ term: m.term.condition }));
+    Object.assign(blockedTerm, { condition: resultOfCondition.term });
+    steps = resultOfCondition.steps;
     if (resultOfCondition.blocked) {
-        // to do, return new IfTerm
-        throw "condition blocked"
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     } else {
         if (typeof resultOfCondition.term === "boolean") {
+            let ifResult = m;
             if (resultOfCondition.term) {
-                return rewriteTerm(m.copyWith({ term: m.term.then }));
+                ifResult = rewriteTerm(m.copyWith({ term: m.term.then, steps: steps }));
             } else {
                 if ("else" in m.term) {
-                    return rewriteTerm(m.copyWith({ term: m.term.else }));
+                    ifResult = rewriteTerm(m.copyWith({ term: m.term.else, steps: steps }));
                 } else {
-                    return m.copyWith({ term: null });
+                    ifResult = rewriteTerm(m.copyWith({ term: null, steps: steps }));
                 }
             }
+            steps = stepsMinusOne(ifResult.steps);
+            return m.copyWith({ term: ifResult.term, blocked: ifResult.blocked, steps: steps });
         } else {
             throw "condition not boolean"
         }

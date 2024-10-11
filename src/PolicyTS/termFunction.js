@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isFunction = isFunction;
 exports.rewriteFunction = rewriteFunction;
 exports.matchFunction = matchFunction;
+const term_1 = require("./term");
 function isFunction(term) {
     if ((term !== null) &&
         (typeof term === "object") &&
@@ -32,14 +33,15 @@ function rewriteFunction(m) {
         throw "expected Function";
     }
     ;
-    if (Object.keys(m.bindings).length === 0) {
+    if (("closure" in m.term) || (Object.keys(m.bindings).length === 0)) {
         return m;
     }
     else {
         // to do: filter closure to only free variables in function.
         const cb = Object.assign({}, m.bindings);
         const f = Object.assign({}, m.term, { closure: cb });
-        return m.copyWith({ term: f });
+        const steps = (0, term_1.stepsMinusOne)(m.steps);
+        return m.copyWith({ term: f, steps: steps });
     }
 }
 /*

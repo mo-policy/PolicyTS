@@ -28,17 +28,23 @@ function rewriteLet(m) {
         throw "expected Let";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfBindingTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfBindingTerm.term });
+    steps = resultOfBindingTerm.steps;
     if (resultOfBindingTerm.blocked) {
-        // to do: return new LetTerm with blocked term
-        return m;
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     else {
         const matchOfBinding = (0, term_1.matchTerm)(m, m.term.pattern, resultOfBindingTerm.term);
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
-            const resultOfIn = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.in, bindings: nextBindings }));
-            return m.copyWith({ term: resultOfIn.term });
+            const resultOfIn = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.in, bindings: nextBindings, steps: steps }));
+            if (!resultOfIn.blocked) {
+                steps = (0, term_1.stepsMinusOne)(resultOfIn.steps);
+            }
+            return m.copyWith({ term: resultOfIn.term, blocked: resultOfIn.blocked, steps: steps });
         }
         else {
             throw "binding failed";

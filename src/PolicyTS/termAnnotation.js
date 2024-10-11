@@ -26,9 +26,13 @@ function rewriteAnnotation(m) {
         throw "expected AnnotationTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     let result = resultOfTerm.term;
     if (typeof m.term.type === "string") {
@@ -91,7 +95,8 @@ function rewriteAnnotation(m) {
             }
         }
     }
-    return m.copyWith({ term: result });
+    steps = (0, term_1.stepsMinusOne)(steps);
+    return m.copyWith({ term: result, steps: steps });
 }
 /*
 ## Match Rules

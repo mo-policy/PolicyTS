@@ -85,11 +85,6 @@ export function rewriteFix(m: Machine): Machine {
         const mFix = m.copyWith({ term: f.term, bindings: bindings });
         return rewriteTerm(mFix);
     } else {
-        const resultOfFixTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
-        const nextFix = {
-            $policy: "Fix",
-            term: resultOfFixTerm.term
-        };
-        return m.copyWith({ term: nextFix });
+        throw "fix expects function"
     }
 }

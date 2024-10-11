@@ -2,7 +2,6 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.passOrThrow = passOrThrow;
-const crypto_1 = require("crypto");
 const machine_1 = require("./machine");
 const term_1 = require("./term");
 const testsTAPL_1 = require("./testsTAPL");
@@ -83,7 +82,10 @@ function testLookupIndex() {
 }
 function testQuote() {
     // {@ {@ 1 @} @}
-    const term = { $policy: "Quote", quote: { $policy: "Quote", quote: 1 } };
+    const term = {
+        $policy: "Quote",
+        quote: { $policy: "Quote", quote: 1 }
+    };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
     const mjs = JSON.stringify(m);
@@ -418,6 +420,83 @@ function testMatchGuard() {
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
     passOrThrow(r.term === 1);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testMatchGuardBlocked() {
+    // match 1 + 1 with
+    // | x when y -> 3
+    // | _ -> 4
+    const term = {
+        $policy: "Match",
+        term: {
+            $policy: "Infix",
+            left: 1,
+            operator: "+",
+            right: 1
+        },
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "x" },
+                guard: { $policy: "Lookup", name: "y" },
+                term: 3
+            },
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "_" },
+                term: 4
+            }
+        ]
+    };
+    /*
+    match term with
+    | blockedRule.pattern when blockedGuard -> blockedRule.term
+    | remaining rules...
+    | _ -> resultOfTerm.term
+    */
+    const expected = {
+        $policy: "Match",
+        term: 2,
+        rules: [
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "x" },
+                guard: { $policy: "Lookup", name: "y" },
+                term: 3
+            },
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "_" },
+                term: 4
+            },
+            {
+                $policy: "Rule",
+                pattern: { $policy: "Lookup", name: "_" },
+                term: {
+                    $policy: "Match",
+                    term: 2,
+                    rules: [
+                        {
+                            $policy: "Rule",
+                            pattern: { $policy: "Lookup", name: "x" },
+                            guard: { $policy: "Lookup", name: "y" },
+                            term: 3
+                        },
+                        {
+                            $policy: "Rule",
+                            pattern: { $policy: "Lookup", name: "_" },
+                            term: 4
+                        }
+                    ]
+                }
+            }
+        ]
+    };
+    const m = new machine_1.Machine(term);
+    const r = (0, term_1.rewriteTerm)(m);
+    const rtjs = JSON.stringify(r.term);
+    const ejs = JSON.stringify(expected);
+    passOrThrow(rtjs === ejs);
     passOrThrow(r.bindings === m.bindings);
 }
 function testTryWith() {
@@ -764,7 +843,7 @@ function testForTo() {
             step: 1
         },
         pattern: { $policy: "Lookup", name: "i" },
-        term: null
+        term: 1
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
@@ -772,24 +851,29 @@ function testForTo() {
     passOrThrow(r.bindings === m.bindings);
 }
 function testWhile() {
-    // while (fun null -> true) do
-    //     1
+    // while true do
+    //     throw 1
     const term = {
         $policy: "Loop",
         iterator: {
             $policy: "WhileIterator",
             done: false,
-            condition: {
-                $policy: "Function",
-                pattern: null,
-                term: true
-            }
+            condition: true
         },
+        term: {
+            $policy: "Exception",
+            term: 1
+        }
+    };
+    const expected = {
+        $policy: "Exception",
         term: 1
     };
     const m = new machine_1.Machine(term);
     const r = (0, term_1.rewriteTerm)(m);
-    passOrThrow(r.term === null);
+    const rtjs = JSON.stringify(r.term);
+    const ejs = JSON.stringify(expected);
+    passOrThrow(rtjs === ejs);
     passOrThrow(r.bindings === m.bindings);
 }
 function testInfixPlus() {
@@ -940,58 +1024,70 @@ function testLetRec() {
     passOrThrow(r.term === 4);
     passOrThrow(r.bindings === m.bindings);
 }
-function termHash(term) {
-    const hash = (0, crypto_1.createHash)("sha256");
-    if (term === null) {
-        hash.update("null");
-    }
-    else if (term === true) {
-        hash.update("true");
-    }
-    else if (term === false) {
-        hash.update("false");
-    }
-    else if (Array.isArray(term)) {
-        hash.update("[");
-        for (let i = 0; i < term.length; i++) {
-            if (i > 0) {
-                hash.update(",");
-            }
-            const h = termHash(term[i]);
-            hash.update(h);
+function testStepsInfix1() {
+    const term = {
+        $policy: "Infix",
+        left: 1,
+        operator: "+",
+        right: 2
+    };
+    const m = new machine_1.Machine(term, undefined, undefined, undefined, undefined, 1);
+    const r = (0, term_1.rewriteTerm)(m);
+    passOrThrow(r.term === 3);
+    passOrThrow(r.steps === 0);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testStepsInfixBlockedLeft() {
+    const term = {
+        $policy: "Infix",
+        left: {
+            $policy: "Infix",
+            left: 2,
+            operator: "*",
+            right: 3
+        },
+        operator: "+",
+        right: 1
+    };
+    const expected = {
+        $policy: "Infix",
+        left: 6,
+        operator: "+",
+        right: 1
+    };
+    const m = new machine_1.Machine(term, undefined, undefined, undefined, undefined, 1);
+    const r = (0, term_1.rewriteTerm)(m);
+    const ajs = JSON.stringify(r.term);
+    const ejs = JSON.stringify(expected);
+    passOrThrow(ajs === ejs);
+    passOrThrow(r.steps === 0);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testStepsInfixBlockedRight() {
+    const term = {
+        $policy: "Infix",
+        left: 1,
+        operator: "+",
+        right: {
+            $policy: "Infix",
+            left: 2,
+            operator: "*",
+            right: 3
         }
-        hash.update("]");
-    }
-    else {
-        switch (typeof term) {
-            case "object":
-                hash.update("{");
-                let first = true;
-                for (const p in term) {
-                    if (first) {
-                        first = false;
-                    }
-                    else {
-                        hash.update(",");
-                    }
-                    const pjs = JSON.stringify(p);
-                    hash.update(pjs);
-                    hash.update(":");
-                    const h = termHash(term[p]);
-                    hash.update(h);
-                }
-                hash.update("}");
-                break;
-            case "string":
-            case "number":
-                const js = JSON.stringify(term);
-                hash.update(js);
-                break;
-            default:
-                throw "unexpected type";
-        }
-    }
-    return hash.digest();
+    };
+    const expected = {
+        $policy: "Infix",
+        left: 1,
+        operator: "+",
+        right: 6
+    };
+    const m = new machine_1.Machine(term, undefined, undefined, undefined, undefined, 1);
+    const r = (0, term_1.rewriteTerm)(m);
+    const ajs = JSON.stringify(r.term);
+    const ejs = JSON.stringify(expected);
+    passOrThrow(ajs === ejs);
+    passOrThrow(r.steps === 0);
+    passOrThrow(r.bindings === m.bindings);
 }
 function develop() {
 }
@@ -1004,6 +1100,9 @@ else {
     // Run all the tests.
     develop();
     (0, testsTAPL_1.testTAPL)();
+    testStepsInfix1();
+    testStepsInfixBlockedLeft();
+    testStepsInfixBlockedRight();
     testExternal();
     testAnnotationIsInteger();
     testAnnotationIsNull();
@@ -1039,6 +1138,7 @@ else {
     testMatchMap();
     testMatchAsPattern();
     testMatchGuard();
+    testMatchGuardBlocked();
     testRefAssignment();
     testRefDereference();
     testLetRec();

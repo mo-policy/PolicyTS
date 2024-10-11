@@ -58,35 +58,42 @@ function rewriteReceive(m) {
         throw "expected ReceiveTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfChannel = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.channel }));
+    Object.assign(blockedTerm, { channel: resultOfChannel.term });
+    steps = resultOfChannel.steps;
     if (resultOfChannel.blocked) {
-        const blockedReceive = Object.assign({}, m.term, { channel: resultOfChannel.term });
-        return m.copyWith({ term: blockedReceive, blocked: true });
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     else {
         let lastId = m.term.id;
-        if (lastId === undefined) {
+        if ((!("id" in m.term)) || lastId === undefined) {
             lastId = -1;
         }
         while (true) {
             // { id: number, message: any }
             const resultOfReserve = m.reserve(resultOfChannel.term, lastId);
             if (resultOfReserve.id === lastId) {
-                let termUpdate = { channel: resultOfChannel.term };
-                if (resultOfReserve.id !== undefined) {
-                    termUpdate["id"] = resultOfReserve.id;
-                }
-                const blockedReceive = Object.assign({}, m.term, termUpdate);
-                return m.copyWith({ term: blockedReceive, blocked: true });
+                let termUpdate = {};
+                termUpdate["id"] = resultOfReserve.id;
+                Object.assign(blockedTerm, termUpdate);
+                return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
             }
             else {
                 lastId = resultOfReserve.id;
                 const matchingRule = (0, termMatch_1.findMatchingRule)(m, m.term.rules, resultOfReserve.message);
                 if (matchingRule.matchResult !== false && matchingRule.rule !== undefined) {
                     if (matchingRule.resultOfGuard !== undefined) {
-                        if (matchingRule.resultOfGuard.blocked) {
-                            // to do, return a blocked match term
-                            throw "guard blocked";
+                        if (matchingRule.resultOfGuard.blocked && matchingRule.remainingRules !== undefined) {
+                            /*
+                            match message with
+                            | blockedRule.pattern when blockedGuard -> blockedRule.term
+                            | remaining rules...
+                            | _ -> m.term
+                            */
+                            const blockedMatch = (0, termMatch_1.createBlockedRuleMatch)(matchingRule, resultOfReserve.message, blockedTerm);
+                            return m.copyWith({ term: blockedMatch, blocked: true, steps: steps });
                         }
                         else if (matchingRule.resultOfGuard.term !== true) {
                             throw "unexpected guard value";
@@ -94,8 +101,11 @@ function rewriteReceive(m) {
                     }
                     const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
                     if (m.receive(resultOfChannel.term, lastId)) {
-                        const resultOfRule = (0, term_1.rewriteTerm)(m.copyWith({ term: matchingRule.rule.term, bindings: bindings }));
-                        return m.copyWith({ term: resultOfRule.term });
+                        const resultOfRule = (0, term_1.rewriteTerm)(m.copyWith({ term: matchingRule.rule.term, bindings: bindings, steps: steps }));
+                        if (!(resultOfRule.blocked)) {
+                            steps = (0, term_1.stepsMinusOne)(steps);
+                        }
+                        return m.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: steps });
                     }
                     else {
                         throw "receive returned false";

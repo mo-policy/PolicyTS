@@ -24,11 +24,18 @@ function rewriteRewrite(m) {
         throw "expected RewriteTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfCode = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.code }));
+    Object.assign(blockedTerm, { code: resultOfCode.term });
+    steps = resultOfCode.steps;
     if (resultOfCode.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
-    const resultOfEval = (0, term_1.rewriteTerm)(m.copyWith({ term: resultOfCode.term }));
-    return m.copyWith({ term: resultOfEval.term });
+    const resultOfEval = (0, term_1.rewriteTerm)(m.copyWith({ term: resultOfCode.term, steps: steps }));
+    if (!(resultOfEval.blocked)) {
+        steps = (0, term_1.stepsMinusOne)(resultOfEval.steps);
+    }
+    return m.copyWith({ term: resultOfEval.term, blocked: resultOfEval.blocked, steps: steps });
 }
 //# sourceMappingURL=termRewrite.js.map

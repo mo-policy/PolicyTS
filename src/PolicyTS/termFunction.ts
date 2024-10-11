@@ -45,6 +45,7 @@ An function value term.
 */
 
 import { Machine, MatchResult } from "./machine"
+import { rewriteTerm, stepsMinusOne } from "./term";
 
 export type FunctionTerm = {
     $policy: "Function",
@@ -79,13 +80,14 @@ Function bindings block if any of the closure bindings are blocked.
 */
 export function rewriteFunction(m: Machine): Machine {
     if (!(isFunction(m.term))) { throw "expected Function"; };
-    if (Object.keys(m.bindings).length === 0) {
+    if (("closure" in m.term) || (Object.keys(m.bindings).length === 0)) {
         return m;
     } else {
         // to do: filter closure to only free variables in function.
         const cb = Object.assign({}, m.bindings);
         const f = Object.assign({}, m.term, { closure: cb });
-        return m.copyWith({ term: f });
+        const steps = stepsMinusOne(m.steps);
+        return m.copyWith({ term: f, steps: steps });
     }
 }
 

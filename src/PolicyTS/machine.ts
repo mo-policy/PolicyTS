@@ -52,6 +52,7 @@ export class Machine {
     readonly bindings: { readonly [k: string]: any };
     readonly comm: ChannelMessages;
     readonly policies: ActivePolicy[];
+    readonly steps: number;
     /**
      * @param term      The current term.
      * @param blocked   The current blocked state.
@@ -63,13 +64,15 @@ export class Machine {
         blocked: boolean = false,
         bindings: { [k: string]: any } = {},
         comm: ChannelMessages = {},
-        policies: ActivePolicy[] = []
+        policies: ActivePolicy[] = [],
+        steps: number = -1
     ) {
         this.term = term;
         this.blocked = blocked;
         this.bindings = bindings;
         this.comm = comm;
         this.policies = policies;
+        this.steps = steps;
     }
 
     /**
@@ -80,6 +83,7 @@ export class Machine {
     copyWith(values: { [k: string]: any }): Machine {
         return Object.assign(new Machine(), this, values);
     }
+
     /**
      * Returns the value of a bound name.
      * @param name      The name of the binding.

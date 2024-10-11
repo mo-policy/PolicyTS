@@ -22,15 +22,22 @@ function rewriteSend(m) {
         throw "expected SendTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfMessage = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.message }));
+    Object.assign(blockedTerm, { message: resultOfMessage.term });
+    steps = resultOfMessage.steps;
     if (resultOfMessage.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     const resultOfChannel = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.channel }));
+    Object.assign(blockedTerm, { channel: resultOfChannel.term });
+    steps = resultOfChannel.steps;
     if (resultOfChannel.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     m.send(resultOfMessage.term, resultOfChannel.term);
-    return m.copyWith({ term: null });
+    steps = (0, term_1.stepsMinusOne)(steps);
+    return m.copyWith({ term: null, steps: steps });
 }
 //# sourceMappingURL=termSend.js.map

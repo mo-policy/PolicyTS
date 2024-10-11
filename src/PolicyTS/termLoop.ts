@@ -29,8 +29,9 @@ for (let x of y) {
 */
 
 import { Machine, MatchResult } from "./machine"
-import { matchTerm, rewriteTerm } from "./term";
+import { matchTerm, rewriteTerm, stepsMinusOne } from "./term";
 import { isFunction } from "./termFunction";
+import { isException } from "./termTryWith";
 
 
 export type ForToIteratorTerm = {
@@ -45,7 +46,7 @@ export type ForToIteratorTerm = {
 export type WhileIteratorTerm = {
     $policy: "WhileIterator",
     done: boolean,
-    condition: any  // function which returns true or false
+    condition: any
 }
 
 export type LoopTerm = {
@@ -139,30 +140,40 @@ export function rewriteForToIterator(m: Machine): Machine {
 
 export function rewriteWhileIterator(m: Machine): Machine {
     if (!(isWhileIterator(m.term))) { throw "expected WhileIteratorTerm" }
-    if (!(isFunction(m.term.condition))) { throw "expected FunctionTerm" }
     if (m.term.done) { return m; }
-    const appTerm = {
-        $policy: "Application",
-        function: m.term.condition,
-        arg: null
+    const resultOfCondition = rewriteTerm(m.copyWith({ term: m.term.condition }));
+    let steps = resultOfCondition.steps;
+    if (resultOfCondition.blocked) {
+        // (blockedCondition && term.condition)
+        const blockedTerm = {
+            $policy: "Infix",
+            left: resultOfCondition.term,
+            operator: "&&",
+            right: m.term.condition
+        }
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
-    const resultOfCondition = rewriteTerm(m.copyWith({ term: appTerm }))
     if (typeof resultOfCondition.term !== "boolean") { throw "exepected boolean" }
-    const nextIterator = Object.assign({}, m.term, { "done": resultOfCondition.term });
-    return m.copyWith({ term: nextIterator });
+    const nextIterator: WhileIteratorTerm = Object.assign({}, m.term, { "done": (!resultOfCondition.term) });
+    return m.copyWith({ term: nextIterator, steps: steps });
 }
 
 export function rewriteLoop(m: Machine): Machine {
     if (!(isLoop(m.term))) { throw "expected LoopTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     let iterator = m.term.iterator;
     while (true) {
-        const iteratorResult = rewriteTerm(m.copyWith({ term: iterator }));
+        const iteratorResult = rewriteTerm(m.copyWith({ term: iterator, steps: steps }));
+        Object.assign(blockedTerm, { iterator: iteratorResult.term });
+        steps = iteratorResult.steps;
         if (iteratorResult.blocked) {
-            throw "blocked"
+            return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
         }
         iterator = iteratorResult.term;
         if (iterator.done) {
-            return m.copyWith({ term: null });
+            steps = stepsMinusOne(steps);
+            return m.copyWith({ term: null, steps: steps });
         }
         let bindings = m.bindings;
         if ("pattern" in m.term && "value" in iterator) {
@@ -172,9 +183,15 @@ export function rewriteLoop(m: Machine): Machine {
             }
             bindings = Object.assign({}, bindings, matchResult);
         }
-        const termResult = rewriteTerm(m.copyWith({ term: m.term.term, bindings: bindings }));
+        const termResult = rewriteTerm(m.copyWith({ term: m.term.term, bindings: bindings, steps: steps }));
+        Object.assign(blockedTerm, { term: termResult.term });
+        steps = termResult.steps;
         if (termResult.blocked) {
-            throw "blocked"
+            return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
+        } else {
+            if (isException(termResult.term)) {
+                return m.copyWith({ term: termResult.term, steps: steps });
+            }
         }
     }
 }

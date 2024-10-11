@@ -38,7 +38,7 @@ The rewrite term is used to execute dynamic code.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { rewriteTerm } from "./term";
+import { rewriteTerm, stepsMinusOne } from "./term";
 
 export type RewriteTerm = {
     $policy: "Rewrite",
@@ -63,10 +63,17 @@ Rewrite result of term.code
 */
 export function rewriteRewrite(m: Machine): Machine {
     if (!(isRewrite(m.term))) { throw "expected RewriteTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfCode = rewriteTerm(m.copyWith({ term: m.term.code }));
+    Object.assign(blockedTerm, { code: resultOfCode.term });
+    steps = resultOfCode.steps;
     if (resultOfCode.blocked) {
-        throw "blocked"
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
-    const resultOfEval = rewriteTerm(m.copyWith({ term: resultOfCode.term }));
-    return m.copyWith({ term: resultOfEval.term });
+    const resultOfEval = rewriteTerm(m.copyWith({ term: resultOfCode.term, steps: steps }));
+    if (!(resultOfEval.blocked)) {
+        steps = stepsMinusOne(resultOfEval.steps);
+    }    
+    return m.copyWith({ term: resultOfEval.term, blocked: resultOfEval.blocked, steps: steps });
 }

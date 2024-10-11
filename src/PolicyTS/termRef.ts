@@ -89,7 +89,7 @@ Allocation, dereferencing, and assignment.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { rewriteTerm } from "./term"
+import { rewriteTerm, stepsMinusOne } from "./term"
 
 export type RefTerm = {
     $policy: "Ref",
@@ -151,18 +151,35 @@ export function rewriteRef(m: Machine): Machine {
 
 export function rewriteDereference(m: Machine): Machine {
     if (!(isDereference(m.term))) { throw "expected DereferenceTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfRef = rewriteTerm(m.copyWith({ term: m.term.ref }));
-    if (resultOfRef.blocked) { throw "blocked" }
+    Object.assign(blockedTerm, { term: resultOfRef.term });
+    steps = resultOfRef.steps;
+    if (resultOfRef.blocked) {
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
+    }
     if (!isRef(resultOfRef.term)) { throw "Expected Ref" }
-    return m.copyWith({ term: resultOfRef.term.value });
+    return m.copyWith({ term: resultOfRef.term.value, steps: steps });
 }
 export function rewriteAssignment(m: Machine): Machine {
     if (!(isAssignment(m.term))) { throw "expected AssignmentTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfRef = rewriteTerm(m.copyWith({ term: m.term.ref }));
-    if (resultOfRef.blocked) { throw "blocked" }
+    Object.assign(blockedTerm, { ref: resultOfRef.term });
+    steps = resultOfRef.steps;
+    if (resultOfRef.blocked) {
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
+    }
     if (!isRef(resultOfRef.term)) { throw "Expected Ref" }
-    const resultOfValue = rewriteTerm(m.copyWith({ term: m.term.value }));
-    if (resultOfValue.blocked) { throw "blocked" }
+    const resultOfValue = rewriteTerm(m.copyWith({ term: m.term.value, steps: steps }));
+    Object.assign(blockedTerm, { value: resultOfValue.term });
+    steps = resultOfRef.steps;
+    if (resultOfValue.blocked) {
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
+    }
     resultOfRef.term.value = resultOfValue.term;
-    return m.copyWith({ term: null });
+    steps = stepsMinusOne(steps);
+    return m.copyWith({ term: null, steps: steps });
 }

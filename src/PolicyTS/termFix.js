@@ -48,12 +48,7 @@ function rewriteFix(m) {
         return (0, term_1.rewriteTerm)(mFix);
     }
     else {
-        const resultOfFixTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
-        const nextFix = {
-            $policy: "Fix",
-            term: resultOfFixTerm.term
-        };
-        return m.copyWith({ term: nextFix });
+        throw "fix expects function";
     }
 }
 //# sourceMappingURL=termFix.js.map

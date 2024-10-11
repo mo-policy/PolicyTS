@@ -24,24 +24,28 @@ function rewriteSequence(m) {
         throw "expected SequenceTerm";
     }
     ;
+    let anyBlocked = false;
+    let steps = m.steps;
     const resultTerms = [];
-    let nextMachine = m;
+    let nm = m;
     for (let i = 0; i < m.term.terms.length; i++) {
         const seqTerm = m.term.terms[i];
-        nextMachine = (0, term_1.rewriteTerm)(nextMachine.copyWith({ term: seqTerm }));
-        if (nextMachine.term !== null) {
-            resultTerms.push(nextMachine.term);
+        nm = (0, term_1.rewriteTerm)(nm.copyWith({ term: seqTerm, steps: steps }));
+        anyBlocked = anyBlocked || nm.blocked;
+        if (nm.term !== null) {
+            resultTerms.push(nm.term);
         }
     }
     if (resultTerms.length === 0) {
         resultTerms.push(null);
     }
-    if (nextMachine.blocked) {
+    if (anyBlocked) {
         const blockedTerm = Object.assign({}, m.term, { terms: resultTerms });
-        return nextMachine.copyWith({ term: blockedTerm });
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     else {
-        return nextMachine.copyWith({ term: resultTerms[resultTerms.length - 1] });
+        steps = (0, term_1.stepsMinusOne)(steps);
+        return m.copyWith({ term: resultTerms[resultTerms.length - 1], steps: steps });
     }
 }
 //# sourceMappingURL=termSequence.js.map

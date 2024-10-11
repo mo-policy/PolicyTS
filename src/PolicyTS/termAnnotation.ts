@@ -41,7 +41,7 @@ Tests if a term is of a given type.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { rewriteTerm } from "./term";
+import { rewriteTerm, stepsMinusOne } from "./term";
 
 export type AnnotationTerm = {
     $policy: "Annotation",
@@ -68,9 +68,13 @@ if type is string,
 */
 export function rewriteAnnotation(m: Machine): Machine {
     if (!(isAnnotation(m.term))) { throw "expected AnnotationTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked"
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     let result = resultOfTerm.term;
     if (typeof m.term.type === "string") {
@@ -134,7 +138,8 @@ export function rewriteAnnotation(m: Machine): Machine {
             }
         }
     }
-    return m.copyWith({ term: result });
+    steps = stepsMinusOne(steps);
+    return m.copyWith({ term: result, steps: steps });
 }
 
 

@@ -9,8 +9,6 @@ exports.rewriteLookupMember = rewriteLookupMember;
 exports.rewriteLookupIndex = rewriteLookupIndex;
 exports.matchLookup = matchLookup;
 const term_1 = require("./term");
-const termQuote_1 = require("./termQuote");
-const termFunction_1 = require("./termFunction");
 function isLookup(term) {
     return (term !== null) &&
         (typeof term === "object") &&
@@ -50,16 +48,12 @@ function rewriteLookup(m) {
     }
     ;
     const binding = m.getBinding(m.term.name);
+    const steps = (0, term_1.stepsMinusOne)(m.steps);
     if (binding === undefined) {
-        return m.copyWith({ blocked: true });
+        return m.copyWith({ blocked: true, steps: steps });
     }
     else {
-        if (((0, termQuote_1.isConstant)(binding) || (0, termFunction_1.isFunction)(binding))) {
-            return m.copyWith({ term: binding });
-        }
-        else {
-            return (0, term_1.rewriteTerm)(m.copyWith({ term: binding }));
-        }
+        return (0, term_1.rewriteTerm)(m.copyWith({ term: binding, steps: steps }));
     }
 }
 function rewriteLookupMember(m) {
@@ -67,16 +61,22 @@ function rewriteLookupMember(m) {
         throw "expected LookupMemberTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if ((resultOfTerm.term === null) || (typeof resultOfTerm.term !== "object")) {
         throw "not object";
     }
-    const resultOfMember = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.member }));
+    const resultOfMember = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.member, steps: steps }));
+    Object.assign(blockedTerm, { member: resultOfMember.term });
+    steps = resultOfMember.steps;
     if (resultOfMember.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if (typeof resultOfMember.term !== "string") {
         throw "not string";
@@ -85,23 +85,30 @@ function rewriteLookupMember(m) {
         throw "member not found";
     }
     const memberValue = resultOfTerm.term[resultOfMember.term];
-    return m.copyWith({ term: memberValue });
+    steps = (0, term_1.stepsMinusOne)(steps);
+    return m.copyWith({ term: memberValue, steps: steps });
 }
 function rewriteLookupIndex(m) {
     if (!(isLookupIndex(m.term))) {
         throw "expected LookupIndexTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if (!(Array.isArray(resultOfTerm.term))) {
         throw "not array";
     }
     const resultOfIndex = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.index }));
+    Object.assign(blockedTerm, { index: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfIndex.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if (typeof resultOfIndex.term !== "number") {
         throw "not number";
@@ -110,7 +117,8 @@ function rewriteLookupIndex(m) {
         throw "index out of range";
     }
     const itemValue = resultOfTerm.term[resultOfIndex.term];
-    return m.copyWith({ term: itemValue });
+    steps = (0, term_1.stepsMinusOne)(steps);
+    return m.copyWith({ term: itemValue, steps: steps });
 }
 /*
 ## Match Rules

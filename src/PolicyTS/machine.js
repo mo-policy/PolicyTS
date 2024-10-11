@@ -37,12 +37,13 @@ class Machine {
      * @param bindings  The current name to value bindings.
      * @param comm      The current channels and messages.
      */
-    constructor(term = null, blocked = false, bindings = {}, comm = {}, policies = []) {
+    constructor(term = null, blocked = false, bindings = {}, comm = {}, policies = [], steps = -1) {
         this.term = term;
         this.blocked = blocked;
         this.bindings = bindings;
         this.comm = comm;
         this.policies = policies;
+        this.steps = steps;
     }
     /**
      * Helper for immutable coding style. Creates copy of this Machine with given value overrides.

@@ -27,21 +27,28 @@ function rewriteTryFinally(m) {
         throw "expected TryFinallyTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     else {
-        const resultOfFinally = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.finally }));
+        const resultOfFinally = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.finally, steps: steps }));
+        Object.assign(blockedTerm, { term: resultOfTerm.term });
+        steps = resultOfTerm.steps;
         if (resultOfFinally.blocked) {
-            throw "blocked";
+            return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
         }
         else {
+            steps = (0, term_1.stepsMinusOne)(steps);
             if ((0, termTryWith_1.isException)(resultOfFinally.term)) {
-                return m.copyWith({ term: resultOfFinally.term });
+                return m.copyWith({ term: resultOfFinally.term, steps: steps });
             }
         }
-        return m.copyWith({ term: resultOfTerm.term });
+        return m.copyWith({ term: resultOfTerm.term, steps: steps });
     }
 }
 //# sourceMappingURL=termTryFinally.js.map

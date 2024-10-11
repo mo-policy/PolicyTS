@@ -51,7 +51,7 @@ Branch if the current term matches a rule.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { matchTerm, rewriteTerm } from "./term";
+import { matchTerm, rewriteTerm, stepsMinusOne } from "./term";
 import { RuleTerm, isRule } from "./termMatch";
 
 export type PolicyTerm = {
@@ -85,8 +85,17 @@ Reduce Policy.term.
 */
 export function rewritePolicy(m: Machine): Machine {
     if (!(isPolicy(m.term))) { throw "expected PolicyTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const policies = m.policies.slice();
     policies.push({ machine: m, term: m.term });
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term, policies: policies }));
-    return m.copyWith({ term: resultOfTerm.term });
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
+    if (resultOfTerm.blocked) {
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
+    } else {
+        steps = stepsMinusOne(resultOfTerm.steps);
+        return m.copyWith({ term: resultOfTerm.term });
+    }
 }

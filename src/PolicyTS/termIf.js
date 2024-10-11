@@ -34,24 +34,30 @@ function rewriteIf(m) {
         throw "expected IfTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfCondition = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.condition }));
+    Object.assign(blockedTerm, { condition: resultOfCondition.term });
+    steps = resultOfCondition.steps;
     if (resultOfCondition.blocked) {
-        // to do, return new IfTerm
-        throw "condition blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     else {
         if (typeof resultOfCondition.term === "boolean") {
+            let ifResult = m;
             if (resultOfCondition.term) {
-                return (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.then }));
+                ifResult = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.then, steps: steps }));
             }
             else {
                 if ("else" in m.term) {
-                    return (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.else }));
+                    ifResult = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.else, steps: steps }));
                 }
                 else {
-                    return m.copyWith({ term: null });
+                    ifResult = (0, term_1.rewriteTerm)(m.copyWith({ term: null, steps: steps }));
                 }
             }
+            steps = (0, term_1.stepsMinusOne)(ifResult.steps);
+            return m.copyWith({ term: ifResult.term, blocked: ifResult.blocked, steps: steps });
         }
         else {
             throw "condition not boolean";

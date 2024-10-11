@@ -24,6 +24,7 @@ function rewriteParallel(m) {
     }
     ;
     const resultOfTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.term }));
-    return m.copyWith({ term: resultOfTerm.term, blocked: resultOfTerm.blocked });
+    const steps = (0, term_1.stepsMinusOne)(resultOfTerm.steps);
+    return m.copyWith({ term: resultOfTerm.term, blocked: resultOfTerm.blocked, steps: steps });
 }
 //# sourceMappingURL=termParallel.js.map

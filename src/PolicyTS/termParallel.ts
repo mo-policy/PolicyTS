@@ -42,7 +42,7 @@ The parallel term executes if previous code has blocked.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { rewriteTerm } from "./term";
+import { rewriteTerm, stepsMinusOne } from "./term";
 
 export type ParallelTerm = {
     $policy: "Parallel",
@@ -67,5 +67,6 @@ Return result of term, blocked with m.blocked || result.blocked
 export function rewriteParallel(m: Machine): Machine {
     if (!(isParallel(m.term))) { throw "expected ParallelTerm"; };
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
-    return m.copyWith({ term: resultOfTerm.term, blocked: resultOfTerm.blocked });
+    const steps = stepsMinusOne(resultOfTerm.steps);
+    return m.copyWith({ term: resultOfTerm.term, blocked: resultOfTerm.blocked, steps: steps });
 }

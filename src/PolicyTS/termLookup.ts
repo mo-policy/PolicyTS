@@ -38,7 +38,7 @@ The lookup term is used to refer to the value bound to a name.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { rewriteTerm } from "./term";
+import { rewriteTerm, stepsMinusOne } from "./term";
 import { isConstant } from "./termQuote";
 import { isFunction } from "./termFunction";
 
@@ -98,29 +98,32 @@ the reduction is the lookup term.
 export function rewriteLookup(m: Machine): Machine {
     if (!(isLookup(m.term))) { throw "expected LookupTerm"; };
     const binding = m.getBinding(m.term.name);
+    const steps = stepsMinusOne(m.steps);
     if (binding === undefined) {
-        return m.copyWith({ blocked: true });
+        return m.copyWith({ blocked: true, steps: steps });
     } else {
-        if ((isConstant(binding) || isFunction(binding))) {
-            return m.copyWith({ term: binding });
-        } else {
-            return rewriteTerm(m.copyWith({ term: binding }));
-        }        
+        return rewriteTerm(m.copyWith({ term: binding, steps: steps }));
     }
 }
 
 export function rewriteLookupMember(m: Machine): Machine {
     if (!(isLookupMember(m.term))) { throw "expected LookupMemberTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked"
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if ((resultOfTerm.term === null) || (typeof resultOfTerm.term !== "object")) {
         throw "not object"
     }
-    const resultOfMember = rewriteTerm(m.copyWith({ term: m.term.member }));
+    const resultOfMember = rewriteTerm(m.copyWith({ term: m.term.member, steps: steps }));
+    Object.assign(blockedTerm, { member: resultOfMember.term });
+    steps = resultOfMember.steps;
     if (resultOfMember.blocked) {
-        throw "blocked"
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if (typeof resultOfMember.term !== "string") {
         throw "not string"
@@ -129,21 +132,28 @@ export function rewriteLookupMember(m: Machine): Machine {
         throw "member not found"
     }
     const memberValue = resultOfTerm.term[resultOfMember.term];
-    return m.copyWith({ term: memberValue });
+    steps = stepsMinusOne(steps);
+    return m.copyWith({ term: memberValue, steps: steps });
 }
 
 export function rewriteLookupIndex(m: Machine): Machine {
     if (!(isLookupIndex(m.term))) { throw "expected LookupIndexTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked"
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if (!(Array.isArray(resultOfTerm.term))) {
         throw "not array"
     }
     const resultOfIndex = rewriteTerm(m.copyWith({ term: m.term.index }));
+    Object.assign(blockedTerm, { index: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfIndex.blocked) {
-        throw "blocked"
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if (typeof resultOfIndex.term !== "number") {
         throw "not number"
@@ -152,7 +162,8 @@ export function rewriteLookupIndex(m: Machine): Machine {
         throw "index out of range"
     }
     const itemValue = resultOfTerm.term[resultOfIndex.term];
-    return m.copyWith({ term: itemValue });
+    steps = stepsMinusOne(steps);
+    return m.copyWith({ term: itemValue, steps: steps });
 }
 
 /*

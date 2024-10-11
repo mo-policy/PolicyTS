@@ -58,8 +58,8 @@ Reduce term and catch exceptions
 */
 
 import { Machine, MatchResult } from "./machine"
-import { matchTerm, rewriteTerm } from "./term";
-import { findMatchingRule, isRule, RuleTerm } from "./termMatch";
+import { matchTerm, rewriteTerm, stepsMinusOne } from "./term";
+import { createBlockedRuleMatch, findMatchingRule, isRule, RuleTerm } from "./termMatch";
 
 export type TryWithTerm = {
     $policy: "TryWith",
@@ -108,27 +108,35 @@ else
 */
 export function rewriteTryWith(m: Machine): Machine {
     if (!(isTryWith(m.term))) { throw "expected TryWithTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     } else {
         if (isException(resultOfTerm.term)) {
             const matchingRule = findMatchingRule(m, m.term.rules, resultOfTerm.term);
             if (matchingRule.matchResult !== false && matchingRule.rule !== undefined) {
                 if (matchingRule.resultOfGuard !== undefined) {
                     if (matchingRule.resultOfGuard.blocked) {
-                        // to do, return a blocked match term
-                        throw "guard blocked"
+                        const blockedMatch = createBlockedRuleMatch(matchingRule, resultOfTerm.term, blockedTerm);
+                        return m.copyWith({ term: blockedMatch, blocked: true, steps: steps })
                     } else if (matchingRule.resultOfGuard.term !== true) {
                         throw "unexpected guard value"
                     }
                 }
                 const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
-                const resultOfRule = rewriteTerm(m.copyWith({ term: matchingRule.rule.term, bindings: bindings }));
-                return m.copyWith({ term: resultOfRule.term });
+                const resultOfRule = rewriteTerm(m.copyWith({ term: matchingRule.rule.term, bindings: bindings, steps: steps }));
+                if (!(resultOfRule.blocked)) {
+                    steps = stepsMinusOne(steps);
+                }
+                return m.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: steps });
             }
         }
-        return resultOfTerm;
+        steps = stepsMinusOne(steps);
+        return m.copyWith({ term: resultOfTerm.term, steps: steps });
     }
 }
 export function rewriteException(m: Machine): Machine {

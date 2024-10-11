@@ -54,32 +54,43 @@ function rewriteDereference(m) {
         throw "expected DereferenceTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfRef = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.ref }));
+    Object.assign(blockedTerm, { term: resultOfRef.term });
+    steps = resultOfRef.steps;
     if (resultOfRef.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if (!isRef(resultOfRef.term)) {
         throw "Expected Ref";
     }
-    return m.copyWith({ term: resultOfRef.term.value });
+    return m.copyWith({ term: resultOfRef.term.value, steps: steps });
 }
 function rewriteAssignment(m) {
     if (!(isAssignment(m.term))) {
         throw "expected AssignmentTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfRef = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.ref }));
+    Object.assign(blockedTerm, { ref: resultOfRef.term });
+    steps = resultOfRef.steps;
     if (resultOfRef.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     if (!isRef(resultOfRef.term)) {
         throw "Expected Ref";
     }
-    const resultOfValue = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.value }));
+    const resultOfValue = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.value, steps: steps }));
+    Object.assign(blockedTerm, { value: resultOfValue.term });
+    steps = resultOfRef.steps;
     if (resultOfValue.blocked) {
-        throw "blocked";
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     resultOfRef.term.value = resultOfValue.term;
-    return m.copyWith({ term: null });
+    steps = (0, term_1.stepsMinusOne)(steps);
+    return m.copyWith({ term: null, steps: steps });
 }
 //# sourceMappingURL=termRef.js.map

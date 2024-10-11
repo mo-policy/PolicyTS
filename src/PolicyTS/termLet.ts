@@ -44,7 +44,7 @@ Used to bind a value to a name.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { rewriteTerm, matchTerm } from "./term"
+import { rewriteTerm, matchTerm, stepsMinusOne } from "./term"
 
 export type LetTerm = {
     $policy: "Let",
@@ -75,16 +75,22 @@ binding term.
 */
 export function rewriteLet(m: Machine): Machine {
     if (!(isLet(m.term))) { throw "expected Let"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfBindingTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfBindingTerm.term });
+    steps = resultOfBindingTerm.steps;
     if (resultOfBindingTerm.blocked) {
-        // to do: return new LetTerm with blocked term
-        return m;
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     } else {
         const matchOfBinding = matchTerm(m, m.term.pattern, resultOfBindingTerm.term);
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
-            const resultOfIn = rewriteTerm(m.copyWith({ term: m.term.in, bindings: nextBindings }));
-            return m.copyWith({ term: resultOfIn.term });
+            const resultOfIn = rewriteTerm(m.copyWith({ term: m.term.in, bindings: nextBindings, steps: steps }));
+            if (!resultOfIn.blocked) {
+                steps = stepsMinusOne(resultOfIn.steps);
+            }
+            return m.copyWith({ term: resultOfIn.term, blocked: resultOfIn.blocked, steps: steps });
         } else {
             throw "binding failed"
         }

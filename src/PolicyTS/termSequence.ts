@@ -41,7 +41,7 @@ A sequence of terms resulting in the value of the last in the sequence.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { matchTerm, rewriteTerm } from "./term";
+import { matchTerm, rewriteTerm, stepsMinusOne } from "./term";
 
 export type SequenceTerm = {
     $policy: "Sequence",
@@ -67,22 +67,26 @@ otherwise, return result of last term.
 
 export function rewriteSequence(m: Machine): Machine {
     if (!(isSequence(m.term))) { throw "expected SequenceTerm"; };
+    let anyBlocked = false;
+    let steps = m.steps;
     const resultTerms = [];
-    let nextMachine = m;
+    let nm = m;
     for (let i = 0; i < m.term.terms.length; i++) {
         const seqTerm = m.term.terms[i];
-        nextMachine = rewriteTerm(nextMachine.copyWith({ term: seqTerm }));
-        if (nextMachine.term !== null) {
-            resultTerms.push(nextMachine.term);
-        }        
+        nm = rewriteTerm(nm.copyWith({ term: seqTerm, steps: steps }));
+        anyBlocked = anyBlocked || nm.blocked;
+        if (nm.term !== null) {
+            resultTerms.push(nm.term);
+        }
     }
     if (resultTerms.length === 0) {
         resultTerms.push(null);
     }
-    if (nextMachine.blocked) {
+    if (anyBlocked) {
         const blockedTerm = Object.assign({}, m.term, { terms: resultTerms });
-        return nextMachine.copyWith({ term: blockedTerm });
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     } else {
-        return nextMachine.copyWith({ term: resultTerms[resultTerms.length - 1] });
+        steps = stepsMinusOne(steps);
+        return m.copyWith({ term: resultTerms[resultTerms.length - 1], steps: steps });
     }
 }

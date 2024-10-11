@@ -23,27 +23,6 @@ function rewriteLetRec(m) {
         throw "expected LetRec";
     }
     ;
-    // let rec f = (fun x -> if "x<4" then f "x+1" else 4) in f 1
-    // m.term is:
-    /*
-        LetRec
-        pattern: f
-        term: fun x -> if "x<4" then f "x+1" else 4
-        in: f 1
-    */
-    // result should be:
-    // let f = fix (fun f -> fun x -> if "x<4" then f "x+1" else 4) in f 1
-    /*
-        Let
-        pattern: f
-        term: fix (fun f -> fun x -> if "x<4" then f "x+1" else 4)
-        in: f 1
-    */
-    // match gives us:
-    // f, fun x -> if "x<4" then f "x+1" else 4
-    // name, match[name]
-    // want:
-    // let name = fix (fun name -> match[name]) in term.in
     const matchResult = (0, term_1.matchTerm)(m, m.term.pattern, m.term.term);
     if (!matchResult) {
         throw "match failed";
@@ -66,7 +45,8 @@ function rewriteLetRec(m) {
         },
         in: m.term.in
     };
-    const letMachine = m.copyWith({ term: letTerm });
+    const steps = (0, term_1.stepsMinusOne)(m.steps);
+    const letMachine = m.copyWith({ term: letTerm, steps: steps });
     return (0, term_1.rewriteTerm)(letMachine);
 }
 /*

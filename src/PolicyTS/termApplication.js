@@ -31,27 +31,31 @@ function rewriteApplication(m) {
         throw "expected ApplicationTerm";
     }
     ;
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     // first, evaluate the function term
     const resultOfAppFunction = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.function }));
+    Object.assign(blockedTerm, { function: resultOfAppFunction.term });
+    steps = resultOfAppFunction.steps;
     if (resultOfAppFunction.blocked) {
-        // to do: return blocked application
-        return m;
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     }
     else {
         if (!((0, termFunction_1.isFunction)(resultOfAppFunction.term))) {
-            // to do: return an error
-            return m;
+            throw "value is not a function";
         }
         else {
             // second, evaluate the arg term
-            const resultOfAppArg = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.arg }));
+            const resultOfAppArg = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.arg, steps: steps }));
+            Object.assign(blockedTerm, { arg: resultOfAppArg.term });
+            steps = resultOfAppArg.steps;
             if (resultOfAppArg.blocked) {
-                // to do: return blocked application
-                return m;
+                return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
             }
             else {
-                // third, match the arg to the function pattern, returning an object 
+                // third, match the arg to the function pattern, returning an object
                 //        which maps string (names) to Bindings, or false if it fails to match
+                // to do: consider matching using up steps
                 const matchResult = (0, term_1.matchTerm)(m, resultOfAppFunction.term.pattern, resultOfAppArg.term);
                 if (matchResult) {
                     // fourth, assemble the bindings for use inside the term of the function
@@ -62,8 +66,12 @@ function rewriteApplication(m) {
                         bindings = Object.assign(bindings, resultOfAppFunction.term.closure);
                     }
                     bindings = Object.assign(bindings, matchResult);
-                    const resultOfFunctionTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: resultOfAppFunction.term.term, bindings: bindings }));
-                    return (m.copyWith({ term: resultOfFunctionTerm.term }));
+                    const resultOfFunctionTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: resultOfAppFunction.term.term, bindings: bindings, steps: steps }));
+                    steps = resultOfFunctionTerm.steps;
+                    if (!resultOfFunctionTerm.blocked) {
+                        steps = (0, term_1.stepsMinusOne)(steps);
+                    }
+                    return m.copyWith({ term: resultOfFunctionTerm.term, blocked: resultOfFunctionTerm.blocked, steps: steps });
                 }
                 else {
                     throw "binding failed";

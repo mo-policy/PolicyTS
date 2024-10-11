@@ -72,7 +72,7 @@ Match a value against a set of rules.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { matchTerm, rewriteTerm } from "./term";
+import { matchTerm, rewriteTerm, stepsMinusOne } from "./term";
 
 export type RuleTerm = {
     $policy: "Rule",
@@ -128,8 +128,9 @@ Look for rule with a pattern that matches term result.
     If matching rule has a guard, reduce guard, with updated bindings.
         If the guard is blocked, return a blocked MatchTerm of:
             match term with
-            | pattern when guard -> term
-            | ... remaining rules
+            | blockedRule.pattern when blockedGuard -> blockedRule.term
+            | remaining rules...
+            | _ -> m.term
         If the guard returns false, move to the next rule.
         If the guard returns true, 
             reduce the rule's term with updated bindings.
@@ -145,6 +146,7 @@ export type MatchingRule = {
     remainingRules?: RuleTerm[]
 }
 export function findMatchingRule(m: Machine, rules: RuleTerm[], value: any): MatchingRule {
+    let steps = m.steps;
     for (let i = 0; i < rules.length; i++) {
         const rule = rules[i];
         const matchResult = matchTerm(m, rule.pattern, value);
@@ -152,13 +154,14 @@ export function findMatchingRule(m: Machine, rules: RuleTerm[], value: any): Mat
             const bindings = Object.assign({}, m.bindings, matchResult);
             let guardPassed = true;
             if ("guard" in rule) {
-                const resultOfGuard = rewriteTerm(m.copyWith({ term: rule.guard, bindings: bindings }));
+                const resultOfGuard = rewriteTerm(m.copyWith({ term: rule.guard, bindings: bindings, steps: steps }));
+                steps = resultOfGuard.steps;
                 if ((resultOfGuard.blocked) || (typeof resultOfGuard.term !== "boolean")) {
                     return {
                         matchResult: matchResult,
                         rule: rule,
                         resultOfGuard: resultOfGuard,
-                        remainingRules: rules.slice(i)
+                        remainingRules: rules.slice(i+1)
                     };
                 } else {
                     guardPassed = resultOfGuard.term;
@@ -178,28 +181,73 @@ export function findMatchingRule(m: Machine, rules: RuleTerm[], value: any): Mat
     };
 }
 
+export function createBlockedRuleMatch(matchingRule: MatchingRule, matchTerm: any, blockedTerm: any): any {
+    if (matchingRule.matchResult === false ||
+        matchingRule.rule === undefined ||
+        matchingRule.resultOfGuard === undefined || 
+        (!(matchingRule.resultOfGuard.blocked)) ||
+        matchingRule.remainingRules === undefined) {
+        throw "unexpected paramaters to createBlockedRuleMatch"
+    }
+    let blockedRule: RuleTerm = {
+        $policy: "Rule",
+        pattern: matchingRule.rule.pattern,
+        guard: matchingRule.resultOfGuard.term,
+        term: matchingRule.rule.term
+    }
+    let blockedRules: RuleTerm[] = [blockedRule];
+    for (let i = 0; i < matchingRule.remainingRules.length; i++) {
+        blockedRules.push(matchingRule.remainingRules[i]);
+    }
+    let finalRule: RuleTerm = {
+        $policy: "Rule",
+        pattern: { $policy: "Lookup", name: "_" },
+        term: blockedTerm
+    };
+    blockedRules.push(finalRule);
+    const blockedMatch = {
+        $policy: "Match",
+        term: matchTerm,
+        rules: blockedRules
+    }
+    return blockedMatch;
+}
+
 export function rewriteMatch(m: Machine): Machine {
     if (!(isMatch(m.term))) { throw "expected MatchTerm"; };
+    let blockedTerm = Object.assign({}, m.term);
+    let steps = m.steps;
     const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    Object.assign(blockedTerm, { term: resultOfTerm.term });
+    steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
-        const blockedMatch = Object.assign({}, m.term, { channel: resultOfTerm.term });
-        return m.copyWith({ term: blockedMatch, blocked: true });
+        return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     } else {
-        const matchingRule = findMatchingRule(m, m.term.rules, resultOfTerm.term);
+        const matchingRule = findMatchingRule(m.copyWith({steps: steps}), m.term.rules, resultOfTerm.term);
         if (matchingRule.matchResult === false || matchingRule.rule === undefined) {
             throw "no rule passed";
         } else {
             if (matchingRule.resultOfGuard !== undefined) {
-                if (matchingRule.resultOfGuard.blocked) {
-                    // to do, return a blocked match term
-                    throw "guard blocked"
+                steps = matchingRule.resultOfGuard.steps;
+                if (matchingRule.resultOfGuard.blocked && matchingRule.remainingRules !== undefined) {
+                    /* 
+                    match term with
+                    | blockedRule.pattern when blockedGuard -> blockedRule.term
+                    | remaining rules...
+                    | _ -> m.term
+                    */
+                    const blockedMatch = createBlockedRuleMatch(matchingRule, blockedTerm.term, blockedTerm);
+                    return m.copyWith({ term: blockedMatch, blocked: true, steps: steps })
                 } else if (matchingRule.resultOfGuard.term !== true) {
                     throw "unexpected guard value"
                 }
             }
             const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
-            const resultOfRule = rewriteTerm(m.copyWith({ term: matchingRule.rule.term, bindings: bindings }));
-            return m.copyWith({ term: resultOfRule.term });
+            const resultOfRule = rewriteTerm(m.copyWith({ term: matchingRule.rule.term, bindings: bindings, steps: steps }));
+            if (!resultOfRule.blocked) {
+                steps = stepsMinusOne(steps);
+            }
+            return m.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: steps });
         }
     }
 }

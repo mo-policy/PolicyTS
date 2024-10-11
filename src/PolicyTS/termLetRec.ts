@@ -61,7 +61,7 @@ Used to bind recursive values to names.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { matchTerm, rewriteTerm } from "./term"
+import { matchTerm, rewriteTerm, stepsMinusOne } from "./term"
 import { fixMatch } from "./termFix";
 import { rewriteLet } from "./termLet";
 
@@ -89,29 +89,6 @@ export function isLetRec(term: any): term is LetRecTerm {
 
 export function rewriteLetRec(m: Machine): Machine {
     if (!(isLetRec(m.term))) { throw "expected LetRec"; };
-    // let rec f = (fun x -> if "x<4" then f "x+1" else 4) in f 1
-    // m.term is:
-    /*
-        LetRec
-        pattern: f
-        term: fun x -> if "x<4" then f "x+1" else 4
-        in: f 1
-    */
-
-    // result should be:
-    // let f = fix (fun f -> fun x -> if "x<4" then f "x+1" else 4) in f 1
-    /*
-        Let
-        pattern: f
-        term: fix (fun f -> fun x -> if "x<4" then f "x+1" else 4)
-        in: f 1
-    */
-
-    // match gives us:
-    // f, fun x -> if "x<4" then f "x+1" else 4
-    // name, match[name]
-    // want:
-    // let name = fix (fun name -> match[name]) in term.in
     const matchResult = matchTerm(m, m.term.pattern, m.term.term);
     if (!matchResult) { throw "match failed" }
     if (Object.keys(matchResult).length !== 1) {
@@ -132,7 +109,8 @@ export function rewriteLetRec(m: Machine): Machine {
         },
         in: m.term.in
     };
-    const letMachine = m.copyWith({ term: letTerm });
+    const steps = stepsMinusOne(m.steps);
+    const letMachine = m.copyWith({ term: letTerm, steps: steps });
     return rewriteTerm(letMachine);
 }
 
