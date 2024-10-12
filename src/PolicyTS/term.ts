@@ -28,9 +28,9 @@ export function rewriteTerm(m: Machine): Machine {
             // if none found, continue
             // else, evaluate and return the matching rule's term
             for (let i = 0; i < nm.policies.length; i++) {
-                const policy = nm.policies[i];
-                const pm = policy.machine.copyWith({ steps: steps });
-                const matchingRule = findMatchingRule(pm, policy.term.rules, nm.term);
+                const activeRule = nm.policies[i];
+                const pm = activeRule.machine.copyWith({ steps: steps });
+                const matchingRule = findMatchingRule(pm, activeRule.term.rules, nm.term);
                 if (matchingRule.matchResult !== false && matchingRule.rule !== undefined) {
                     policyMatch = true;
                     if (matchingRule.resultOfGuard !== undefined) {
@@ -43,15 +43,15 @@ export function rewriteTerm(m: Machine): Machine {
                             | _ -> m.term
                             */
                             const blockedMatch = createBlockedRuleMatch(matchingRule, nm.term, nm.term);
-                            return m.copyWith({ term: blockedMatch, blocked: true, steps: steps })
+                            return pm.copyWith({ term: blockedMatch, blocked: true, steps: steps })
                         } else if (matchingRule.resultOfGuard.term !== true) {
                             throw "unexpected guard value"
                         }
                     }
                     const policies = nm.policies.slice(0, i);
                     const bindings = Object.assign({}, nm.bindings, matchingRule.matchResult);
-                    const resultOfRule = rewriteTerm(policy.machine.copyWith({ term: matchingRule.rule.term, policies: policies, bindings: bindings, steps: steps }));
-                    nm = policy.machine.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: resultOfRule.steps });
+                    const resultOfRule = rewriteTerm(pm.copyWith({ term: matchingRule.rule.term, policies: policies, bindings: bindings, steps: steps }));
+                    nm = activeRule.machine.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: resultOfRule.steps });
                     break;
                 }
             }
@@ -76,25 +76,26 @@ export function rewriteTerm(m: Machine): Machine {
                         if ((nm.tries.length > 0) && isException(nm.term)) {
                             // look for try/with with a rule that matches the exception
                             // if found, execute it's term
-                            for (let i = 0; i < nm.tries.length; i++) {
+                            for (let i = nm.tries.length - 1; i >= 0; i--) {
                                 const activeRule = nm.tries[i];
+                                const tm = activeRule.machine.copyWith({ steps: steps });
                                 const blockedTerm = Object.assign({}, activeRule.term, { term: nm.term });
-                                const matchingRule = findMatchingRule(nm, activeRule.term.rules, nm.term);
+                                const matchingRule = findMatchingRule(tm, activeRule.term.rules, nm.term);
                                 if (matchingRule.matchResult !== false && matchingRule.rule !== undefined) {
                                     if (matchingRule.resultOfGuard !== undefined) {
                                         if (matchingRule.resultOfGuard.blocked) {
                                             const blockedMatch = createBlockedRuleMatch(matchingRule, nm.term, blockedTerm);
-                                            return m.copyWith({ term: blockedMatch, blocked: true, steps: steps })
+                                            return tm.copyWith({ term: blockedMatch, blocked: true, steps: steps })
                                         } else if (matchingRule.resultOfGuard.term !== true) {
                                             throw "unexpected guard value"
                                         }
                                     }
-                                    const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
-                                    const resultOfRule = rewriteTerm(m.copyWith({ term: matchingRule.rule.term, bindings: bindings, steps: steps }));
+                                    const bindings = Object.assign({}, tm.bindings, matchingRule.matchResult);
+                                    const resultOfRule = rewriteTerm(tm.copyWith({ term: matchingRule.rule.term, bindings: bindings, steps: steps }));
                                     if (!(resultOfRule.blocked)) {
                                         steps = stepsMinusOne(steps);
                                     }
-                                    return m.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: steps });
+                                    return tm.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: steps });
                                 }
                             }
                         }
