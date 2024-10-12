@@ -33,17 +33,21 @@ const termAsPattern_1 = require("./termAsPattern");
 class Machine {
     /**
      * @param term      The current term.
-     * @param blocked   The current blocked state.
+     * @param steps     The number of steps remaining before blocking. Use -1 to disable step counting.
      * @param bindings  The current name to value bindings.
+     * @param blocked   The current blocked state.
+     * @param policies  The current active policy terms.
+     * @param tries     The current active try/with terms.
      * @param comm      The current channels and messages.
      */
-    constructor(term = null, blocked = false, bindings = {}, comm = {}, policies = [], steps = -1) {
+    constructor(term = null, steps = -1, bindings = {}, blocked = false, policies = [], tries = [], comm = {}) {
         this.term = term;
-        this.blocked = blocked;
-        this.bindings = bindings;
-        this.comm = comm;
-        this.policies = policies;
         this.steps = steps;
+        this.bindings = bindings;
+        this.blocked = blocked;
+        this.policies = policies;
+        this.tries = tries;
+        this.comm = comm;
     }
     /**
      * Helper for immutable coding style. Creates copy of this Machine with given value overrides.

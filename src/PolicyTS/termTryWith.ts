@@ -110,33 +110,16 @@ export function rewriteTryWith(m: Machine): Machine {
     if (!(isTryWith(m.term))) { throw "expected TryWithTerm"; };
     let blockedTerm = Object.assign({}, m.term);
     let steps = m.steps;
-    const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term }));
+    const tries = m.tries.slice();
+    tries.push({ machine: m, term: m.term });
+    const resultOfTerm = rewriteTerm(m.copyWith({ term: m.term.term, tries: tries }));
     Object.assign(blockedTerm, { term: resultOfTerm.term });
     steps = resultOfTerm.steps;
     if (resultOfTerm.blocked) {
         return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
     } else {
-        if (isException(resultOfTerm.term)) {
-            const matchingRule = findMatchingRule(m, m.term.rules, resultOfTerm.term);
-            if (matchingRule.matchResult !== false && matchingRule.rule !== undefined) {
-                if (matchingRule.resultOfGuard !== undefined) {
-                    if (matchingRule.resultOfGuard.blocked) {
-                        const blockedMatch = createBlockedRuleMatch(matchingRule, resultOfTerm.term, blockedTerm);
-                        return m.copyWith({ term: blockedMatch, blocked: true, steps: steps })
-                    } else if (matchingRule.resultOfGuard.term !== true) {
-                        throw "unexpected guard value"
-                    }
-                }
-                const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
-                const resultOfRule = rewriteTerm(m.copyWith({ term: matchingRule.rule.term, bindings: bindings, steps: steps }));
-                if (!(resultOfRule.blocked)) {
-                    steps = stepsMinusOne(steps);
-                }
-                return m.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: steps });
-            }
-        }
-        steps = stepsMinusOne(steps);
-        return m.copyWith({ term: resultOfTerm.term, steps: steps });
+        steps = stepsMinusOne(resultOfTerm.steps);
+        return m.copyWith({ term: resultOfTerm.term });
     }
 }
 export function rewriteException(m: Machine): Machine {

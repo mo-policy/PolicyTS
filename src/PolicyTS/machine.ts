@@ -10,7 +10,7 @@ import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup, rewriteLookupMember, rewriteLookupIndex } from "./termLookup"
 import { rewriteForToIterator, rewriteLoop, rewriteWhileIterator } from "./termLoop"
 import { rewriteMatch } from "./termMatch"
-import { PolicyTerm, rewritePolicy } from "./termPolicy"
+import { rewritePolicy } from "./termPolicy"
 import { rewriteReceive } from "./termReceive"
 import { rewriteAssignment, rewriteDereference, rewriteRef } from "./termRef"
 import { rewriteSend } from "./termSend"
@@ -36,9 +36,9 @@ type ChannelMessages = {
     [key: string]: Message[];
 }
 
-type ActivePolicy = {
+type ActiveRules = {
     machine: Machine,
-    term: PolicyTerm
+    term: any
 }
 
 /**
@@ -48,31 +48,37 @@ type ActivePolicy = {
  */
 export class Machine {
     readonly term: any;
-    readonly blocked: boolean;
-    readonly bindings: { readonly [k: string]: any };
-    readonly comm: ChannelMessages;
-    readonly policies: ActivePolicy[];
     readonly steps: number;
+    readonly bindings: { readonly [k: string]: any };
+    readonly blocked: boolean;
+    readonly policies: ActiveRules[];
+    readonly tries: ActiveRules[];
+    readonly comm: ChannelMessages;
     /**
      * @param term      The current term.
-     * @param blocked   The current blocked state.
+     * @param steps     The number of steps remaining before blocking. Use -1 to disable step counting.
      * @param bindings  The current name to value bindings.
+     * @param blocked   The current blocked state.
+     * @param policies  The current active policy terms.
+     * @param tries     The current active try/with terms.
      * @param comm      The current channels and messages.
      */
     constructor(
         term: any = null,
-        blocked: boolean = false,
+        steps: number = -1,
         bindings: { [k: string]: any } = {},
-        comm: ChannelMessages = {},
-        policies: ActivePolicy[] = [],
-        steps: number = -1
+        blocked: boolean = false,
+        policies: ActiveRules[] = [],
+        tries: ActiveRules[] = [],
+        comm: ChannelMessages = {}
     ) {
         this.term = term;
-        this.blocked = blocked;
-        this.bindings = bindings;
-        this.comm = comm;
-        this.policies = policies;
         this.steps = steps;
+        this.bindings = bindings;
+        this.blocked = blocked;
+        this.policies = policies;
+        this.tries = tries;
+        this.comm = comm;
     }
 
     /**

@@ -6,6 +6,7 @@ exports.matchTerm = matchTerm;
 exports.stepsMinusOne = stepsMinusOne;
 const termMatch_1 = require("./termMatch");
 const termParallel_1 = require("./termParallel");
+const termTryWith_1 = require("./termTryWith");
 /**
  * The top level rewrite function for all terms.
  * @param m     The input machine.
@@ -77,6 +78,32 @@ function rewriteTerm(m) {
                 if ((nm.term !== null) && (typeof nm.term === "object")) {
                     if ("$policy" in nm.term) {
                         nm = f(nm);
+                        if ((nm.tries.length > 0) && (0, termTryWith_1.isException)(nm.term)) {
+                            // look for try/with with a rule that matches the exception
+                            // if found, execute it's term
+                            for (let i = 0; i < nm.tries.length; i++) {
+                                const activeRule = nm.tries[i];
+                                const blockedTerm = Object.assign({}, activeRule.term, { term: nm.term });
+                                const matchingRule = (0, termMatch_1.findMatchingRule)(nm, activeRule.term.rules, nm.term);
+                                if (matchingRule.matchResult !== false && matchingRule.rule !== undefined) {
+                                    if (matchingRule.resultOfGuard !== undefined) {
+                                        if (matchingRule.resultOfGuard.blocked) {
+                                            const blockedMatch = (0, termMatch_1.createBlockedRuleMatch)(matchingRule, nm.term, blockedTerm);
+                                            return m.copyWith({ term: blockedMatch, blocked: true, steps: steps });
+                                        }
+                                        else if (matchingRule.resultOfGuard.term !== true) {
+                                            throw "unexpected guard value";
+                                        }
+                                    }
+                                    const bindings = Object.assign({}, m.bindings, matchingRule.matchResult);
+                                    const resultOfRule = rewriteTerm(m.copyWith({ term: matchingRule.rule.term, bindings: bindings, steps: steps }));
+                                    if (!(resultOfRule.blocked)) {
+                                        steps = stepsMinusOne(steps);
+                                    }
+                                    return m.copyWith({ term: resultOfRule.term, blocked: resultOfRule.blocked, steps: steps });
+                                }
+                            }
+                        }
                     }
                     else {
                         // rewrite the properties of machine.term

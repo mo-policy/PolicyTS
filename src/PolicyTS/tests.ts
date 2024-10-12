@@ -54,7 +54,7 @@ function testLookupSuccess() {
     const bindings: { [k: string]: any } = {
         "x": 1
     }
-    const m = new Machine(term, false, bindings);
+    const m = new Machine(term, undefined, bindings);
     const r = rewriteTerm(m);
     passOrThrow(r.term === 1);
     passOrThrow(r.bindings === bindings);
@@ -108,7 +108,7 @@ function testRewrite() {
     const bindings: { [k: string]: any } = {
         "x": 1
     }
-    const m = new Machine(term, false, bindings);
+    const m = new Machine(term, undefined, bindings);
     const r = rewriteTerm(m);
     passOrThrow(r.term === 1);
     passOrThrow(r.bindings === bindings);
@@ -163,7 +163,7 @@ function testParallelArray() {
         }
     ]
     const expected = [{ $policy: "Lookup", name: "x" }, 2];
-    const m = new Machine(term, false, bindings);
+    const m = new Machine(term, undefined, bindings);
     const r = rewriteTerm(m);
     const actualJS = JSON.stringify(r.term);
     const expectedJS = JSON.stringify(expected);
@@ -184,7 +184,7 @@ function testParallelObject() {
         }
     }
     const expected = { x: { $policy: "Lookup", name: "x" }, y: 2 };
-    const m = new Machine(term, false, bindings);
+    const m = new Machine(term, undefined, bindings);
     const r = rewriteTerm(m);
     const actualJS = JSON.stringify(r.term);
     const expectedJS = JSON.stringify(expected);
@@ -214,7 +214,7 @@ function testParallelSequence() {
             2
         ]
     };
-    const m = new Machine(term, false, bindings);
+    const m = new Machine(term, undefined, bindings);
     const r = rewriteTerm(m);
     const actualJS = JSON.stringify(r.term);
     const expectedJS = JSON.stringify(expected);
@@ -1077,7 +1077,7 @@ function testStepsInfix1() {
         operator: "+",
         right: 2
     }
-    const m = new Machine(term, undefined, undefined, undefined, undefined, 1);
+    const m = new Machine(term, 1);
     const r = rewriteTerm(m);
     passOrThrow(r.term === 3);
     passOrThrow(r.steps === 0);
@@ -1101,7 +1101,7 @@ function testStepsInfixBlockedLeft() {
         operator: "+",
         right: 1
     }
-    const m = new Machine(term, undefined, undefined, undefined, undefined, 1);
+    const m = new Machine(term, 1);
     const r = rewriteTerm(m);
     const ajs = JSON.stringify(r.term);
     const ejs = JSON.stringify(expected);
@@ -1128,7 +1128,7 @@ function testStepsInfixBlockedRight() {
         operator: "+",
         right: 6
     }
-    const m = new Machine(term, undefined, undefined, undefined, undefined, 1);
+    const m = new Machine(term, 1);
     const r = rewriteTerm(m);
     const ajs = JSON.stringify(r.term);
     const ejs = JSON.stringify(expected);
