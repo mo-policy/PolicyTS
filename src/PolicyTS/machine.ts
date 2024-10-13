@@ -6,7 +6,6 @@ import { rewriteFix } from "./termFix"
 import { matchFunction, rewriteFunction } from "./termFunction"
 import { rewriteIf } from "./termIf"
 import { matchLet, rewriteLet } from "./termLet"
-import { matchLetRec, rewriteLetRec } from "./termLetRec"
 import { rewriteLookup, matchLookup, rewriteLookupMember, rewriteLookupIndex } from "./termLookup"
 import { rewriteForToIterator, rewriteLoop, rewriteWhileIterator } from "./termLoop"
 import { rewriteMatch } from "./termMatch"
@@ -121,7 +120,6 @@ export class Machine {
                     case "If": return rewriteIf;
                     case "Infix": return rewriteInfix;
                     case "Let": return rewriteLet;
-                    case "LetRec": return rewriteLetRec;
                     case "Lookup": return rewriteLookup;
                     case "LookupIndex": return rewriteLookupIndex;
                     case "LookupMember": return rewriteLookupMember;
@@ -157,7 +155,6 @@ export class Machine {
                     case "AsPattern": return matchAsPattern;
                     case "Function": return matchFunction;
                     case "Let": return matchLet;
-                    case "LetRec": return matchLetRec;
                     case "Lookup": return matchLookup;
                     case "Quote": return matchQuote;
                     default: return matchConstant;

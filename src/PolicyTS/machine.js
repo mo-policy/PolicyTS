@@ -8,7 +8,6 @@ const termFix_1 = require("./termFix");
 const termFunction_1 = require("./termFunction");
 const termIf_1 = require("./termIf");
 const termLet_1 = require("./termLet");
-const termLetRec_1 = require("./termLetRec");
 const termLookup_1 = require("./termLookup");
 const termLoop_1 = require("./termLoop");
 const termMatch_1 = require("./termMatch");
@@ -88,7 +87,6 @@ class Machine {
                     case "If": return termIf_1.rewriteIf;
                     case "Infix": return termInfix_1.rewriteInfix;
                     case "Let": return termLet_1.rewriteLet;
-                    case "LetRec": return termLetRec_1.rewriteLetRec;
                     case "Lookup": return termLookup_1.rewriteLookup;
                     case "LookupIndex": return termLookup_1.rewriteLookupIndex;
                     case "LookupMember": return termLookup_1.rewriteLookupMember;
@@ -124,7 +122,6 @@ class Machine {
                     case "AsPattern": return termAsPattern_1.matchAsPattern;
                     case "Function": return termFunction_1.matchFunction;
                     case "Let": return termLet_1.matchLet;
-                    case "LetRec": return termLetRec_1.matchLetRec;
                     case "Lookup": return termLookup_1.matchLookup;
                     case "Quote": return termQuote_1.matchQuote;
                     default: return termQuote_1.matchConstant;
