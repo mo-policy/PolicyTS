@@ -62,7 +62,7 @@ export function rewriteTerm(m: Machine): Machine {
                 let anyBlocked = false;
                 const nextTerm = [];
                 for (let i = 0; i < m.term.length; i++) {
-                    nm = rewriteTerm(m.copyWith({ term: m.term[i], steps: steps }));
+                    nm = rewriteTerm(m.copyWith({ term: m.term[i], blocked: nm.blocked, steps: steps }));
                     steps = nm.steps;
                     anyBlocked = (anyBlocked || nm.blocked);
                     nextTerm[i] = nm.term;
@@ -104,7 +104,7 @@ export function rewriteTerm(m: Machine): Machine {
                         let anyBlocked = false;
                         const nextTerm: { [k: string]: any } = {};
                         for (let p in m.term) {
-                            nm = rewriteTerm(m.copyWith({ term: m.term[p], steps: steps }));
+                            nm = rewriteTerm(m.copyWith({ term: m.term[p], blocked: nm.blocked, steps: steps }));
                             steps = nm.steps;
                             anyBlocked = (anyBlocked || nm.blocked);
                             nextTerm[p] = nm.term;

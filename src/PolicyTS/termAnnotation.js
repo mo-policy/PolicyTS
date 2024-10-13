@@ -109,6 +109,7 @@ function matchAnnotation(m, pattern, value) {
     }
     ;
     // todo
-    return false;
+    return {};
+    ;
 }
 //# sourceMappingURL=termAnnotation.js.map

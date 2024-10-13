@@ -66,7 +66,7 @@ function rewriteTerm(m) {
                 let anyBlocked = false;
                 const nextTerm = [];
                 for (let i = 0; i < m.term.length; i++) {
-                    nm = rewriteTerm(m.copyWith({ term: m.term[i], steps: steps }));
+                    nm = rewriteTerm(m.copyWith({ term: m.term[i], blocked: nm.blocked, steps: steps }));
                     steps = nm.steps;
                     anyBlocked = (anyBlocked || nm.blocked);
                     nextTerm[i] = nm.term;
@@ -111,7 +111,7 @@ function rewriteTerm(m) {
                         let anyBlocked = false;
                         const nextTerm = {};
                         for (let p in m.term) {
-                            nm = rewriteTerm(m.copyWith({ term: m.term[p], steps: steps }));
+                            nm = rewriteTerm(m.copyWith({ term: m.term[p], blocked: nm.blocked, steps: steps }));
                             steps = nm.steps;
                             anyBlocked = (anyBlocked || nm.blocked);
                             nextTerm[p] = nm.term;

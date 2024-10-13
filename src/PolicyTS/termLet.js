@@ -41,10 +41,14 @@ function rewriteLet(m) {
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
             const resultOfIn = (0, term_1.rewriteTerm)(m.copyWith({ term: m.term.in, bindings: nextBindings, steps: steps }));
-            if (!resultOfIn.blocked) {
-                steps = (0, term_1.stepsMinusOne)(resultOfIn.steps);
+            if (resultOfIn.blocked) {
+                Object.assign(blockedTerm, { in: resultOfIn.term });
+                return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
             }
-            return m.copyWith({ term: resultOfIn.term, blocked: resultOfIn.blocked, steps: steps });
+            else {
+                steps = (0, term_1.stepsMinusOne)(resultOfIn.steps);
+                return m.copyWith({ term: resultOfIn.term, steps: steps });
+            }
         }
         else {
             throw "binding failed";

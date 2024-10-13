@@ -87,10 +87,13 @@ export function rewriteLet(m: Machine): Machine {
         if (matchOfBinding) {
             const nextBindings = Object.assign({}, m.bindings, matchOfBinding);
             const resultOfIn = rewriteTerm(m.copyWith({ term: m.term.in, bindings: nextBindings, steps: steps }));
-            if (!resultOfIn.blocked) {
+            if (resultOfIn.blocked) {
+                Object.assign(blockedTerm, { in: resultOfIn.term });
+                return m.copyWith({ term: blockedTerm, blocked: true, steps: steps });
+            } else {
                 steps = stepsMinusOne(resultOfIn.steps);
+                return m.copyWith({ term: resultOfIn.term, steps: steps });
             }
-            return m.copyWith({ term: resultOfIn.term, blocked: resultOfIn.blocked, steps: steps });
         } else {
             throw "binding failed"
         }
