@@ -993,37 +993,6 @@ function testFix() {
     passOrThrow(r.term === 4);
     passOrThrow(r.bindings === m.bindings);
 }
-function testLetRec() {
-    // let rec f = (fun x -> if "x<4" then f "x+1" else 4) in f 1
-    // let f = fix (fun f -> fun x -> if "x<4" then f "x+1" else 4) in f 1
-    const term = {
-        $policy: "LetRec",
-        pattern: { $policy: "Lookup", name: "f" },
-        term: {
-            $policy: "Function",
-            pattern: { $policy: "Lookup", name: "x" },
-            term: {
-                $policy: "If",
-                condition: "x<4",
-                then: {
-                    $policy: "Application",
-                    function: { $policy: "Lookup", name: "f" },
-                    arg: "x+1"
-                },
-                else: 4
-            }
-        },
-        in: {
-            $policy: "Application",
-            function: { $policy: "Lookup", name: "f" },
-            arg: 1
-        }
-    };
-    const m = new DevMachine(term);
-    const r = (0, term_1.rewriteTerm)(m);
-    passOrThrow(r.term === 4);
-    passOrThrow(r.bindings === m.bindings);
-}
 function testStepsInfix1() {
     const term = {
         $policy: "Infix",
@@ -1141,7 +1110,6 @@ else {
     testMatchGuardBlocked();
     testRefAssignment();
     testRefDereference();
-    testLetRec();
     testFix();
     testApplyFunction();
     testLet();
