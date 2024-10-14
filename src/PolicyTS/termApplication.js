@@ -57,16 +57,29 @@ function rewriteApplication(m) {
                 //        which maps string (names) to Bindings, or false if it fails to match
                 // to do: consider matching using up steps
                 const matchResult = (0, term_1.matchTerm)(m, resultOfAppFunction.term.pattern, resultOfAppArg.term);
-                if (matchResult) {
+                if (!(matchResult === false)) {
                     // fourth, assemble the bindings for use inside the term of the function
                     //         the bindings should be, the bindings of the function's closure
                     //         and the bindings which matched the function pattern to the arg
-                    let bindings = {};
+                    let applyTerm = resultOfAppFunction.term.term;
                     if ("closure" in resultOfAppFunction.term) {
-                        bindings = Object.assign(bindings, resultOfAppFunction.term.closure);
+                        // let [ lookup x] = [ closure[x] ] in resultOfAppFunction.term.term
+                        const letPatterns = [];
+                        const letTerms = [];
+                        for (const p in resultOfAppFunction.term.closure) {
+                            letPatterns.push({ $policy: "Lookup", name: p });
+                            letTerms.push(resultOfAppFunction.term.closure[p]);
+                        }
+                        if (letPatterns.length > 0) {
+                            applyTerm = {
+                                $policy: "Let",
+                                pattern: letPatterns,
+                                term: letTerms,
+                                in: applyTerm
+                            };
+                        }
                     }
-                    bindings = Object.assign(bindings, matchResult);
-                    const resultOfFunctionTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: resultOfAppFunction.term.term, bindings: bindings, steps: steps }));
+                    const resultOfFunctionTerm = (0, term_1.rewriteTerm)(m.copyWith({ term: applyTerm, bindings: matchResult, steps: steps }));
                     steps = resultOfFunctionTerm.steps;
                     if (!resultOfFunctionTerm.blocked) {
                         steps = (0, term_1.stepsMinusOne)(steps);

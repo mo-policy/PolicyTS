@@ -3,6 +3,7 @@
 import { Machine } from "./machine"
 import { rewriteTerm } from "./term"
 import { testTAPL } from "./testsTAPL"
+import { freenames } from "./termFunction";
 
 export function passOrThrow(condition: boolean): asserts condition {
     if (!condition) {
@@ -1105,7 +1106,66 @@ function testStepsInfixBlockedRight() {
     passOrThrow(r.bindings === m.bindings);
 }
 
+function testFreenames() {
+    const m = new Machine();
+    let bound: { [k: string]: null } = {};
+    let fn: { [k: string]: null } = {};
 
+    // fun x -> x
+    let t1 = {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "x" },
+        term: { $policy: "Lookup", name: "x" }
+    }
+    const fn1 = freenames(bound, fn, t1);
+    passOrThrow(m.compare(fn1, {}) === 0);
+
+    // fun x -> y
+    bound = {};
+    fn = {};
+    let t2 = {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "x" },
+        term: { $policy: "Lookup", name: "y" }
+    }
+    let fn2 = freenames(bound, fn, t2);
+    passOrThrow(m.compare(fn2, { y: null }) === 0);
+
+    // fun x -> let y = x in y
+    bound = {};
+    fn = {};
+    let t3 = {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "x" },
+        term: {
+            $policy: "Let",
+            pattern: { $policy: "Lookup", name: "y" },
+            term: { $policy: "Lookup", name: "x" },
+            in: { $policy: "Lookup", name: "y" }
+        }
+    }
+    let fn3 = freenames(bound, fn, t3);
+    passOrThrow(m.compare(fn3, {}) === 0);
+
+    /*
+    fun x ->
+        let z = z in z;
+    */
+    bound = {};
+    fn = {};
+    let t4 = {
+        $policy: "Function",
+        pattern: { $policy: "Lookup", name: "x" },
+        term: {
+            $policy: "Let",
+            pattern: { $policy: "Lookup", name: "z" },
+            term: { $policy: "Lookup", name: "z" },
+            in: { $policy: "Lookup", name: "z" }
+        }
+    }
+    let fn4 = freenames(bound, fn, t4);
+    passOrThrow(m.compare(fn4, { z: null }) === 0);
+}
 function develop() {
 }
 
@@ -1119,6 +1179,7 @@ if (dev) {
     develop();
     testTAPL();
 
+    testFreenames();
     testStepsInfix1();
     testStepsInfixBlockedLeft();
     testStepsInfixBlockedRight();

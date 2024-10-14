@@ -45,7 +45,9 @@ An function value term.
 */
 
 import { Machine, MatchResult } from "./machine"
-import { rewriteTerm, stepsMinusOne } from "./term";
+import { stepsMinusOne } from "./term";
+import { isLet } from "./termLet";
+import { isLookup } from "./termLookup";
 
 export type FunctionTerm = {
     $policy: "Function",
@@ -71,6 +73,37 @@ export function isFunction(term: any): term is FunctionTerm {
     return false;
 }
 
+export function freenames(bound: { [k: string]: any }, fn: { [k: string]: any }, term: any): { [k: string]: any } {
+    let nfn = fn;
+    let nb = bound;
+    if (term !== null) {
+        if (Array.isArray(term)) {
+            for (let i = 0; i < term.length; i++) {
+                nfn = freenames(nb, nfn, term[i]);
+            }
+        } else if (typeof term === "object") {
+            if (isLookup(term)) {
+                if (!(term.name in bound)) {
+                    nfn = Object.assign({}, nfn);
+                    nfn[term.name] = null;
+                }
+            } else if (isLet(term)) {
+                nfn = freenames(nb, nfn, term.term);        // get freenames of let.term
+                nb = freenames(nb, nb, term.pattern);       // get names (as bound) of let.pattern
+                nfn = freenames(nb, nfn, term.in);          // get freenames of let.in
+            } else if (isFunction(term)) {
+                nb = freenames(nb, nb, term.pattern);       // get names (as bound) of fun.pattern
+                nfn = freenames(nb, nfn, term.term);        // get freenames of fun.term
+            } else {
+                for (const p in term) {
+                    nfn = freenames(nb, nfn, term[p]);
+                }
+            }
+        }
+    }
+    return nfn;
+}
+
 /*
 ## Rewrite Rules
 
@@ -83,8 +116,13 @@ export function rewriteFunction(m: Machine): Machine {
     if (("closure" in m.term) || (Object.keys(m.bindings).length === 0)) {
         return m;
     } else {
-        // to do: filter closure to only free variables in function.
-        const cb = Object.assign({}, m.bindings);
+        const fn = freenames({}, {}, m.term);
+        const cb: { [k: string]: any } = {};
+        for (const p in fn) {
+            if (p in m.bindings) {
+                cb[p] = m.bindings[p];
+            }
+        }
         const f = Object.assign({}, m.term, { closure: cb });
         const steps = stepsMinusOne(m.steps);
         return m.copyWith({ term: f, steps: steps });
