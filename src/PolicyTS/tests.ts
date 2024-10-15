@@ -1,5 +1,7 @@
 // Copyright (c) Mobile Ownership, mobileownership.org.  All Rights Reserved.  See LICENSE.txt in the project root for license information.
 
+import { writeFileSync } from "fs";
+import { rewriteFile } from "./app";
 import { Machine } from "./machine"
 import { rewriteTerm } from "./term"
 import { testTAPL } from "./testsTAPL"
@@ -1166,7 +1168,112 @@ function testFreenames() {
     let fn4 = freenames(bound, fn, t4);
     passOrThrow(m.compare(fn4, { z: null }) === 0);
 }
+
+function testRecBlocked1() {
+    // let f = fix (fun f -> fun () -> y) in f ()
+    // expect: let f = fix (fun f -> fun () -> y) in y
+    const term = {
+        $policy: "Let",
+        pattern: { $policy: "Lookup", name: "f" },
+        term: {
+            $policy: "Fix", 
+            term: {
+            $policy: "Function",
+                pattern: { $policy: "Lookup", name: "f" },
+                term: {
+                    $policy: "Function",
+                    pattern: null,
+                    term: { $policy: "Lookup", name: "y" }
+                }
+            }
+        },
+        in: {
+            $policy: "Application",
+            function: { $policy: "Lookup", name: "f" },
+            arg: null
+        }
+    };
+    const expectedIn = { $policy: "Lookup", name: "y" };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.compare(r.term.in, expectedIn) === 0);
+    passOrThrow(r.bindings === m.bindings);
+}
+function testRecBlocked2() {
+    /*
+    let rec rx() =
+        receive on 1 with
+        | m -> 
+            if m then rx() else null
+    in
+        send true on 1
+        send false on 1
+        rx()
+    */
+    const term = {
+        $policy: "Let",
+        pattern: { $policy: "Lookup", name: "rx" },
+        term: {
+            $policy: "Fix",
+            term: {
+                $policy: "Function",
+                pattern: { $policy: "Lookup", name: "rx" },
+                term: {
+                    $policy: "Function",
+                    pattern: null,
+                    term: {
+                        $policy: "Receive",
+                        channel: 1,
+                        rules: [
+                            {
+                                $policy: "Rule",
+                                pattern: { $policy: "Lookup", name: "m" },
+                                term: {
+                                    $policy: "If",
+                                    condition: { $policy: "Lookup", name: "m" },
+                                    then: {
+                                        $policy: "Application",
+                                        function: { $policy: "Lookup", name: "rx" },
+                                        arg: null
+                                    },
+                                    else: null
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        in: {
+            $policy: "Sequence",
+            terms: [
+                {
+                    $policy: "Send",
+                    message: true,
+                    channel: 1
+                },
+                {
+                    $policy: "Send",
+                    message: false,
+                    channel: 1
+                },
+                {
+                    $policy: "Application",
+                    function: { $policy: "Lookup", name: "rx" },
+                    arg: null
+                }
+            ]
+        }
+    };
+    const expectedIn = { $policy: "Lookup", name: "y" };
+    const m = new Machine(term);
+    const r = rewriteTerm(m);
+    passOrThrow(r.term === null);
+    passOrThrow(r.bindings === m.bindings);
+}
+
 function develop() {
+    
 }
 
 const dev = false;
@@ -1176,9 +1283,11 @@ if (dev) {
     develop();
 } else {
     // Run all the tests.
-    develop();
+    //develop();
     testTAPL();
 
+    testRecBlocked2();
+    testRecBlocked1();
     testFreenames();
     testStepsInfix1();
     testStepsInfixBlockedLeft();

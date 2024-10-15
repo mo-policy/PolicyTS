@@ -75,12 +75,7 @@ export function rewriteSequence(m: Machine): Machine {
         const seqTerm = m.term.terms[i];
         nm = rewriteTerm(nm.copyWith({ term: seqTerm, steps: steps }));
         anyBlocked = anyBlocked || nm.blocked;
-        if (nm.term !== null) {
-            resultTerms.push(nm.term);
-        }
-    }
-    if (resultTerms.length === 0) {
-        resultTerms.push(null);
+        resultTerms.push(nm.term);
     }
     if (anyBlocked) {
         const blockedTerm = Object.assign({}, m.term, { terms: resultTerms });
